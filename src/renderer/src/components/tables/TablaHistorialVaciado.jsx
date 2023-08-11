@@ -8,14 +8,25 @@ import {
   Toolbar,
   Typography,
   TableCell,
-  TableBody
+  TableBody,
+  Button
 } from '@mui/material'
+import RestoreIcon from '@mui/icons-material/Restore'
 import React, { useReducer, useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
+import ModificarHistorial from '../modals/ModificarHistorial'
 
 export default function TablaHistorialVaciado({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
   const [titleTable, setTitleTable] = useState('Lotes')
+  const [showBtnModificar, setShowBtnModificar] = useState(false)
+  //states de los modales
+  const [modalModificar, setModalModificar] = useState(false)
+  //props para los modales y de los modales
+  const [propsModal, setPropsModal] = useState({ nombre: '', canastillas: 0 })
+  const [openSucces, setOpenSuccess] = useState(false)
+  const [message, setMessage] = useState('')
 
   const reducer = (tabla, action) => {
     if (busqueda === '') {
@@ -57,10 +68,24 @@ export default function TablaHistorialVaciado({ filtro }) {
 
   const clickLote = (e) => {
     let lote = e.target.value
-   
+    setPropsModal(() => ({
+      nombre: tabla[lote]['Nombre Predio'],
+      canastillas: tabla[lote]['Canastillas'],
+      enf: lote
+    }))
     if (e.target.checked) {
       setTitleTable(lote + ' ' + tabla[lote]['Nombre Predio'])
+      if (
+        format(new Date(tabla[lote]['Fecha']), 'MM/dd/yyyy') == format(new Date(), 'MM/dd/yyyy')
+      ) {
+        setShowBtnModificar(true)
+      }
     }
+  }
+
+  //funciones que cierra los modales
+  const closeModal = () => {
+    setModalModificar(!modalModificar)
   }
 
   return (
@@ -69,16 +94,21 @@ export default function TablaHistorialVaciado({ filtro }) {
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable}
         </Typography>
+
+        {showBtnModificar && (
+          <Button variant="contained" endIcon={<RestoreIcon />} onClick={closeModal}>
+            Modificar
+          </Button>
+        )}
       </Toolbar>
       <TableContainer>
         <Table>
-
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
                 <CheckBox />
               </TableCell>
-       
+
               <TableCell>ENF</TableCell>
               <TableCell>Nombre del Predio</TableCell>
               <TableCell>Canastillas</TableCell>
@@ -89,31 +119,36 @@ export default function TablaHistorialVaciado({ filtro }) {
           </TableHead>
           <TableBody>
             {Object.keys(tabla).map((item) => (
-                <TableRow>
-                      <TableCell padding="checkbox">
-                    {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
-                    <input
-                      type="radio"
-                      id={item}
-                      style={{ width: '2rem' }}
-                      onClick={clickLote}
-                      value={item}
-                      name="lote"
-                    />
-                  </TableCell>
-                    <TableCell key={item}>{item}</TableCell>
-                    <TableCell key={item+'NombrePredio'}>{tabla[item]['Nombre Predio']}</TableCell>
-                    <TableCell key={item+'Canastillas'}>{tabla[item]['Canastillas']}</TableCell>
-                    <TableCell key={item+'Kilos'}>{tabla[item]['Kilos']}</TableCell>
-                    <TableCell key={item+'TipoFruta'}>{tabla[item]['Tipo Fruta']}</TableCell>
-                    <TableCell key={item + 'fecha'}>
-                    {format(new Date(tabla[item]['Fecha']), 'MM/dd/yyyy')}
-                  </TableCell>
-                </TableRow>
+              <TableRow>
+                <TableCell padding="checkbox">
+                  {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
+                  <input
+                    type="radio"
+                    id={item}
+                    style={{ width: '2rem' }}
+                    onClick={clickLote}
+                    value={item}
+                    name="lote"
+                  />
+                </TableCell>
+                <TableCell key={item}>{item}</TableCell>
+                <TableCell key={item + 'NombrePredio'}>{tabla[item]['Nombre Predio']}</TableCell>
+                <TableCell key={item + 'Canastillas'}>{tabla[item]['Canastillas']}</TableCell>
+                <TableCell key={item + 'Kilos'}>{tabla[item]['Kilos']}</TableCell>
+                <TableCell key={item + 'TipoFruta'}>{tabla[item]['Tipo Fruta']}</TableCell>
+                <TableCell key={item + 'fecha'}>
+                  {format(new Date(tabla[item]['Fecha']), 'MM/dd/yyyy')}
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      {modalModificar &&
+        createPortal(
+          <ModificarHistorial closeModal={closeModal} propsModal={propsModal} />,
+          document.body
+        )}
     </Box>
   )
 }
