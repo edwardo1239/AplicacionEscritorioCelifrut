@@ -71,14 +71,17 @@ export default function TablaHistorialVaciado({ filtro }) {
     setPropsModal(() => ({
       nombre: tabla[lote]['Nombre Predio'],
       canastillas: tabla[lote]['Canastillas'],
-      enf: lote
+      enf: tabla[lote]['ENF'],
+      id: lote
     }))
     if (e.target.checked) {
-      setTitleTable(lote + ' ' + tabla[lote]['Nombre Predio'])
+      setTitleTable(tabla[lote]['ENF'] + ' ' + tabla[lote]['Nombre Predio'])
       if (
         format(new Date(tabla[lote]['Fecha']), 'MM/dd/yyyy') == format(new Date(), 'MM/dd/yyyy')
       ) {
         setShowBtnModificar(true)
+      } else {
+        setShowBtnModificar(false)
       }
     }
   }
@@ -86,6 +89,12 @@ export default function TablaHistorialVaciado({ filtro }) {
   //funciones que cierra los modales
   const closeModal = () => {
     setModalModificar(!modalModificar)
+  }
+
+  //funcion para mostrar que la accion se llevo acabo con exito
+  const funcOpenSuccess = (message) => {
+    setOpenSuccess(true)
+    setMessage(message)
   }
 
   return (
@@ -118,7 +127,7 @@ export default function TablaHistorialVaciado({ filtro }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Object.keys(tabla).map((item) => (
+            {Object.keys(tabla).reverse().map((item) => (
               <TableRow>
                 <TableCell padding="checkbox">
                   {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
@@ -131,7 +140,7 @@ export default function TablaHistorialVaciado({ filtro }) {
                     name="lote"
                   />
                 </TableCell>
-                <TableCell key={item}>{item}</TableCell>
+                <TableCell key={item}>{tabla[item]['ENF']}</TableCell>
                 <TableCell key={item + 'NombrePredio'}>{tabla[item]['Nombre Predio']}</TableCell>
                 <TableCell key={item + 'Canastillas'}>{tabla[item]['Canastillas']}</TableCell>
                 <TableCell key={item + 'Kilos'}>{tabla[item]['Kilos']}</TableCell>
@@ -146,7 +155,7 @@ export default function TablaHistorialVaciado({ filtro }) {
       </TableContainer>
       {modalModificar &&
         createPortal(
-          <ModificarHistorial closeModal={closeModal} propsModal={propsModal} />,
+          <ModificarHistorial closeModal={closeModal} propsModal={propsModal} funcOpenSuccess={funcOpenSuccess} />,
           document.body
         )}
     </Box>

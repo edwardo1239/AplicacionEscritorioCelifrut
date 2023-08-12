@@ -16,11 +16,13 @@ import logo from '../assets/CELIFRUT.png'
 import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import InventoryIcon from '@mui/icons-material/Inventory'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
+import FlagIcon from '@mui/icons-material/Flag';
 
 import Index from './Index'
 import Recepcion from './Recepcion'
 import FrutaSinProcesar from './FrutaSinProcesar'
 import Procesado from './Procesado'
+import FrutaDescarte from './FrutaDescarte'
 
 const drawerWidth = 240
 
@@ -28,7 +30,8 @@ const links = {
   index: true,
   0: false,
   1: false,
-  2: false
+  2: false,
+  3: false,
 }
 
 export default function Nav() {
@@ -56,6 +59,11 @@ export default function Nav() {
       case 2:
         //fruta sin procesar en el inventario
         nuevo = cambiarLink(2)
+        setState(nuevo)
+        break
+      case 3:
+        //fruta sin procesar en el inventario
+        nuevo = cambiarLink(3)
         setState(nuevo)
         break
       default:
@@ -97,13 +105,14 @@ export default function Nav() {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada'].map((text, index) => (
+            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Decarte'].map((text, index) => (
               <ListItem key={text + index} disablePadding>
                 <ListItemButton onClick={() => navBar(index)}>
                   <ListItemIcon>
                     {index == 0 && <LocalShippingIcon />}
                     {index == 1 && <InventoryIcon />}
                     {index == 2 && <MoveToInboxIcon />}
+                    {index == 3 && <FlagIcon />}
                   </ListItemIcon>
 
                   <ListItemText primary={text} />
@@ -121,6 +130,7 @@ export default function Nav() {
         {links[0] && <Recepcion />}
         {links[1] && <FrutaSinProcesar />}
         {links[2] && <Procesado />}
+        {links[3] && <FrutaDescarte />}
       </Box>
     </Box>
   )

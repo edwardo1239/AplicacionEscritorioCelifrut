@@ -1,7 +1,7 @@
 
-import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
+import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert, InputLabel } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
+import RestoreIcon from '@mui/icons-material/Restore'
 import React, { useState } from 'react'
 
 export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuccess }) {
@@ -10,21 +10,23 @@ export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuc
     const [errorMessage, setErrorMessage] = useState('')
     const [loading, setLoading] = useState(false)
   
-    const desverdizado = async () => {
+    const modificarHistorial = async () => {
       setLoading(true)
       if (parseInt(canastillas) > parseInt(propsModal.canastillas)) {
         setErrorMessage('Error en el numero de canastillas')
         setOpenError(true)
         setLoading(false)
       } else {
-        let obj = { canastillas: canastillas, enf: propsModal.enf }
-        const response = await window.api.desverdizado(obj)
+        let obj = { canastillas: canastillas, enf: propsModal.enf, id: propsModal.id }
+   
+        const response = await window.api.modificarHistorial(obj)
         console.log(response)
-        if (response == 'Lote se ha puesto a desverdizar') {
-          funcOpenSuccess('Lote se ha puesto a desverdizar')
+        if (response == 'Historial modificado con exito!') {
+          funcOpenSuccess('Historial modificado con exito!')
         } else {
-          setErrorMessage('Error al desverdizar el lote')
+          setErrorMessage('Error al modificar el historial')
           setOpenError(true)
+          setLoading(false)
         }
         closeModal()
       }
@@ -46,15 +48,15 @@ export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuc
       >
         <div
           style={{
-            width: 450,
-            height: 300,
+            width: 550,
+            height: 350,
             backgroundColor: 'white',
             borderRadius: 15,
             overflow: 'hidden'
           }}
         >
           <AppBar position="static">
-            <Toolbar sx={{ backgroundColor: 'orange', justifyContent: 'space-between' }}>
+            <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
               <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
                 {propsModal.nombre}
               </Typography>
@@ -62,10 +64,12 @@ export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuc
           </AppBar>
           <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-              Numero de canastillas en inventario: {propsModal.canastillas}
+              Numero de canastillas: {propsModal.canastillas}
             </Typography>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+     
+          <div style={{ display: 'flex', flexDirection:'column', justifyContent: 'center', marginTop: '2rem', marginLeft:'1rem', marginRight:'1rem' }}>
+            <InputLabel htmlFor="component-helper"> Ingrese las canastilals que desea devolver a la fruta no procesada</InputLabel>
             <TextField
               id="outlined-basic"
               label="Canastillas"
@@ -88,8 +92,8 @@ export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuc
               color="primary"
               loading={loading}
               loadingPosition="start"
-              onClick={desverdizado}
-            //   startIcon={<ColorLensIcon />}
+              onClick={modificarHistorial}
+               startIcon={<RestoreIcon />}
               variant="contained"
               sx={{ width: '20%', marginBottom: '5rem' }}
             >

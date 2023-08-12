@@ -37,6 +37,11 @@ const api = {
   obtenerHistorialProceso: async () => {
     const response = await ipcRenderer.invoke('obtenerHistorialProceso');
     return response
+  },
+
+  modificarHistorial: async (datos) => {
+    const response = await ipcRenderer.invoke('modificarHistorial', datos);
+    return response
   }
 }
 

@@ -145,7 +145,7 @@ setInterval(async () => {
   } catch (e) {
     console.log(e)
   }
-}, 800)
+}, 500)
 
 //funcion para vaciar canastillas
 ipcMain.handle('vaciarLote', async (event, datos) => {
@@ -189,6 +189,25 @@ ipcMain.handle('desverdizado', async (event, datos) => {
       action: 'desverdizado',
       canastillas: datos.canastillas,
       enf: datos.enf
+    }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8'
+    }
+  })
+  const responseGuardarLote = await response.json()
+  return responseGuardarLote
+})
+
+//funcion para modificar el historial
+
+ipcMain.handle('modificarHistorial', async (event, datos) => {
+  const response = await net.fetch(linkObj.predios, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'modificarHistorial',
+      canastillas: datos.canastillas,
+      enf: datos.enf,
+      id: datos.id
     }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8'
