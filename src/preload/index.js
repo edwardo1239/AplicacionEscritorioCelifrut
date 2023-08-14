@@ -42,6 +42,16 @@ const api = {
   modificarHistorial: async (datos) => {
     const response = await ipcRenderer.invoke('modificarHistorial', datos);
     return response
+  },
+
+  obtenerDescarte: async () => {
+    const response = await ipcRenderer.invoke('obtenerDescarte');
+    return response;
+  },
+
+  eliminarFrutaDescarte: async (datos) => {
+    const response = await ipcRenderer.invoke('eliminarFrutaDescarte', datos);
+    return response;
   }
 }
 

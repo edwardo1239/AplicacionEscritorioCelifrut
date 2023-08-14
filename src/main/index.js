@@ -1,13 +1,13 @@
 import { app, shell, BrowserWindow, net, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { Worker } from 'node:worker_threads'
 import icon from '../../resources/icon.png?asset'
 
 let linkObj = {}
 let infoPredios
 let infoFrutaActual
-let infoHistorialProcesado
+let infoHistorialVaciado
+let infoDescarteInventario
 
 function createWindow() {
   // Create the browser window.
@@ -60,11 +60,11 @@ app.whenReady().then(async () => {
   linkObj = await response.json()
   console.log(linkObj)
   await (async () => {
-    try{
-      const response = await net.fetch(linkObj.predios + '?action=predios')
+    try {
+      const response = await net.fetch(linkObj.recepcion + '?action=recepcion')
       const predios = await response.json()
       infoPredios = predios
-    }catch(e){
+    } catch (e) {
       console.log(e)
     }
   })()
@@ -96,12 +96,41 @@ ipcMain.handle('obtenerPredios', async (event) => {
 
 //funcion para obtener el historial de vaciado
 ipcMain.handle('obtenerHistorialProceso', async (event) => {
-  return infoHistorialProcesado
+  return infoHistorialVaciado
 })
+
+//funcion para obtener el descarte en el inventario
+ipcMain.handle('obtenerDescarte', async (event) => {
+  return infoDescarteInventario
+})
+
+//funcion para obtener la fruta sin procesar
+ipcMain.handle('obtenerFrutaActual', async (event) => {
+  return infoFrutaActual
+})
+
+//funcion que hace fetch de los datos
+setInterval(async () => {
+  try {
+    if (Object.keys(linkObj).length === 0) {
+      console.log('cargando...')
+    } else {
+      const response = await net.fetch(linkObj.recepcion + '?action=recepcion')
+      const info = await response.json()
+      infoPredios = info.predios
+      infoFrutaActual = info.frutaActual
+      infoHistorialVaciado = info.historialVaciado
+      infoDescarteInventario = info.descarteInventario
+      //console.log(infoDescarteInventario)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}, 800)
 
 //funcion para guardar un nuevo lote
 ipcMain.handle('guardarLote', async (event, datos) => {
-  const response = await net.fetch(linkObj.predios, {
+  const response = await net.fetch(linkObj.recepcion, {
     method: 'POST',
     body: JSON.stringify({
       action: 'ingresarLote',
@@ -120,36 +149,9 @@ ipcMain.handle('guardarLote', async (event, datos) => {
   return responseGuardarLote
 })
 
-//funcion para obtener la fruta sin procesar
-ipcMain.handle('obtenerFrutaActual', async (event) => {
-  try {
-    return infoFrutaActual
-  } catch (e) {
-    return e
-  }
-})
-
-//funcion que hace fetch de los datos
-setInterval(async () => {
-  try {
-    if (Object.keys(linkObj).length === 0) {
-      console.log('cargando...')
-    } else {
-      const response = await net.fetch(linkObj.predios + '?action=frutaActual')
-      const frutaActual = await response.json()
-      infoFrutaActual = frutaActual
-      const responseHistorialProceso = await net.fetch(linkObj.predios + '?action=historialVaciado')
-      const historialProceso = await responseHistorialProceso.json()
-      infoHistorialProcesado = historialProceso
-    }
-  } catch (e) {
-    console.log(e)
-  }
-}, 500)
-
 //funcion para vaciar canastillas
 ipcMain.handle('vaciarLote', async (event, datos) => {
-  const response = await net.fetch(linkObj.predios, {
+  const response = await net.fetch(linkObj.recepcion, {
     method: 'POST',
     body: JSON.stringify({
       action: 'vaciar',
@@ -166,7 +168,7 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
 
 //funcion para directo nacional
 ipcMain.handle('directoNacional', async (event, datos) => {
-  const response = await net.fetch(linkObj.predios, {
+  const response = await net.fetch(linkObj.recepcion, {
     method: 'POST',
     body: JSON.stringify({
       action: 'directoNacional',
@@ -183,7 +185,7 @@ ipcMain.handle('directoNacional', async (event, datos) => {
 
 //funcion para desverdizado
 ipcMain.handle('desverdizado', async (event, datos) => {
-  const response = await net.fetch(linkObj.predios, {
+  const response = await net.fetch(linkObj.recepcion, {
     method: 'POST',
     body: JSON.stringify({
       action: 'desverdizado',
@@ -201,13 +203,29 @@ ipcMain.handle('desverdizado', async (event, datos) => {
 //funcion para modificar el historial
 
 ipcMain.handle('modificarHistorial', async (event, datos) => {
-  const response = await net.fetch(linkObj.predios, {
+  const response = await net.fetch(linkObj.recepcion, {
     method: 'POST',
     body: JSON.stringify({
       action: 'modificarHistorial',
       canastillas: datos.canastillas,
       enf: datos.enf,
       id: datos.id
+    }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8'
+    }
+  })
+  const responseGuardarLote = await response.json()
+  return responseGuardarLote
+})
+//funcion para enviar la fruta en el inventario de descarte
+
+ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
+  const response = await net.fetch(linkObj.recepcion, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'eliminarFrutaDescarte',
+      objEnf: datos
     }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8'

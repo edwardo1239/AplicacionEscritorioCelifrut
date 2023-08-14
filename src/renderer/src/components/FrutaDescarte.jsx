@@ -1,6 +1,7 @@
 import { Box } from '@mui/material'
 import React, { useState } from 'react'
 import BarraDeBusqueda from './utils/BarraDeBusqueda'
+import TablaDescarte from './tables/TablaDescarte';
 
 export default function FrutaDescarte() {
   const title = "Fruta Descarte"
@@ -11,6 +12,7 @@ export default function FrutaDescarte() {
   return (
     <Box>
       <BarraDeBusqueda changeFilter={changeFilter} filtro={filtro} title={title}/>
+      <TablaDescarte filtro={filtro} />
     </Box>
   )
 }

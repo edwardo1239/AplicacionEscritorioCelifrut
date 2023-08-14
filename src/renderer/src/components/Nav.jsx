@@ -105,7 +105,7 @@ export default function Nav() {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Decarte'].map((text, index) => (
+            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Descarte'].map((text, index) => (
               <ListItem key={text + index} disablePadding>
                 <ListItemButton onClick={() => navBar(index)}>
                   <ListItemIcon>
