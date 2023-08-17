@@ -19,8 +19,8 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
       let obj = { canastillas: canastillas, enf: propsModal.enf }
       const response = await window.api.directoNacional(obj)
       console.log(response)
-      if (response == 'Enviado directo nacional con exito') {
-        funcOpenSuccess('Enviado directo nacional con exito')
+      if (response == 'Fruta enviada nacional con exito') {
+        funcOpenSuccess('Fruta enviada nacional con exito')
       } else {
         setErrorMessage('Error al enviar el lote')
         setOpenError(true)

@@ -18,6 +18,7 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
       setLoading(false)
     } else {
       let obj = { canastillas: canastillas, enf: propsModal.enf }
+      //console.log(obj)
       const response = await window.api.vaciarLote(obj)
       console.log(response)
       if (response == 'Vaciado con exito') {

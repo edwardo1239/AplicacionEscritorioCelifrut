@@ -18,7 +18,7 @@ import NumbersRoundedIcon from '@mui/icons-material/NumbersRounded'
 import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded'
 import SaveIcon from '@mui/icons-material/Save'
 import LoadingButton from '@mui/lab/LoadingButton'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function Recepcion() {
   const [prediosDatos, setPrediosData] = useState([])
@@ -38,7 +38,8 @@ export default function Recepcion() {
     const obtenerPredios = async () => {
       let predios = []
       const prediosData = await window.api.obtenerPredios()
-      Object.keys(prediosData).map((key) => {
+      prediosData.map((key) => {
+        //console.log(key)
         predios.push({ label: key })
       })
       setPrediosData(predios)
@@ -73,13 +74,14 @@ export default function Recepcion() {
       setLoadin(false)
       return 0;
     }
-
+    //console.log(datos)
     const response =  await window.api.guardarLote(datos);
     if(response == "Guardado con exito"){
       setSuccessMessage(response);
       setOpenSuccess(true);
     }
     else{
+      console.log(response)
       setErrorMessage("Error al guardar el lote")
       setOpenError(true)
     }
@@ -88,6 +90,7 @@ export default function Recepcion() {
     reiniciarCampos()
     setLoadin(false)
     } catch(e){
+      console.log("Recepcion" + e)
       setLoadin(false);
     }
     

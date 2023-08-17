@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, net, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { fs } from 'node:fs/promises'
 import icon from '../../resources/icon.png?asset'
 
 let linkObj = {}
@@ -16,12 +17,15 @@ function createWindow() {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
   })
+
+  //    process.setFdLimit(131072)
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -121,7 +125,7 @@ setInterval(async () => {
       infoFrutaActual = info.frutaActual
       infoHistorialVaciado = info.historialVaciado
       infoDescarteInventario = info.descarteInventario
-      //console.log(infoDescarteInventario)
+      //console.log(infoPredios)
     }
   } catch (e) {
     console.log(e)
@@ -130,23 +134,28 @@ setInterval(async () => {
 
 //funcion para guardar un nuevo lote
 ipcMain.handle('guardarLote', async (event, datos) => {
-  const response = await net.fetch(linkObj.recepcion, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'ingresarLote',
-      tipoFruta: datos.tipoFruta,
-      nombre: datos.nombre,
-      kilos: datos.kilos,
-      placa: datos.placa,
-      canastillas: datos.canastillas,
-      observaciones: datos.observaciones
-    }),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8'
-    }
-  })
-  const responseGuardarLote = await response.json()
-  return responseGuardarLote
+  try {
+    const response = await net.fetch(linkObj.recepcion, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'ingresarLote',
+        tipoFruta: datos.tipoFruta,
+        nombre: datos.nombre,
+        kilos: datos.kilos,
+        placa: datos.placa,
+        canastillas: datos.canastillas,
+        observaciones: datos.observaciones
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+    const responseGuardarLote = await response.json()
+    console.log(responseGuardarLote)
+    return responseGuardarLote
+  } catch (e) {
+    console.error(e)
+  }
 })
 
 //funcion para vaciar canastillas

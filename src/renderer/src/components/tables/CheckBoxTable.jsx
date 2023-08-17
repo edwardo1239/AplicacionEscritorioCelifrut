@@ -48,13 +48,13 @@ export default function CheckBoxTable({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['Nombre Predio'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
+          action.datos[lote]['nombrePredio'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
             -1 ||
           String(action.datos[lote]['ICA'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
-          action.datos[lote]['Fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
-          action.datos[lote]['Tipo Fruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
+          action.datos[lote]['fechaIngreso'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          action.datos[lote]['tipoFruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
       )
 
       tablaFiltrada.map((item) => {
@@ -88,17 +88,17 @@ export default function CheckBoxTable({ filtro }) {
   const clickLote = (e) => {
     let lote = e.target.value
     setPropsModal(() => ({
-      nombre: tabla[lote]['Nombre Predio'],
-      canastillas: tabla[lote]['En inventario'],
+      nombre: tabla[lote]['nombrePredio'],
+      canastillas: tabla[lote]["inventario"],
       enf: lote
     }))
     if (e.target.checked) {
-      setTitleTable(lote + ' ' + tabla[lote]['Nombre Predio'])
-      if (tabla[lote]['Tipo Fruta'] == 'Naranja') {
+      setTitleTable(lote + ' ' + tabla[lote]['nombrePredio'])
+      if (tabla[lote]['tipoFruta'] == 'Naranja') {
         setShowVaciar(true)
         setShowDirecto(true)
         setShowDesverdizar(true)
-      } else if (tabla[lote]['Tipo Fruta'] == 'Limon') {
+      } else if (tabla[lote]['tipoFruta'] == 'Limon') {
         setShowVaciar(true)
         setShowDirecto(true)
         setShowDesverdizar(false)
@@ -119,6 +119,7 @@ export default function CheckBoxTable({ filtro }) {
 
   //funcion para mostrar que la accion se llevo acabo con exito
   const funcOpenSuccess = (message) => {
+    setOpenSuccess(false)
     setOpenSuccess(true)
     setMessage(message)
   }
@@ -185,14 +186,14 @@ export default function CheckBoxTable({ filtro }) {
                     />
                   </TableCell>
                   <TableCell key={item}>{item}</TableCell>
-                  <TableCell key={item + 'nombrePredio'}>{tabla[item]['Nombre Predio']}</TableCell>
+                  <TableCell key={item + 'nombrePredio'}>{tabla[item]['nombrePredio']}</TableCell>
                   <TableCell key={item + 'ica'}>{tabla[item]['ICA']}</TableCell>
                   <TableCell key={item + 'fecha'}>
-                    {format(new Date(tabla[item]['Fecha']), 'MM/dd/yyyy')}
+                    {format(new Date(tabla[item]['fechaIngreso']), 'MM/dd/yyyy')}
                   </TableCell>
                   <TableCell key={item + 'kilos'}>{tabla[item]['Kilos']}</TableCell>
-                  <TableCell key={item + 'En inventario'}>{tabla[item]['En inventario']}</TableCell>
-                  <TableCell key={item + 'Tipo Fruta'}>{tabla[item]['Tipo Fruta']}</TableCell>
+                  <TableCell key={item + 'inventario'}>{tabla[item]['inventario']}</TableCell>
+                  <TableCell key={item + 'tipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
                   <TableCell key={item + 'Observaciones'}>{tabla[item]['Observaciones']}</TableCell>
                 </TableRow>
               ))}

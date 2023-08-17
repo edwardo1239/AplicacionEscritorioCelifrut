@@ -17,7 +17,6 @@ export default function FrutaSinProcesar() {
   return (
     <Box sx={{ flexGrow: 1 }}>
      <BarraDeBusqueda changeFilter={changeFilter} filtro={filtro} title={title}/>
-
       <CheckBoxTable filtro={filtro} />
     </Box>
   )
