@@ -18,7 +18,7 @@ export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuc
         setLoading(false)
       } else {
         let obj = { canastillas: canastillas, enf: propsModal.enf, id: propsModal.id }
-   
+        console.log(obj)
         const response = await window.api.modificarHistorial(obj)
         console.log(response)
         if (response == 'Historial modificado con exito!') {

@@ -122,6 +122,8 @@ export default function CheckBoxTable({ filtro }) {
     setOpenSuccess(false)
     setOpenSuccess(true)
     setMessage(message)
+    document.getElementById(propsModal.enf).checked = false
+    setPropsModal(({ nombre: '', canastillas: 0 }))
   }
 
   return (
