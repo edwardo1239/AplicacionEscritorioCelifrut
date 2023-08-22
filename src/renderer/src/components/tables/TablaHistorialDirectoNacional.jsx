@@ -17,7 +17,7 @@ import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
 import ModificarHistorial from '../modals/ModificarHistorial'
 
-export default function TablaHistorialVaciado({ filtro }) {
+export default function TablaHistorialDirectoNacional({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
   const [titleTable, setTitleTable] = useState('Lotes')
   const [showBtnModificar, setShowBtnModificar] = useState(false)
@@ -60,7 +60,7 @@ export default function TablaHistorialVaciado({ filtro }) {
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const interval = setInterval(async () => {
-      const frutaActual = await window.api.obtenerHistorialProceso()
+      const frutaActual = await window.api.obtenerHistorialDirectoNacional()
       dispatch({ datos: frutaActual })
     }, 500)
     return () => clearInterval(interval)

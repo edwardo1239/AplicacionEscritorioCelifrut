@@ -17,12 +17,14 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping'
 import InventoryIcon from '@mui/icons-material/Inventory'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
 import FlagIcon from '@mui/icons-material/Flag';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 import Index from './Index'
 import Recepcion from './Recepcion'
 import FrutaSinProcesar from './FrutaSinProcesar'
 import Procesado from './Procesado'
 import FrutaDescarte from './FrutaDescarte'
+import DirectoNacional from './DirectoNacional'
 
 const drawerWidth = 240
 
@@ -32,6 +34,7 @@ const links = {
   1: false,
   2: false,
   3: false,
+  4: false
 }
 
 export default function Nav() {
@@ -62,8 +65,13 @@ export default function Nav() {
         setState(nuevo)
         break
       case 3:
-        //fruta sin procesar en el inventario
+        //historial vaciado donde se puede modificar
         nuevo = cambiarLink(3)
+        setState(nuevo)
+        break
+      case 4:
+        //historial directo nacional
+        nuevo = cambiarLink(4)
         setState(nuevo)
         break
       default:
@@ -105,7 +113,7 @@ export default function Nav() {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Descarte'].map((text, index) => (
+            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Descarte', 'Directo Nacional'].map((text, index) => (
               <ListItem key={text + index} disablePadding>
                 <ListItemButton onClick={() => navBar(index)}>
                   <ListItemIcon>
@@ -113,6 +121,7 @@ export default function Nav() {
                     {index == 1 && <InventoryIcon />}
                     {index == 2 && <MoveToInboxIcon />}
                     {index == 3 && <FlagIcon />}
+                    {index == 4 && <SwapHorizIcon />}
                   </ListItemIcon>
 
                   <ListItemText primary={text} />
@@ -131,6 +140,7 @@ export default function Nav() {
         {links[1] && <FrutaSinProcesar />}
         {links[2] && <Procesado />}
         {links[3] && <FrutaDescarte />}
+        {links[4] && <DirectoNacional />}
       </Box>
     </Box>
   )

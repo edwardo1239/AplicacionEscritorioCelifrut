@@ -9,6 +9,7 @@ let infoPredios
 let infoFrutaActual
 let infoHistorialVaciado
 let infoDescarteInventario
+let infoHistorialDirectoNacional
 
 function createWindow() {
   // Create the browser window.
@@ -113,6 +114,11 @@ ipcMain.handle('obtenerFrutaActual', async (event) => {
   return infoFrutaActual
 })
 
+
+ipcMain.handle('obtenerHistorialDirectoNacional', async (event) => {
+  return infoHistorialDirectoNacional
+})
+
 //funcion que hace fetch de los datos
 setInterval(async () => {
   try {
@@ -125,6 +131,7 @@ setInterval(async () => {
       infoFrutaActual = info.frutaActual
       infoHistorialVaciado = info.historialVaciado
       infoDescarteInventario = info.descarteInventario
+      infoHistorialDirectoNacional = info.historialDirectoNacional
       //console.log(infoPredios)
     }
   } catch (e) {
@@ -234,6 +241,22 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
     method: 'POST',
     body: JSON.stringify({
       action: 'eliminarFrutaDescarte',
+      objEnf: datos
+    }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8'
+    }
+  })
+  const responseGuardarLote = await response.json()
+  return responseGuardarLote
+})
+//funcion para modificar el historial de directo nacional
+
+ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
+  const response = await net.fetch(linkObj.recepcion, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'modificarHistorialDirectoNacional',
       objEnf: datos
     }),
     headers: {

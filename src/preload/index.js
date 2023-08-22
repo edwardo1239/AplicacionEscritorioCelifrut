@@ -52,6 +52,15 @@ const api = {
   eliminarFrutaDescarte: async (datos) => {
     const response = await ipcRenderer.invoke('eliminarFrutaDescarte', datos);
     return response;
+  },
+  obtenerHistorialDirectoNacional: async () => {
+    const response = await ipcRenderer.invoke('obtenerHistorialDirectoNacional');
+    return response
+  },
+
+  modificarHistorialDirectoNacional: async () => {
+    const response = await ipcRenderer.invoke('modificarHistorialDirectoNacional', datos);
+    return response
   }
 }
 
