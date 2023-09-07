@@ -1,4 +1,3 @@
-
 import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
@@ -18,7 +17,7 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
       setLoading(false)
     } else {
       let obj = { canastillas: canastillas, enf: propsModal.enf }
-      //console.log(obj)
+      console.log(obj)
       const response = await window.api.vaciarLote(obj)
       console.log(response)
       if (response == 'Vaciado con exito') {
@@ -85,18 +84,18 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
             marginTop: '2rem'
           }}
         >
-           <LoadingButton
+          <LoadingButton
             color="primary"
             loading={loading}
             loadingPosition="start"
             onClick={vaciar}
             startIcon={<MoveToInboxIcon />}
             variant="contained"
-            sx={{ width: '20%', marginBottom:'5rem' }}
+            sx={{ width: '20%', marginBottom: '5rem' }}
           >
             <span>Vaciar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height:38 }} onClick={closeVaciado}>
+          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeVaciado}>
             Cancelar
           </Button>
         </div>
@@ -109,7 +108,6 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
       >
         <Alert severity="error">{errorMessage}</Alert>
       </Snackbar>
-  
     </div>
   )
 }

@@ -48,7 +48,7 @@ export default function CheckBoxTable({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['nombrePredio'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
+          action.datos[lote]['nombre'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
             -1 ||
           String(action.datos[lote]['ICA'])
             .toLowerCase()
@@ -88,12 +88,12 @@ export default function CheckBoxTable({ filtro }) {
   const clickLote = (e) => {
     let lote = e.target.value
     setPropsModal(() => ({
-      nombre: tabla[lote]['nombrePredio'],
+      nombre: tabla[lote]['nombre'],
       canastillas: tabla[lote]["inventario"],
       enf: lote
     }))
     if (e.target.checked) {
-      setTitleTable(lote + ' ' + tabla[lote]['nombrePredio'])
+      setTitleTable(lote + ' ' + tabla[lote]['nombre'])
       if (tabla[lote]['tipoFruta'] == 'Naranja') {
         setShowVaciar(true)
         setShowDirecto(true)
@@ -127,7 +127,7 @@ export default function CheckBoxTable({ filtro }) {
   }
 
   return (
-    <Box>
+    <div>
       <Toolbar>
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable}
@@ -175,8 +175,8 @@ export default function CheckBoxTable({ filtro }) {
           <TableBody>
             {tabla &&
               Object.keys(tabla).map((item) => (
-                <TableRow>
-                  <TableCell padding="checkbox">
+                <TableRow key={item + 'tableRow'}>
+                  <TableCell padding="checkbox" key={item + 'cell'}>
                     {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
                     <input
                       type="radio"
@@ -185,18 +185,19 @@ export default function CheckBoxTable({ filtro }) {
                       onClick={clickLote}
                       value={item}
                       name="lote"
+                      key={item+'input'}
                     />
                   </TableCell>
                   <TableCell key={item}>{item}</TableCell>
-                  <TableCell key={item + 'nombrePredio'}>{tabla[item]['nombrePredio']}</TableCell>
+                  <TableCell key={item + 'nombre'}>{tabla[item]['nombre']}</TableCell>
                   <TableCell key={item + 'ica'}>{tabla[item]['ICA']}</TableCell>
                   <TableCell key={item + 'fecha'}>
-                    {format(new Date(tabla[item]['fechaIngreso']), 'MM/dd/yyyy')}
+                    {format(new Date(tabla[item]['fecha']), 'MM/dd/yyyy')}
                   </TableCell>
-                  <TableCell key={item + 'kilos'}>{tabla[item]['Kilos']}</TableCell>
+                  <TableCell key={item + 'KilosActual'}>{tabla[item]['KilosActual']}</TableCell>
                   <TableCell key={item + 'inventario'}>{tabla[item]['inventario']}</TableCell>
                   <TableCell key={item + 'tipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
-                  <TableCell key={item + 'Observaciones'}>{tabla[item]['Observaciones']}</TableCell>
+                  <TableCell key={item + 'observaciones'}>{tabla[item]['observaciones']}</TableCell>
                 </TableRow>
               ))}
           </TableBody>
@@ -238,7 +239,7 @@ export default function CheckBoxTable({ filtro }) {
       >
         <Alert severity="success">{message}</Alert>
       </Snackbar>
-    </Box>
+    </div>
   )
 }
 

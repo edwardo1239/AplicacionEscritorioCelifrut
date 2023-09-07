@@ -21,7 +21,9 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useEffect, useState } from 'react'
 
 export default function Recepcion() {
+  let fecha = new Date();
   const [prediosDatos, setPrediosData] = useState([])
+  const [enf, setEnf] = useState('')
   const [loading, setLoadin] = useState(false)
   const [tipoFruta, setTipoFruta] = useState('')
   const [nombrePredio, setNombrePredio] = useState('')
@@ -38,11 +40,10 @@ export default function Recepcion() {
     const obtenerPredios = async () => {
       let predios = []
       const prediosData = await window.api.obtenerPredios()
-      prediosData.map((key) => {
-        //console.log(key)
-        predios.push({ label: key })
-      })
+      //console.log(prediosData)
+      predios = Object.keys(prediosData.predios)
       setPrediosData(predios)
+      setEnf(prediosData.enf)
     }
     obtenerPredios()
   }, [])
@@ -57,7 +58,8 @@ export default function Recepcion() {
       kilos: kilos,
       placa: placa,
       tipoFruta: tipoFruta,
-      observaciones: observaciones
+      observaciones: observaciones,
+      enf: enf
     }
     
     datos.promedio = datos.kilos / datos.canastillas
@@ -108,8 +110,15 @@ export default function Recepcion() {
       <Grid container spacing={2} sx={{ padding: '1rem',  overflow: 'auto' }}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Typography variant="h4" component="h2">
-            Recepcion
+            Recepcion 
           </Typography>
+      
+        </Grid>
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Typography variant="h6" component="h6">
+          ENF-{fecha.getFullYear().toString().slice(-2)+String(fecha.getMonth() + 1).padStart(2, "0")+enf}
+          </Typography>
+
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Autocomplete

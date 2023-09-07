@@ -43,6 +43,10 @@ const api = {
     const response = await ipcRenderer.invoke('modificarHistorial', datos);
     return response
   },
+  actualizarDescarte: async () => {
+    const response = await ipcRenderer.invoke('actualizarDescarte');
+    return response
+  },
 
   obtenerDescarte: async () => {
     const response = await ipcRenderer.invoke('obtenerDescarte');

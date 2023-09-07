@@ -36,8 +36,8 @@ export default function TablaHistorialVaciado({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['ENF'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
-          String(action.datos[lote]['nombrePredio'])
+          action.datos[lote]['enf'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          String(action.datos[lote]['nombre'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
           action.datos[lote]['fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
@@ -61,6 +61,7 @@ export default function TablaHistorialVaciado({ filtro }) {
   useEffect(() => {
     const interval = setInterval(async () => {
       const frutaActual = await window.api.obtenerHistorialProceso()
+      //console.log(frutaActual)
       dispatch({ datos: frutaActual })
     }, 500)
     return () => clearInterval(interval)
@@ -69,13 +70,13 @@ export default function TablaHistorialVaciado({ filtro }) {
   const clickLote = (e) => {
     let lote = e.target.value
     setPropsModal(() => ({
-      nombre: tabla[lote]['nombrePredio'],
+      nombre: tabla[lote]['nombre'],
       canastillas: tabla[lote]['canastillas'],
-      enf: tabla[lote]['ENF'],
+      enf: tabla[lote]['enf'],
       id: lote
     }))
     if (e.target.checked) {
-      setTitleTable(tabla[lote]['ENF'] + ' ' + tabla[lote]['nombrePredio'])
+      setTitleTable(tabla[lote]['enf'] + ' ' + tabla[lote]['nombre'])
       if (
         format(new Date(tabla[lote]['fecha']), 'MM/dd/yyyy') == format(new Date(), 'MM/dd/yyyy')
       ) {
@@ -128,8 +129,8 @@ export default function TablaHistorialVaciado({ filtro }) {
           </TableHead>
           <TableBody>
             {tabla && Object.keys(tabla).reverse().map((item) => (
-              <TableRow>
-                <TableCell padding="checkbox">
+              <TableRow key={item+'tableRow'}>
+                <TableCell padding="checkbox" key={item+'tablecellInput'}>
                   {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
                   <input
                     type="radio"
@@ -138,10 +139,11 @@ export default function TablaHistorialVaciado({ filtro }) {
                     onClick={clickLote}
                     value={item}
                     name="lote"
+                    key={item+'input'}
                   />
                 </TableCell>
-                <TableCell key={item}>{tabla[item]['ENF']}</TableCell>
-                <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombrePredio']}</TableCell>
+                <TableCell key={item}>{tabla[item]['enf']}</TableCell>
+                <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombre']}</TableCell>
                 <TableCell key={item + 'Canastillas'}>{tabla[item]['canastillas']}</TableCell>
                 <TableCell key={item + 'Kilos'}>{tabla[item]['kilos']}</TableCell>
                 <TableCell key={item + 'TipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>

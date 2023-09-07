@@ -14,20 +14,12 @@ import {
   Alert
 } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
+import ReplayIcon from '@mui/icons-material/Replay';
 import React, { useEffect, useReducer, useState } from 'react'
 
 
 let enfObj = {}
 
-const descartes = [
-  'General lavado',
-  'Pareja lavado',
-  'Balin lavado',
-  'General encerado',
-  'Pareja encerado',
-  'Balin encerado',
-  'Extra encerado'
-]
 
 export default function TablaDescarte({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
@@ -50,9 +42,9 @@ export default function TablaDescarte({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['Nombre Predio'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
+          action.datos[lote]['nombre'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
             -1 ||
-          action.datos[lote]['Tipo Fruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
+          action.datos[lote]['tipoFruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
       )
 
       tablaFiltrada.map((item) => {
@@ -84,13 +76,24 @@ export default function TablaDescarte({ filtro }) {
 
 
 
+  //funcion para actualizar el descarte
+  const clickActualizarDescarte = async () => {
+    try{
+      const response = await window.api.actualizarDescarte();
+      dispatch({ datos: response })
+
+    } catch(e){
+      console.log(`${e.name}: ${e.message}`)
+    }
+  }
 
   // funcion donde se elimina la fruta descarte
   const clickEliminarFrutaDescarte = async () => {
     try {
       setLoading(true)
       const response = await window.api.eliminarFrutaDescarte(enfObj)
-      if(response === 'Fruta enviada con exito'){
+      console.log(response)
+      if(response === 'Enviado con exito'){
         setLoading(false)
         setOpenSuccess(true)
         setMessage(response)
@@ -98,7 +101,7 @@ export default function TablaDescarte({ filtro }) {
       } else{
         setLoading(false)
         setOpenError(true)
-        setMessage("Erros al guardar los datos")
+        setMessage(response)
       }
       
     } catch (e) {
@@ -108,10 +111,12 @@ export default function TablaDescarte({ filtro }) {
   }
   //el nombre es la ENF que a su vez es la key de el objeto tabla
   const seleccionarDescarte = (e) => {
-    const [enf, descarte] = e.value.split('/')
+    const [enf, descarte, tipoDescarte] = e.value.split('/')
+
+   
 
     if (e.checked) {
-      enfObj[e.value] = tabla[enf][descarte]
+      enfObj[e.value] = tabla[enf][descarte][tipoDescarte]
     } else {
       delete enfObj[e.value]
     }
@@ -129,15 +134,37 @@ export default function TablaDescarte({ filtro }) {
       <Toolbar>
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           Total{' '}
-          {Object.keys(tabla).length !== 0 &&
+          {tabla &&
             (Object.keys(tabla).reduce(
-              (acu, item) => acu + descartes.reduce((acu, item2) => acu + tabla[item][item2], 0),
+              (acu, item) => item != 'nombre' && item != 'tipoFruta'
+                 ? acu + Object.keys(tabla[item]['descarteLavado']).reduce((acu2, item2) => acu2 + tabla[item]['descarteLavado'][item2], 0) 
+                 : acu + 0,
               0
-            ) + 'Kg')}
+            ) + 
+            Object.keys(tabla).reduce(
+              (acu, item) => item != 'nombre' && item != 'tipoFruta'
+                 ? acu + Object.keys(tabla[item]['descarteEncerado']).reduce((acu2, item2) => acu2 + tabla[item]['descarteEncerado'][item2], 0) 
+                 : acu + 0,
+              0
+            )
+            +
+            'Kg')}
         </Typography>
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable + 'Kg'}
         </Typography>
+
+        <LoadingButton
+          color="primary"
+          loading={loading}
+          loadingPosition="start"
+          onClick={clickActualizarDescarte}
+          startIcon={<ReplayIcon />}
+          variant="contained"
+          sx={{ width: '30%', marginRight:'2rem' }}
+        >
+          <span>Actualizar</span>
+        </LoadingButton>
 
         <LoadingButton
           color="primary"
@@ -164,8 +191,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 General Lavado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['General lavado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteLavado']['descarteGeneral'] + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -173,8 +200,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 Pareja lavado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['Pareja lavado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteLavado']['pareja'] + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -182,8 +209,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 Balin lavado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['Balin lavado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteLavado']['balin'] + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -191,8 +218,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 General encerado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['General encerado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteEncerado']['descarteGeneral'] + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -200,8 +227,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 Pareja encerado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['Pareja encerado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteEncerado']['pareja'] + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -209,8 +236,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 Balin encerado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['Balin encerado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteEncerado']['balin'] + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -218,8 +245,8 @@ export default function TablaDescarte({ filtro }) {
               <TableCell>
                 Extra encerado (Kg){' '}
                 <span>
-                  {Object.keys(tabla).length !== 0 && (Object.keys(tabla).reduce(
-                    (acu, item) => tabla[item]['Extra encerado'] + acu,
+                  {tabla && (Object.keys(tabla).reduce(
+                    (acu, item) => tabla[item]['descarteEncerado']['extra']  + acu,
                     0
                   ) + 'Kg')}
                 </span>
@@ -227,10 +254,10 @@ export default function TablaDescarte({ filtro }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {Object.keys(tabla).length !== 0 &&
+            {tabla &&
               Object.keys(tabla).map((item) => (
-                <TableRow>
-                   <TableCell padding="checkbox">
+                <TableRow key={item+'tableRow'}>
+                   <TableCell padding="checkbox" key={item+'tableCell'}>  
                     {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
                     <input
                       type="radio"
@@ -239,80 +266,88 @@ export default function TablaDescarte({ filtro }) {
                    
                       value={item}
                       name="lote"
+                      key={item+'checkBox'}
                     />
                   </TableCell>
                   <TableCell key={item}>{item}</TableCell>
-                  <TableCell key={item + 'nombrePredio'}>{tabla[item]['Nombre Predio']}</TableCell>
-                  <TableCell key={item + 'tipoFruta'}>{tabla[item]['Tipo Fruta']}</TableCell>
-                  <TableCell key={item + 'General lavado'}>
+                  <TableCell key={item + 'nombre'}>{tabla[item]['nombre']}</TableCell>
+                  <TableCell key={item + 'tipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
+                  <TableCell key={item + 'General lavado' + 'cell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'General lavado'}
+                      value={item + '/' + 'descarteLavado' + '/' + 'descarteGeneral'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item+'inputGeneralLavado'}
                     />{' '}
-                    {tabla[item]['General lavado']}
+                    {tabla[item]['descarteLavado']['descarteGeneral']}
                   </TableCell>
-                  <TableCell key={item + 'Pareja lavado'}>
+                  <TableCell key={item + 'Pareja lavado' + 'cell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'Pareja lavado'}
+                      value={item + '/' + 'descarteLavado' + '/' + 'pareja'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item+'inputParejaLavado'}
                     />{' '}
-                    {tabla[item]['Pareja lavado']}
+                    {tabla[item]['descarteLavado']['pareja']}
                   </TableCell>
-                  <TableCell key={item + 'Balin lavado'}>
+                  <TableCell key={item + 'Balin lavado'+'cell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'Balin lavado'}
+                      value={item + '/' + 'descarteLavado' + '/' + 'balin'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item +'inputBalinLavado'}
                     />{' '}
-                    {tabla[item]['Balin lavado']}
+                    {tabla[item]['descarteLavado']['balin']}
                   </TableCell>
-                  <TableCell key={item + 'General encerado'}>
+                  <TableCell key={item + 'generalEnceradoCell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'General encerado'}
+                      value={item + '/' + 'descarteEncerado' + '/' + 'descarteGeneral'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item+'inputGeneralEncerado'}
                     />{' '}
-                    {tabla[item]['General encerado']}
+                    {tabla[item]['descarteEncerado']['descarteGeneral']}
                   </TableCell>
-                  <TableCell key={item + 'Pareja encerado'}>
+                  <TableCell key={item + 'parejaEnceradoCell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'Pareja encerado'}
+                      value={item + '/' + 'descarteEncerado' + '/' + 'pareja'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item+'inputParejaEncerado'}
                     />{' '}
-                    {tabla[item]['Pareja encerado']}
+                   {tabla[item]['descarteEncerado']['pareja']}
                   </TableCell>
-                  <TableCell key={item + 'Balin encerado'}>
+                  <TableCell key={item + 'balinEnceradoCell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'Balin encerado'}
+                      value={item + '/' + 'descarteEncerado' + '/' + 'balin'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item+'inputBalinEncerado'}
                     />{' '}
-                    {tabla[item]['Balin encerado']}
+                    {tabla[item]['descarteEncerado']['balin']}
                   </TableCell>
-                  <TableCell key={item + 'Extra encerado'}>
+                  <TableCell key={item + 'extraEnceradoCell'}>
                     <input
                       type="checkBox"
                       className="check"
-                      value={item + '/' + 'Extra encerado'}
+                      value={item + '/' + 'descarteEncerado' + '/' + 'extra'}
                       onClick={(e) => seleccionarDescarte(e.target)}
                       style={{ width: 20, height: 20 }}
+                      key={item+'inputExtraEncerado'}
                     />{' '}
-                    {tabla[item]['Extra encerado']}
+                    {tabla[item]['descarteEncerado']['extra']}
                   </TableCell>
                 </TableRow>
               ))}
