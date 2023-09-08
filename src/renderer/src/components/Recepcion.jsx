@@ -35,6 +35,7 @@ export default function Recepcion() {
   const [errorMessage, setErrorMessage] = useState('');
   const [openSuccess, setOpenSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [saveRender, setSaveRender] = useState(false)
 
   useEffect(() => {
     const obtenerPredios = async () => {
@@ -46,7 +47,7 @@ export default function Recepcion() {
       setEnf(prediosData.enf)
     }
     obtenerPredios()
-  }, [])
+  }, [saveRender])
 
   const guardarLote = async () => {
     try{
@@ -79,12 +80,13 @@ export default function Recepcion() {
     //console.log(datos)
     const response =  await window.api.guardarLote(datos);
     if(response == "Guardado con exito"){
+      setSaveRender(!saveRender);
       setSuccessMessage(response);
       setOpenSuccess(true);
     }
     else{
-      console.log(response)
-      setErrorMessage("Error al guardar el lote")
+      //console.log(response)
+      setErrorMessage(response)
       setOpenError(true)
     }
     

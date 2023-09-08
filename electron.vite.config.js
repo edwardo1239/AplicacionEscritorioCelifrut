@@ -11,8 +11,8 @@ export default defineConfig({
         input: {
           index: resolve(__dirname, 'src/main/index.js'),
           worker: resolve(__dirname, 'src/main/worker.js'),
-          menuMaker: resolve(__dirname, 'src/main/menuMaker.js')
-          
+          menuMaker: resolve(__dirname, 'src/main/menuMaker.js'),
+
         },
 
       }

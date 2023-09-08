@@ -106,10 +106,11 @@ app.on('window-all-closed', () => {
 //funcion para obtener el nombre de los predios
 ipcMain.handle('obtenerPredios', async () => {
   try {
-    let prediosJSON = fs.readFileSync('./proveedores.json')
+    let prediosJSON = fs.readFileSync(join(__dirname, '../data/proveedores.json'))
     let predios = JSON.parse(prediosJSON)
+    console.log(__dirname)
 
-    let enfJSON = fs.readFileSync('./inventario.json')
+    let enfJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
     let enf = JSON.parse(enfJSON)
     //console.log(predios)
 
@@ -125,10 +126,10 @@ ipcMain.handle('obtenerPredios', async () => {
 
 //funcion para obtener la fruta sin procesar
 ipcMain.handle('obtenerFrutaActual', async () => {
-  let inventarioJSON = fs.readFileSync('./inventario.json')
+  let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
   let inventario = JSON.parse(inventarioJSON)
 
-  let prediosJSON = fs.readFileSync('./proveedores.json')
+  let prediosJSON = fs.readFileSync(join(__dirname, '../data/proveedores.json'))
   let proveedores = JSON.parse(prediosJSON)
 
   let objFrutaActual = {}
@@ -158,7 +159,7 @@ ipcMain.handle('obtenerFrutaActual', async () => {
 //funcion para obtener el historial de vaciado
 ipcMain.handle('obtenerHistorialProceso', async (eent) => {
   try {
-    let inventarioJSON = fs.readFileSync('./inventario.json')
+    let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
     let inventario = JSON.parse(inventarioJSON)
 
     let datos = {}
@@ -189,7 +190,7 @@ ipcMain.handle('obtenerHistorialProceso', async (eent) => {
 ipcMain.handle('obtenerDescarte', async () => {
   try {
     //Se obtiene los datos para mostrar en la tabla
-    let inventarioJSON = fs.readFileSync('./inventario.json')
+    let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
     let inventario = JSON.parse(inventarioJSON)
     let descarteObj = {}
 
@@ -241,7 +242,7 @@ ipcMain.handle('actualizarDescarte', async () => {
     const response = await net.fetch(url + request)
     const descarte = await response.json()
 
-    let inventarioJSON = fs.readFileSync('./inventario.json')
+    let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
     let inventario = JSON.parse(inventarioJSON)
 
     // se guarda el descarte en el inventario
@@ -261,7 +262,7 @@ ipcMain.handle('actualizarDescarte', async () => {
         inventario[enf]['descarteEncerado'] = descarte[enf]['descarteEncerado']
 
         inventarioJSON = JSON.stringify(inventario)
-        fs.writeFileSync('./inventario.json', inventarioJSON)
+        fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
       })
 
       //console.log(inventario)
@@ -362,7 +363,7 @@ ipcMain.handle('guardarLote', async (event, datos) => {
         datos.enf
 
       try {
-        let inventarioJSON = fs.readFileSync('./inventario.json')
+        let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
         let inventario = JSON.parse(inventarioJSON)
 
         if (!inventario.hasOwnProperty(datos.enf)) {
@@ -382,16 +383,10 @@ ipcMain.handle('guardarLote', async (event, datos) => {
 
         // console.log(inventario)
         inventarioJSON = JSON.stringify(inventario)
-        fs.writeFileSync('./inventario.json', inventarioJSON)
+        fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
       } catch (e) {
-        console.log(`${e.name}: ${e.message}`)
-        let inventario = {}
-        inventario['enf'] = 0
-        inventario['idVaciado'] = 0
-        inventario['idDirectoNacional'] = 0
+        return(`${e.name}: ${e.message}`)
 
-        fs.writeFileSync('./inventario.json', inventario)
-        console.log('Data saved')
       }
     }
     return responseGuardarLote
@@ -420,7 +415,7 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
     //const responseGuardarLote = 'Vaciado con exito'
     //console.log(datos)
     if (responseGuardarLote === 'Vaciado con exito') {
-      let inventarioJSON = fs.readFileSync('./inventario.json')
+      let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
       let inventario = JSON.parse(inventarioJSON)
 
       //console.log(inventario)
@@ -442,7 +437,7 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
       //console.log(inventario)
 
       inventarioJSON = JSON.stringify(inventario)
-      fs.writeFileSync('./inventario.json', inventarioJSON)
+      fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
       console.log('Data saved')
     }
 
@@ -505,7 +500,7 @@ ipcMain.handle('modificarHistorial', async (event, datos) => {
     })
     const responseModificarLote = await response.json()
     if (responseModificarLote === 'Modificado con exito') {
-      let inventarioJSON = fs.readFileSync('./inventario.json')
+      let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
       let inventario = JSON.parse(inventarioJSON)
 
       inventario[datos.enf]['inventario'] += Number(datos.canastillas)
@@ -516,7 +511,7 @@ ipcMain.handle('modificarHistorial', async (event, datos) => {
         (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
       //console.log(inventario);
       inventarioJSON = JSON.stringify(inventario)
-      fs.writeFileSync('./inventario.json', inventarioJSON)
+      fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
     }
     return responseModificarLote
   } catch (e) {
@@ -543,7 +538,7 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
     const responseEliminarDescarte = await response.json()
 
     if (responseEliminarDescarte === 'Enviado con exito') {
-      let inventarioJSON = fs.readFileSync('./inventario.json')
+      let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
       let inventario = JSON.parse(inventarioJSON)
 
       Object.keys(datos).map((item) => {
@@ -553,7 +548,7 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
       })
 
       inventarioJSON = JSON.stringify(inventario)
-      fs.writeFileSync('./inventario.json', inventarioJSON)
+      fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
     }
     return responseEliminarDescarte
   } catch (e) {

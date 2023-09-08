@@ -1,4 +1,5 @@
-import { Menu, app } from 'electron'
+import { Menu, app, Notification } from 'electron'
+import { join } from 'path'
 
 const isMac = process.platform === 'darwin'
 
@@ -91,15 +92,24 @@ const template = [
             const responseJSON = await net.fetch(url + '?action=actualizarPredio')
             const predios = await responseJSON.json()
             let nombrepredios = JSON.stringify(predios)
-            console.log(nombrepredios)
-            fs.writeFileSync('./proveedores.json', nombrepredios)
-            console.log('Data saved')
+            //console.log(nombrepredios)
+            fs.writeFileSync(join(__dirname, '../data/proveedores.json'), nombrepredios)
+            //console.log('Data saved')
+            new Notification({
+              title: 'Success',
+              body: 'Data saved'
+            }).show()
           } catch (e) {
             console.log(`${e.name}: ${e.message}`)
+            new Notification({
+              title: 'Error',
+              body: `${e.name}: ${e.message}`
+            }).show()
           }
         }
       },
       {
+        /////obtener ENF
         label: 'Obtener ENF',
         click: async () => {
           const { net } = require('electron')
@@ -110,57 +120,70 @@ const template = [
             const responseJSON = await net.fetch(url + '?action=actualizarENF')
             const ENF = await responseJSON.json()
 
-            let inventarioJSON = fs.readFileSync('./inventario.json')
+            
+            let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
             let inventario = JSON.parse(inventarioJSON)
 
             inventario['enf'] = ENF
 
             inventarioJSON = JSON.stringify(inventario)
-            fs.writeFileSync('./inventario.json', inventarioJSON)
+            fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
             
-            console.log('Data saved')
+            new Notification({
+              title: 'Success',
+              body: 'Data saved'
+            }).show()
           } catch (e) {
             console.log(`${e.name}: ${e.message}`)
+            new Notification({
+              title: 'Error',
+              body: `${e.name}: ${e.message}`
+            }).show()
           }
         }
       },
       {
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         label: 'Resetear inventario local',
         click: () => {
           const fs = require('fs')
           try {
-            let inventarioJSON = fs.readFileSync('./inventario.json')
-            let inventario = JSON.parse(inventarioJSON)
-
-            inventario = {}
+      
+            let inventario = {}
             inventario['ENF-vaciando'] = ''
             inventario['enf'] = 0
             inventario['idVaciado'] = 0
             inventario['idDirectoNacional'] = 0
             inventario['historialVaciado'] = {}
             console.log(inventario)
-            inventarioJSON = JSON.stringify(inventario)
-            fs.writeFileSync('./inventario.json', inventarioJSON)
-            console.log('Data saved')
+            let inventarioJSON = JSON.stringify(inventario)
+            fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+            new Notification({
+              title: 'Success',
+              body: 'Inventario reseteado'
+            }).show()
           } catch (e) {
-            console.log(`${e.name}: ${e.message}`)
+            new Notification({
+              title: 'Error',
+              body: `${e.name}: ${e.message}`
+            }).show()
           }
         }
       },
-      {
-        label: 'Ver inventario Local',
-        click: () => {
-          const fs = require('fs')
-          try {
-            let inventarioJSON = fs.readFileSync('./inventario.json')
-            let inventario = JSON.parse(inventarioJSON)
+      // {
+      //   label: 'Ver inventario Local',
+      //   click: () => {
+      //     const fs = require('fs')
+      //     try {
+      //       let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+      //       let inventario = JSON.parse(inventarioJSON)
 
-            console.log(inventario)
-          } catch (e) {
-            console.log(`${e.name}: ${e.message}`)
-          }
-        }
-      }
+      //       console.log(inventario)
+      //     } catch (e) {
+      //       console.log(`${e.name}: ${e.message}`)
+      //     }
+      //   }
+      // }
     ]
   },
   {
