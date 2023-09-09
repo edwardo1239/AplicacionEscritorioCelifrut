@@ -15,7 +15,8 @@ import RestoreIcon from '@mui/icons-material/Restore'
 import React, { useReducer, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
-import ModificarHistorial from '../modals/ModificarHistorial'
+
+import ModificarDirectoNacional from '../modals/ModificarDirectoNacional'
 
 export default function TablaHistorialDirectoNacional({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
@@ -69,13 +70,13 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
   const clickLote = (e) => {
     let lote = e.target.value
     setPropsModal(() => ({
-      nombre: tabla[lote]['nombrePredio'],
+      nombre: tabla[lote]['nombre'],
       canastillas: tabla[lote]['canastillas'],
-      enf: tabla[lote]['ENF'],
+      enf: tabla[lote]['enf'],
       id: lote
     }))
     if (e.target.checked) {
-      setTitleTable(tabla[lote]['ENF'] + ' ' + tabla[lote]['nombrePredio'])
+      setTitleTable(tabla[lote]['enf'] + ' ' + tabla[lote]['nombre'])
       if (
         format(new Date(tabla[lote]['fecha']), 'MM/dd/yyyy') == format(new Date(), 'MM/dd/yyyy')
       ) {
@@ -140,8 +141,8 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
                     name="lote"
                   />
                 </TableCell>
-                <TableCell key={item}>{tabla[item]['ENF']}</TableCell>
-                <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombrePredio']}</TableCell>
+                <TableCell key={item}>{tabla[item]['enf']}</TableCell>
+                <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombre']}</TableCell>
                 <TableCell key={item + 'Canastillas'}>{tabla[item]['canastillas']}</TableCell>
                 <TableCell key={item + 'Kilos'}>{tabla[item]['kilos']}</TableCell>
                 <TableCell key={item + 'TipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
@@ -155,7 +156,7 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
       </TableContainer>
       {modalModificar &&
         createPortal(
-          <ModificarHistorial closeModal={closeModal} propsModal={propsModal} funcOpenSuccess={funcOpenSuccess} />,
+          <ModificarDirectoNacional closeModal={closeModal} propsModal={propsModal} funcOpenSuccess={funcOpenSuccess} />,
           document.body
         )}
     </Box>

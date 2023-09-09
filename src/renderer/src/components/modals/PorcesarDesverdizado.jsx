@@ -1,15 +1,16 @@
 import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import ColorLensIcon from '@mui/icons-material/ColorLens'
+import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
 import React, { useState } from 'react'
 
-export default function Desverdizado({ closeDesverdizado, propsModal, funcOpenSuccess }) {
+
+export default function PorcesarDesverdizado({ closeModal, propsModal, funcOpenSuccess }) {
     const [canastillas, setCanastillas] = useState(0)
     const [openError, setOpenError] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const [loading, setLoading] = useState(false)
   
-    const desverdizado = async () => {
+    const vaciar = async () => {
       setLoading(true)
       if (parseInt(canastillas) > parseInt(propsModal.canastillas)) {
         setErrorMessage('Error en el numero de canastillas')
@@ -17,16 +18,16 @@ export default function Desverdizado({ closeDesverdizado, propsModal, funcOpenSu
         setLoading(false)
       } else {
         let obj = { canastillas: canastillas, enf: propsModal.enf }
-        const response = await window.api.desverdizado(obj)
         //console.log(obj)
-        console.log(response)
-        if (response == 'Lote se ha puesto a desverdizar') {
-          funcOpenSuccess('Lote se ha puesto a desverdizar')
+        const response = await window.api.procesarDesverdizado(obj)
+        //console.log(response)
+        if (response == 'Vaciado con exito') {
+          funcOpenSuccess('Vaciado con exito')
         } else {
-          setErrorMessage('Error al desverdizar el lote')
+          setErrorMessage('Error al vaciar')
           setOpenError(true)
         }
-        closeDesverdizado()
+        closeVaciado()
       }
     }
   
@@ -54,7 +55,7 @@ export default function Desverdizado({ closeDesverdizado, propsModal, funcOpenSu
           }}
         >
           <AppBar position="static">
-            <Toolbar sx={{ backgroundColor: 'orange', justifyContent: 'space-between' }}>
+            <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
               <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
                 {propsModal.nombre}
               </Typography>
@@ -88,14 +89,14 @@ export default function Desverdizado({ closeDesverdizado, propsModal, funcOpenSu
               color="primary"
               loading={loading}
               loadingPosition="start"
-              onClick={desverdizado}
-              startIcon={<ColorLensIcon />}
+              onClick={vaciar}
+              startIcon={<MoveToInboxIcon />}
               variant="contained"
               sx={{ width: '20%', marginBottom: '5rem' }}
             >
-              <span>Enviar</span>
+              <span>Vaciar</span>
             </LoadingButton>
-            <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeDesverdizado}>
+            <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeModal}>
               Cancelar
             </Button>
           </div>

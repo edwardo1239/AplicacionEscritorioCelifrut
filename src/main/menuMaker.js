@@ -3,6 +3,12 @@ import { join } from 'path'
 
 const isMac = process.platform === 'darwin'
 
+// const pathIDsDev = join(__dirname, '../../../ids.json')
+// const pathProveedoresDev = join(__dirname, '../../../proveedores.json')
+
+const pathIDsDev = './ids.json'
+const pathProveedoresDev = './proveedores.json'
+
 const template = [
   // { role: 'appMenu' }
   ...(isMac
@@ -92,9 +98,13 @@ const template = [
             const responseJSON = await net.fetch(url + '?action=actualizarPredio')
             const predios = await responseJSON.json()
             let nombrepredios = JSON.stringify(predios)
-            //console.log(nombrepredios)
-            fs.writeFileSync(join(__dirname, '../data/proveedores.json'), nombrepredios)
-            //console.log('Data saved')
+            ///para dev
+            fs.writeFileSync(pathProveedoresDev, nombrepredios)
+
+            ////////// para produccion
+            //fs.writeFileSync(join(__dirname, '../../../proveedores.json'), nombrepredios)
+
+
             new Notification({
               title: 'Success',
               body: 'Data saved'
@@ -119,19 +129,29 @@ const template = [
           try {
             const responseJSON = await net.fetch(url + '?action=actualizarENF')
             const ENF = await responseJSON.json()
-
             
-            let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
-            let inventario = JSON.parse(inventarioJSON)
+            
+            if(fs.existsSync(pathIDsDev)){
+              let inventarioJSON = fs.readFileSync(pathIDsDev)
+              let inventario = JSON.parse(inventarioJSON)
 
-            inventario['enf'] = ENF
+              inventario['enf'] = ENF
 
-            inventarioJSON = JSON.stringify(inventario)
-            fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+              inventarioJSON = JSON.stringify(inventario)
+              fs.writeFileSync(pathIDsDev, inventarioJSON)
+            }
+
+            else{
+              let inventario = {}
+              inventario['enf'] = ENF
+              let inventarioJSON = JSON.stringify(inventario)
+              fs.writeFileSync(pathIDsDev, inventarioJSON)
+            }
+
             
             new Notification({
               title: 'Success',
-              body: 'Data saved'
+              body: "ENF actualizada"
             }).show()
           } catch (e) {
             console.log(`${e.name}: ${e.message}`)
@@ -142,34 +162,34 @@ const template = [
           }
         }
       },
-      {
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        label: 'Resetear inventario local',
-        click: () => {
-          const fs = require('fs')
-          try {
+      // {
+      //   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //   label: 'Resetear inventario local',
+      //   click: () => {
+      //     const fs = require('fs')
+      //     try {
       
-            let inventario = {}
-            inventario['ENF-vaciando'] = ''
-            inventario['enf'] = 0
-            inventario['idVaciado'] = 0
-            inventario['idDirectoNacional'] = 0
-            inventario['historialVaciado'] = {}
-            console.log(inventario)
-            let inventarioJSON = JSON.stringify(inventario)
-            fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
-            new Notification({
-              title: 'Success',
-              body: 'Inventario reseteado'
-            }).show()
-          } catch (e) {
-            new Notification({
-              title: 'Error',
-              body: `${e.name}: ${e.message}`
-            }).show()
-          }
-        }
-      },
+      //       let inventario = {}
+      //       inventario['ENF-vaciando'] = ''
+      //       inventario['enf'] = 0
+      //       inventario['idVaciado'] = 0
+      //       inventario['idDirectoNacional'] = 0
+      //       inventario['historialVaciado'] = {}
+      //       console.log(inventario)
+      //       let inventarioJSON = JSON.stringify(inventario)
+      //       fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+      //       new Notification({
+      //         title: 'Success',
+      //         body: 'Inventario reseteado'
+      //       }).show()
+      //     } catch (e) {
+      //       new Notification({
+      //         title: 'Error',
+      //         body: `${e.name}: ${e.message}`
+      //       }).show()
+      //     }
+      //   }
+      // },
       // {
       //   label: 'Ver inventario Local',
       //   click: () => {

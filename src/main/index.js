@@ -7,12 +7,19 @@ const fs = require('fs')
 const { mainMenu } = require('./menuMaker')
 import icon from '../../resources/icon.png?asset'
 
-// let linkObj = {}
-// //let infoPredios
-// let infoFrutaActual
-// let infoHistorialVaciado
-// let infoDescarteInventario
-// let infoHistorialDirectoNacional
+const pathIDs = './ids.json'
+const pathProveedores = './proveedores.json'
+const pathInventario = './inventario.json'
+const pathHistorialVaciado = './historialVaciado.json'
+const pathHistorialDirectoNacional= './historialDirectoNacional.json'
+const pathInventarioDesverdizando = './pathInventarioDesverdizado.json'
+
+// const pathIDs = join(__dirname, '../../../ids.json')
+// const pathProveedores = join(__dirname, '../../../proveedores.json')
+// const pathInventario = join(__dirname, '../../../inventario.json')
+// const pathHistorialVaciado = join(__dirname, '../../../historialVaciado.json')
+// const pathHistorialDirectoNacional = join(__dirname, '../../../historialDirectoNacional.json')
+// const pathInventarioDesverdizado = join(__dirname, '../../../inventarioDesverdizado.json')
 
 function createWindow() {
   // Create the browser window.
@@ -66,22 +73,6 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // const response = await net.fetch(
-  //   'https://script.google.com/macros/s/AKfycbyxbqQq58evRO8Hp5FE88TJPatYPc03coveFaBc9cFYYIii-j5I1tvxsUOQH7xfJ8KB/exec'
-  // )
-  // linkObj = await response.json()
-  // console.log(linkObj)
-  // await (async () => {
-  //   try {
-  //     let infoPredios
-  //     const response = await net.fetch(linkObj.recepcion + '?action=recepcion')
-  //     const predios = await response.json()
-  //     infoPredios = predios
-  //   } catch (e) {
-  //     console.log(e)
-  //   }
-  // })()
-
   createWindow()
 
   app.on('activate', function () {
@@ -106,13 +97,11 @@ app.on('window-all-closed', () => {
 //funcion para obtener el nombre de los predios
 ipcMain.handle('obtenerPredios', async () => {
   try {
-    let prediosJSON = fs.readFileSync(join(__dirname, '../data/proveedores.json'))
+    let prediosJSON = fs.readFileSync(pathProveedores)
     let predios = JSON.parse(prediosJSON)
-    console.log(__dirname)
 
-    let enfJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+    let enfJSON = fs.readFileSync(pathIDs)
     let enf = JSON.parse(enfJSON)
-    //console.log(predios)
 
     let obj = {}
     obj['predios'] = predios
@@ -126,10 +115,10 @@ ipcMain.handle('obtenerPredios', async () => {
 
 //funcion para obtener la fruta sin procesar
 ipcMain.handle('obtenerFrutaActual', async () => {
-  let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+  let inventarioJSON = fs.readFileSync(pathInventario)
   let inventario = JSON.parse(inventarioJSON)
 
-  let prediosJSON = fs.readFileSync(join(__dirname, '../data/proveedores.json'))
+  let prediosJSON = fs.readFileSync(pathProveedores)
   let proveedores = JSON.parse(prediosJSON)
 
   let objFrutaActual = {}
@@ -157,25 +146,31 @@ ipcMain.handle('obtenerFrutaActual', async () => {
 })
 
 //funcion para obtener el historial de vaciado
-ipcMain.handle('obtenerHistorialProceso', async (eent) => {
+ipcMain.handle('obtenerHistorialProceso', async () => {
   try {
-    let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+    let historialVaciadoJSON = fs.readFileSync(pathHistorialVaciado)
+    let historialVaciado = JSON.parse(historialVaciadoJSON)
+
+    let inventarioJSON = fs.readFileSync(pathInventario)
     let inventario = JSON.parse(inventarioJSON)
 
+    let enfJSON = fs.readFileSync(pathIDs)
+    let enf = JSON.parse(enfJSON)
+
     let datos = {}
-    let id = inventario['idVaciado']
+    let id = enf.idVaciado
     let rango = id - 200
 
     if (rango < 0) rango = 0
     for (let i = id - 1; i >= rango; i--) {
       datos[i] = {}
 
-      datos[i]['enf'] = inventario['historialVaciado'][i]['enf']
+      datos[i]['enf'] = historialVaciado[i]['enf']
       datos[i]['nombre'] = inventario[datos[i]['enf']]['nombre']
-      datos[i]['canastillas'] = inventario['historialVaciado'][i]['canastillas']
-      datos[i]['kilos'] = inventario['historialVaciado'][i]['kilos']
+      datos[i]['canastillas'] = historialVaciado[i]['canastillas']
+      datos[i]['kilos'] = historialVaciado[i]['kilos']
       datos[i]['tipoFruta'] = inventario[datos[i]['enf']]['tipoFruta']
-      datos[i]['fecha'] = inventario['historialVaciado'][i]['fecha']
+      datos[i]['fecha'] = historialVaciado[i]['fecha']
     }
 
     //console.log(datos)
@@ -190,39 +185,31 @@ ipcMain.handle('obtenerHistorialProceso', async (eent) => {
 ipcMain.handle('obtenerDescarte', async () => {
   try {
     //Se obtiene los datos para mostrar en la tabla
-    let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+    let inventarioJSON = fs.readFileSync(pathInventario)
     let inventario = JSON.parse(inventarioJSON)
     let descarteObj = {}
 
     Object.keys(inventario).map((item) => {
       if (
-        item !== 'enf' ||
-        item !== 'ENF-vaciando' ||
-        item !== 'idVaciado' ||
-        item !== 'idDirectoNacional' ||
-        item !== 'historialVaciado'
+        inventario[item].hasOwnProperty('descarteLavado') ||
+        inventario[item].hasOwnProperty('descarteEncerado')
       ) {
         if (
-          inventario[item].hasOwnProperty('descarteLavado') ||
-          inventario[item].hasOwnProperty('descarteEncerado')
+          !(
+            inventario[item]['descarteLavado']['descarteGeneral'] === 0 &&
+            inventario[item]['descarteLavado']['pareja'] === 0 &&
+            inventario[item]['descarteLavado']['balin'] === 0 &&
+            inventario[item]['descarteEncerado']['descarteGeneral'] === 0 &&
+            inventario[item]['descarteEncerado']['pareja'] === 0 &&
+            inventario[item]['descarteEncerado']['balin'] === 0 &&
+            inventario[item]['descarteEncerado']['extra'] === 0
+          )
         ) {
-          if (
-            !(
-              inventario[item]['descarteLavado']['descarteGeneral'] === 0 &&
-              inventario[item]['descarteLavado']['pareja'] === 0 &&
-              inventario[item]['descarteLavado']['balin'] === 0 &&
-              inventario[item]['descarteEncerado']['descarteGeneral'] === 0 &&
-              inventario[item]['descarteEncerado']['pareja'] === 0 &&
-              inventario[item]['descarteEncerado']['balin'] === 0 &&
-              inventario[item]['descarteEncerado']['extra'] === 0
-            )
-          ) {
-            descarteObj[item] = {}
-            descarteObj[item]['nombre'] = inventario[item]['nombre']
-            descarteObj[item]['tipoFruta'] = inventario[item]['tipoFruta']
-            descarteObj[item]['descarteLavado'] = inventario[item]['descarteLavado']
-            descarteObj[item]['descarteEncerado'] = inventario[item]['descarteEncerado']
-          }
+          descarteObj[item] = {}
+          descarteObj[item]['nombre'] = inventario[item]['nombre']
+          descarteObj[item]['tipoFruta'] = inventario[item]['tipoFruta']
+          descarteObj[item]['descarteLavado'] = inventario[item]['descarteLavado']
+          descarteObj[item]['descarteEncerado'] = inventario[item]['descarteEncerado']
         }
       }
     })
@@ -242,7 +229,7 @@ ipcMain.handle('actualizarDescarte', async () => {
     const response = await net.fetch(url + request)
     const descarte = await response.json()
 
-    let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+    let inventarioJSON = fs.readFileSync(pathInventario)
     let inventario = JSON.parse(inventarioJSON)
 
     // se guarda el descarte en el inventario
@@ -262,14 +249,14 @@ ipcMain.handle('actualizarDescarte', async () => {
         inventario[enf]['descarteEncerado'] = descarte[enf]['descarteEncerado']
 
         inventarioJSON = JSON.stringify(inventario)
-        fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+        fs.writeFileSync(pathInventario, inventarioJSON)
       })
 
       //console.log(inventario)
     }
 
     //Se obtiene los datos para mostrar en la tabla
-    inventarioJSON = fs.readFileSync('./inventario.json')
+    inventarioJSON = fs.readFileSync(pathInventario)
     inventario = JSON.parse(inventarioJSON)
     let descarteObj = {}
 
@@ -305,7 +292,7 @@ ipcMain.handle('actualizarDescarte', async () => {
         }
       }
     })
-    console.log(descarteObj)
+    //console.log(descarteObj)
     return descarteObj
   } catch (e) {
     console.log(`${e.name}: ${e.message}`)
@@ -313,8 +300,63 @@ ipcMain.handle('actualizarDescarte', async () => {
 })
 
 ipcMain.handle('obtenerHistorialDirectoNacional', async () => {
-  return infoHistorialDirectoNacional
+  try {
+    let historialDirectoNacionalJSON = fs.readFileSync(pathHistorialDirectoNacional)
+    let historialDirectoNacional = JSON.parse(historialDirectoNacionalJSON)
+
+    let inventarioJSON = fs.readFileSync(pathInventario)
+    let inventario = JSON.parse(inventarioJSON)
+
+    let enfJSON = fs.readFileSync(pathIDs)
+    let enf = JSON.parse(enfJSON)
+
+    let datos = {}
+    let id = enf.idDirectoNacional
+    let rango = id - 200
+
+    if (rango < 0) rango = 0
+    for (let i = id - 1; i >= rango; i--) {
+      datos[i] = {}
+
+      datos[i]['enf'] = historialDirectoNacional[i]['enf']
+      datos[i]['nombre'] = inventario[datos[i]['enf']]['nombre']
+      datos[i]['canastillas'] = historialDirectoNacional[i]['canastillas']
+      datos[i]['kilos'] = historialDirectoNacional[i]['kilos']
+      datos[i]['tipoFruta'] = inventario[datos[i]['enf']]['tipoFruta']
+      datos[i]['fecha'] = historialDirectoNacional[i]['fecha']
+    }
+
+    //console.log(datos)
+    return datos
+  } catch (e) {
+    // return `${e.name}: ${e.message}`
+    console.log(`${e.name}: ${e.message}`)
+  }
 })
+
+//funcion para obtener la fruta sin procesar
+ipcMain.handle('obtenerFrutaDesverdizando', async () => {
+  let inventarioJSON = fs.readFileSync(pathInventario)
+  let inventario = JSON.parse(inventarioJSON)
+
+  let desverdizandoJSON = fs.readFileSync(pathInventarioDesverdizando)
+  let desverdizado = JSON.parse(desverdizandoJSON)
+
+  let objDesverdizando = {}
+  //console.log(inventario)
+
+  Object.keys(desverdizado).map(enf => {
+    if(desverdizado[enf]['desverdizando'] == true){
+      objDesverdizando[enf] = {};
+      objDesverdizando[enf]['nombre'] = inventario[enf]['nombre']
+      objDesverdizando[enf] = {...objDesverdizando[enf], ...desverdizado[enf]}
+    }
+  })
+
+  //console.log(objDesverdizando)
+  return objDesverdizando
+})
+
 
 //funcion que hace fetch de los datos
 // setInterval(async () => {
@@ -332,6 +374,7 @@ ipcMain.handle('obtenerHistorialDirectoNacional', async () => {
 
 //funcion para guardar un nuevo lote
 ipcMain.handle('guardarLote', async (event, datos) => {
+  console.log(datos)
   try {
     let ID = 'AKfycbze4iDi5-wZeS0om1f17To1pYLzvzP4aA3V2HiNAqJmKLAvOtbn9DiIHwGqOqUsrfoAwQ'
     let url = 'https://script.google.com/macros/s/' + ID + '/exec'
@@ -362,31 +405,57 @@ ipcMain.handle('guardarLote', async (event, datos) => {
         String(fecha.getMonth() + 1).padStart(2, '0') +
         datos.enf
 
+      let enfJSON = fs.readFileSync(pathIDs)
+
+      let enf = JSON.parse(enfJSON)
+
       try {
-        let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
-        let inventario = JSON.parse(inventarioJSON)
-
-        if (!inventario.hasOwnProperty(datos.enf)) {
+        if (!fs.existsSync(pathInventario)) {
+          let inventario = {}
           inventario[codigoENF] = {}
+          inventario[codigoENF]['inventario'] = datos.canastillas
+          inventario[codigoENF]['canastillas'] = datos.canastillas
+          inventario[codigoENF]['kilos'] = datos.kilos
+          inventario[codigoENF]['nombre'] = datos.nombre
+          inventario[codigoENF]['tipoFruta'] = datos.tipoFruta
+          inventario[codigoENF]['observaciones'] = datos.observaciones
+          inventario[codigoENF]['fecha'] = fecha
+
+          enf.enf += 1
+
+          let inventarioJSON = JSON.stringify(inventario)
+          fs.writeFileSync(pathInventario, inventarioJSON)
+
+          enfJSON = JSON.stringify(enf)
+          fs.writeFileSync(pathIDs, enfJSON)
+        } else {
+          let inventarioJSON = fs.readFileSync(pathInventario)
+
+          let inventario = JSON.parse(inventarioJSON)
+
+          if (!inventario.hasOwnProperty(datos.enf)) {
+            inventario[codigoENF] = {}
+          }
+
+          inventario[codigoENF] = {}
+          inventario[codigoENF]['inventario'] = datos.canastillas
+          inventario[codigoENF]['canastillas'] = datos.canastillas
+          inventario[codigoENF]['kilos'] = datos.kilos
+          inventario[codigoENF]['nombre'] = datos.nombre
+          inventario[codigoENF]['tipoFruta'] = datos.tipoFruta
+          inventario[codigoENF]['observaciones'] = datos.observaciones
+          inventario[codigoENF]['fecha'] = fecha
+
+          enf.enf += 1
+
+          inventarioJSON = JSON.stringify(inventario)
+          fs.writeFileSync(pathInventario, inventarioJSON)
+
+          enfJSON = JSON.stringify(enf)
+          fs.writeFileSync(pathIDs, enfJSON)
         }
-
-        inventario[codigoENF]
-        inventario[codigoENF]['inventario'] = datos.canastillas
-        inventario[codigoENF]['canastillas'] = datos.canastillas
-        inventario[codigoENF]['kilos'] = datos.kilos
-        inventario[codigoENF]['nombre'] = datos.nombre
-        inventario[codigoENF]['tipoFruta'] = datos.tipoFruta
-        inventario[codigoENF]['observaciones'] = datos.observaciones
-        inventario[codigoENF]['fecha'] = fecha
-
-        inventario['enf'] += 1
-
-        // console.log(inventario)
-        inventarioJSON = JSON.stringify(inventario)
-        fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
       } catch (e) {
-        return(`${e.name}: ${e.message}`)
-
+        return `${e.name}: ${e.message}`
       }
     }
     return responseGuardarLote
@@ -415,29 +484,46 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
     //const responseGuardarLote = 'Vaciado con exito'
     //console.log(datos)
     if (responseGuardarLote === 'Vaciado con exito') {
-      let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+      let inventarioJSON = fs.readFileSync(pathInventario)
       let inventario = JSON.parse(inventarioJSON)
+
+      let enfJSON = fs.readFileSync(pathIDs)
+      let enf = JSON.parse(enfJSON)
 
       //console.log(inventario)
 
-      inventario['ENF-vaciando'] = datos.enf
-      inventario[datos.enf]['inventario'] -= datos.canastillas
+      enf['ENF-vaciando'] = datos.enf
+      inventario[datos.enf]['inventario'] -= Number(datos.canastillas)
 
-      if (!inventario.hasOwnProperty('historialVaciado')) {
-        inventario['historialVaciado'] = {}
+      if (!fs.existsSync(pathHistorialVaciado)) {
+        let historialVaciado = {}
+        let historialVaciadoJSON = JSON.stringify(historialVaciado)
+        fs.writeFileSync(pathHistorialVaciado, historialVaciadoJSON)
+        enf['idVaciado'] = 0
       }
-      inventario['historialVaciado'][inventario['idVaciado']] = {}
-      inventario['historialVaciado'][inventario['idVaciado']]['enf'] = datos.enf
-      inventario['historialVaciado'][inventario['idVaciado']]['canastillas'] = datos.canastillas
-      inventario['historialVaciado'][inventario['idVaciado']]['kilos'] =
+
+      let historialVaciadoJSON = fs.readFileSync(pathHistorialVaciado)
+      let historialVaciado = JSON.parse(historialVaciadoJSON)
+
+      historialVaciado[enf['idVaciado']] = {}
+      historialVaciado[enf['idVaciado']]['enf'] = datos.enf
+      historialVaciado[enf['idVaciado']]['canastillas'] = datos.canastillas
+      historialVaciado[enf['idVaciado']]['kilos'] =
         datos.canastillas * (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
-      inventario['historialVaciado'][inventario['idVaciado']]['fecha'] = new Date()
-      inventario['idVaciado'] += 1
+      historialVaciado[enf['idVaciado']]['fecha'] = new Date()
+      enf['idVaciado'] += 1
 
       //console.log(inventario)
 
       inventarioJSON = JSON.stringify(inventario)
-      fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+      fs.writeFileSync(pathInventario, inventarioJSON)
+
+      enfJSON = JSON.stringify(enf)
+      fs.writeFileSync(pathIDs, enfJSON)
+
+      historialVaciadoJSON = JSON.stringify(historialVaciado)
+      fs.writeFileSync(pathHistorialVaciado, historialVaciadoJSON)
+
       console.log('Data saved')
     }
 
@@ -449,36 +535,144 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
 
 //funcion para directo nacional
 ipcMain.handle('directoNacional', async (event, datos) => {
-  const response = await net.fetch(linkObj.recepcion, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'directoNacional',
-      canastillas: datos.canastillas,
-      enf: datos.enf
-    }),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8'
+  let ID = "AKfycbx-AMW2OtRiln4eo5lI32YMCKhZ_-QogslqgLoCuy0pYJ3VXV3DrMVLoMxGuYqh5-SP"
+  let url = "https://script.google.com/macros/s/"+ID+"/exec"
+  try {
+    const response = await net.fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'directoNacional',
+        canastillas: datos.canastillas,
+        enf: datos.enf
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+    const responseDirectoNacional = await response.json()
+
+    if(responseDirectoNacional === 'Directo nacional con exito'){
+
+      let inventarioJSON = fs.readFileSync(pathInventario)
+      let inventario = JSON.parse(inventarioJSON)
+
+      let enfJSON = fs.readFileSync(pathIDs)
+      let enf = JSON.parse(enfJSON)
+
+      inventario[datos.enf]['inventario'] -= Number(datos.canastillas)
+
+      if (!fs.existsSync(pathHistorialDirectoNacional)) {
+        let historialDirectoNacional = {}
+        let historialDirectoNacionalJSON = JSON.stringify(historialDirectoNacional)
+        fs.writeFileSync(pathHistorialDirectoNacional, historialDirectoNacionalJSON)
+        enf['idDirectoNacional'] = 0
+      }
+
+      let historialDirectoNacionalJSON = fs.readFileSync(pathHistorialDirectoNacional)
+      let historialDirectoNacional = JSON.parse(historialDirectoNacionalJSON)
+
+      historialDirectoNacional[enf['idDirectoNacional']] = {}
+      historialDirectoNacional[enf['idDirectoNacional']]['enf'] = datos.enf
+      historialDirectoNacional[enf['idDirectoNacional']]['canastillas'] = datos.canastillas
+      historialDirectoNacional[enf['idDirectoNacional']]['kilos'] =
+        datos.canastillas * (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
+        historialDirectoNacional[enf['idDirectoNacional']]['fecha'] = new Date()
+      enf['idDirectoNacional'] += 1
+
+      //console.log(inventario)
+
+      inventarioJSON = JSON.stringify(inventario)
+      fs.writeFileSync(pathInventario, inventarioJSON)
+
+      enfJSON = JSON.stringify(enf)
+      fs.writeFileSync(pathIDs, enfJSON)
+
+      historialDirectoNacionalJSON = JSON.stringify(historialDirectoNacional)
+      fs.writeFileSync(pathHistorialDirectoNacional, historialDirectoNacionalJSON)
+
+
     }
-  })
-  const responseGuardarLote = await response.json()
-  return responseGuardarLote
+    return responseDirectoNacional
+  } catch (e) {
+    console.log(`${e.name}: ${e.message}`)
+    return `${e.name}: ${e.message}`
+  }
 })
 
 //funcion para desverdizado
 ipcMain.handle('desverdizado', async (event, datos) => {
-  const response = await net.fetch(linkObj.recepcion, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'desverdizado',
-      canastillas: datos.canastillas,
-      enf: datos.enf
-    }),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8'
+  let ID = "AKfycbzbbFtgHtG4zQ2DnOiZAXG1Dj6PZ19AgjXgj1eLqFWihp-ojPeyW53dgslSKN0jNmU1"
+  let url = 'https://script.google.com/macros/s/' + ID + '/exec'
+  console.log("0")
+  try {
+    const response = await net.fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'desverdizado',
+        canastillas: datos.canastillas,
+        enf: datos.enf
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+    const responseGuardarLote = await response.json()
+    //const responseGuardarLote = 'Vaciado con exito'
+    console.log(responseGuardarLote)
+    if (responseGuardarLote === ("Lote" + datos.enf + "Ingreado a desverdizado")) {
+      console.log("1")
+      let inventarioJSON = fs.readFileSync(pathInventario)
+      let inventario = JSON.parse(inventarioJSON)
+
+      // let enfJSON = fs.readFileSync(pathIDs)
+      // let enf = JSON.parse(enfJSON)
+
+      //console.log(inventario)
+
+
+      inventario[datos.enf]['inventario'] -= Number(datos.canastillas)
+
+      if (!fs.existsSync(pathInventarioDesverdizando)) {
+        let inventarioDesverdizado = {}
+        let inventarioDesverdizadoJSON = JSON.stringify(inventarioDesverdizado)
+        fs.writeFileSync(pathInventarioDesverdizando, inventarioDesverdizadoJSON)
+      }
+
+      let inventarioDesverdizadoJSON = fs.readFileSync(pathInventarioDesverdizando)
+      let inventarioDesverdizado = JSON.parse(inventarioDesverdizadoJSON)
+
+      if(!inventarioDesverdizado.hasOwnProperty(datos.enf)){
+        inventarioDesverdizado[datos.enf] = {}
+        inventarioDesverdizado[datos.enf]['canastillasIngreso'] = 0
+        inventarioDesverdizado[datos.enf]['kilosIngreso'] = 0
+      
+      }
+      
+      
+      inventarioDesverdizado[datos.enf]['canastillasIngreso'] += Number(datos.canastillas)
+      inventarioDesverdizado[datos.enf]['kilosIngreso'] +=
+      datos.canastillas * (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
+      inventarioDesverdizado[datos.enf]['fechaIngreso'] = new Date()
+      inventarioDesverdizado[datos.enf]['desverdizando'] = true
+
+
+
+      //console.log(inventario)
+
+      inventarioJSON = JSON.stringify(inventario)
+      fs.writeFileSync(pathInventario, inventarioJSON)
+
+
+      inventarioDesverdizadoJSON = JSON.stringify(inventarioDesverdizado)
+      fs.writeFileSync(pathInventarioDesverdizando, inventarioDesverdizadoJSON)
+
+      console.log('Data saved')
     }
-  })
-  const responseGuardarLote = await response.json()
-  return responseGuardarLote
+
+    return responseGuardarLote
+  } catch (e) {
+    return `${e.name}: ${e.message}`
+  }
 })
 
 //funcion para modificar el historial
@@ -500,18 +694,25 @@ ipcMain.handle('modificarHistorial', async (event, datos) => {
     })
     const responseModificarLote = await response.json()
     if (responseModificarLote === 'Modificado con exito') {
-      let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+      let inventarioJSON = fs.readFileSync(pathInventario)
       let inventario = JSON.parse(inventarioJSON)
 
+      let historialVaciadoJSON = fs.readFileSync(pathHistorialVaciado)
+      let historialVaciado = JSON.parse(historialVaciadoJSON)
+
       inventario[datos.enf]['inventario'] += Number(datos.canastillas)
-      inventario['historialVaciado'][datos.id]['canastillas'] -= datos.canastillas
-      inventario['historialVaciado'][datos.id]['modificado'] = datos.canastillas
-      inventario['historialVaciado'][datos.id]['kilos'] =
-        inventario['historialVaciado'][datos.id]['canastillas'] *
+      historialVaciado[datos.id]['canastillas'] -= datos.canastillas
+      historialVaciado[datos.id]['modificado'] = datos.canastillas
+      historialVaciado[datos.id]['kilos'] =
+        historialVaciado[datos.id]['canastillas'] *
         (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
       //console.log(inventario);
+
       inventarioJSON = JSON.stringify(inventario)
-      fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+      fs.writeFileSync(pathInventario, inventarioJSON)
+
+      historialVaciadoJSON = JSON.stringify(historialVaciado)
+      fs.writeFileSync(pathHistorialVaciado, historialVaciadoJSON)
     }
     return responseModificarLote
   } catch (e) {
@@ -522,8 +723,8 @@ ipcMain.handle('modificarHistorial', async (event, datos) => {
 
 ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
   try {
-    let ID = "AKfycbyZTBrl5SZwpV4W0cPJsSRbWwNHuUB05a_982z1woO1ioR2duQAe7B_DdTLBuHaQ2Bruw"
-    let url = "https://script.google.com/macros/s/"+ID+"/exec"
+    let ID = 'AKfycbyZTBrl5SZwpV4W0cPJsSRbWwNHuUB05a_982z1woO1ioR2duQAe7B_DdTLBuHaQ2Bruw'
+    let url = 'https://script.google.com/macros/s/' + ID + '/exec'
 
     const response = await net.fetch(url, {
       method: 'POST',
@@ -538,17 +739,17 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
     const responseEliminarDescarte = await response.json()
 
     if (responseEliminarDescarte === 'Enviado con exito') {
-      let inventarioJSON = fs.readFileSync(join(__dirname, '../data/inventario.json'))
+      let inventarioJSON = fs.readFileSync(pathInventario)
       let inventario = JSON.parse(inventarioJSON)
 
       Object.keys(datos).map((item) => {
         let [enf, descarte, tipoDescarte] = item.split('/')
-       // console.log(enf)
+        // console.log(enf)
         inventario[enf][descarte][tipoDescarte] -= datos[item]
       })
 
       inventarioJSON = JSON.stringify(inventario)
-      fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+      fs.writeFileSync(pathInventario, inventarioJSON)
     }
     return responseEliminarDescarte
   } catch (e) {
@@ -559,16 +760,68 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
 //funcion para modificar el historial de directo nacional
 
 ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
-  const response = await net.fetch(linkObj.recepcion, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'modificarHistorialDirectoNacional',
-      objEnf: datos
-    }),
-    headers: {
-      'Content-type': 'application/json; charset=UTF-8'
+
+  let ID = "AKfycbyNvCqx8f3_V6kXVx-5BwqArei8xtvO6z0cxMYYpRwGydEBCG0tZ9lIlPgG_qbeRyoR"
+  let url = 'https://script.google.com/macros/s/' + ID + '/exec'
+  try {
+
+    const response = await net.fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'modificarHistorialDirecto',
+        canastillas: datos.canastillas,
+        enf: datos.enf
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+
+    const responseModificarLote = await response.json()
+    if (responseModificarLote === 'Modificado con exito') {
+      let inventarioJSON = fs.readFileSync(pathInventario)
+      let inventario = JSON.parse(inventarioJSON)
+
+      let historialDirectoNacionalJSON = fs.readFileSync(pathHistorialDirectoNacional)
+      let historialDirectoNacional = JSON.parse(historialDirectoNacionalJSON)
+
+      inventario[datos.enf]['inventario'] += Number(datos.canastillas)
+      historialDirectoNacional[datos.id]['canastillas'] -= datos.canastillas
+      historialDirectoNacional[datos.id]['modificado'] = datos.canastillas
+      historialDirectoNacional[datos.id]['kilos'] =
+      historialDirectoNacional[datos.id]['canastillas'] *
+        (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
+      //console.log(inventario);
+
+      inventarioJSON = JSON.stringify(inventario)
+      fs.writeFileSync(pathInventario, inventarioJSON)
+
+      historialDirectoNacionalJSON = JSON.stringify(historialDirectoNacional)
+      fs.writeFileSync(pathHistorialDirectoNacional, historialDirectoNacionalJSON)
     }
-  })
-  const responseGuardarLote = await response.json()
-  return responseGuardarLote
+    return responseModificarLote
+  } catch (e) {
+    return `${e.name}: ${e.message}`
+  }
+})
+
+ipcMain.handle('procesarDesverdizado', async (event, datos) => {
+  let ID = ""
+  let url = ""
+  try{
+    const fetchResponse = await net.fetch(url, {
+      method:'POST',
+      body:JSON.stringify({
+        action:'procesarDesverdizado',
+        data: datos
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    }) 
+  const responsePorcesarDesverdizado = await fetchResponse.json()
+  return responsePorcesarDesverdizado
+  } catch (e){
+    return  `${e.name}: ${e.message}`
+  }
 })

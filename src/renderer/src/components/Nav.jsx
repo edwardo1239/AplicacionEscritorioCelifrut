@@ -18,6 +18,7 @@ import InventoryIcon from '@mui/icons-material/Inventory'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
 import FlagIcon from '@mui/icons-material/Flag';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 import Index from './Index'
 import Recepcion from './Recepcion'
@@ -25,6 +26,7 @@ import FrutaSinProcesar from './FrutaSinProcesar'
 import Procesado from './Procesado'
 import FrutaDescarte from './FrutaDescarte'
 import DirectoNacional from './DirectoNacional'
+import DesverdizadoInv from './DesverdizadoInv'
 
 const drawerWidth = 240
 
@@ -34,7 +36,8 @@ const links = {
   1: false,
   2: false,
   3: false,
-  4: false
+  4: false,
+  5: false
 }
 
 export default function Nav() {
@@ -72,6 +75,11 @@ export default function Nav() {
       case 4:
         //historial directo nacional
         nuevo = cambiarLink(4)
+        setState(nuevo)
+        break
+      case 5:
+        //historial directo nacional
+        nuevo = cambiarLink(5)
         setState(nuevo)
         break
       default:
@@ -113,7 +121,7 @@ export default function Nav() {
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
           <List>
-            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Descarte', 'Directo Nacional'].map((text, index) => (
+            {['Recepcion', 'Fruta sin procesar', 'Fruta Procesada', 'Fruta Descarte', 'Directo Nacional', 'Desverdizando'].map((text, index) => (
               <ListItem key={text + index} disablePadding>
                 <ListItemButton onClick={() => navBar(index)}>
                   <ListItemIcon>
@@ -122,6 +130,7 @@ export default function Nav() {
                     {index == 2 && <MoveToInboxIcon />}
                     {index == 3 && <FlagIcon />}
                     {index == 4 && <SwapHorizIcon />}
+                    {index == 5 && <AccessTimeIcon />}
                   </ListItemIcon>
 
                   <ListItemText primary={text} />
@@ -141,6 +150,7 @@ export default function Nav() {
         {links[2] && <Procesado />}
         {links[3] && <FrutaDescarte />}
         {links[4] && <DirectoNacional />}
+        {links[5] && <DesverdizadoInv />}
       </Box>
     </Box>
   )

@@ -4,7 +4,7 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import RestoreIcon from '@mui/icons-material/Restore'
 import React, { useState } from 'react'
 
-export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuccess }) {
+export default function ModificarDirectoNacional({ closeModal, propsModal, funcOpenSuccess  }) {
     const [canastillas, setCanastillas] = useState(0)
     const [openError, setOpenError] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
@@ -20,6 +20,7 @@ export default function ModificarHistorial({ closeModal, propsModal, funcOpenSuc
         let obj = { canastillas: canastillas, enf: propsModal.enf, id: propsModal.id }
         console.log(obj)
         const response = await window.api.modificarHistorialDirectoNacional(obj)
+        
         console.log(response)
         if (response == 'Historial modificado con exito!') {
           funcOpenSuccess('Historial modificado con exito!')

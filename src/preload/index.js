@@ -62,8 +62,16 @@ const api = {
     return response
   },
 
-  modificarHistorialDirectoNacional: async () => {
+  modificarHistorialDirectoNacional: async (datos) => {
     const response = await ipcRenderer.invoke('modificarHistorialDirectoNacional', datos);
+    return response
+  },
+  obtenerFrutaDesverdizando: async () => {
+    const response = await ipcRenderer.invoke('obtenerFrutaDesverdizando');
+    return response
+  },
+  procesarDesverdizado: async () => {
+    const response = await ipcRenderer.invoke('procesarDesverdizado', datos);
     return response
   }
 }
