@@ -125,11 +125,11 @@ const template = [
           const { net } = require('electron')
           const fs = require('fs')
           const url =
-            'https://script.google.com/macros/s/AKfycbyM7aXbCu2EXkGDNK5fL9zZMIN4W8L4LgBZQau8AI4Nubn2xuliLEh-mQLpOaYSg11FQQ/exec'
+            'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
           try {
             const responseJSON = await net.fetch(url + '?action=actualizarENF')
             const ENF = await responseJSON.json()
-            
+            //console.log(ENF)
             
             if(fs.existsSync(pathIDsDev)){
               let inventarioJSON = fs.readFileSync(pathIDsDev)

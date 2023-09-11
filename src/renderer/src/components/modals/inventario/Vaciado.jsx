@@ -1,33 +1,32 @@
 import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
+import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
 import React, { useState } from 'react'
 
-export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
+export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
   const [canastillas, setCanastillas] = useState(0)
   const [openError, setOpenError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const directo = async () => {
+  const vaciar = async () => {
     setLoading(true)
     if (parseInt(canastillas) > parseInt(propsModal.canastillas)) {
       setErrorMessage('Error en el numero de canastillas')
       setOpenError(true)
       setLoading(false)
     } else {
-
       let obj = { canastillas: canastillas, enf: propsModal.enf }
-   
-      const response = await window.api.directoNacional(obj)
-      console.log(response)
-      if (response == 'Fruta enviada nacional con exito') {
-        funcOpenSuccess('Fruta enviada nacional con exito')
+      //console.log(obj)
+      const response = await window.api.vaciarLote(obj)
+      //console.log(response)
+      if (response == 'Vaciado con exito') {
+        funcOpenSuccess(response)
       } else {
-        setErrorMessage('Error al enviar el lote')
+        setErrorMessage(response)
         setOpenError(true)
       }
-      closeDirecto()
+      closeVaciado()
     }
   }
 
@@ -55,7 +54,7 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
         }}
       >
         <AppBar position="static">
-          <Toolbar sx={{ backgroundColor: '#9E3C29', justifyContent: 'space-between' }}>
+          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
               {propsModal.nombre}
             </Typography>
@@ -89,14 +88,14 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
             color="primary"
             loading={loading}
             loadingPosition="start"
-            onClick={directo}
-            startIcon={<SwapHorizIcon />}
+            onClick={vaciar}
+            startIcon={<MoveToInboxIcon />}
             variant="contained"
             sx={{ width: '20%', marginBottom: '5rem' }}
           >
-            <span>Enviar</span>
+            <span>Vaciar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeDirecto}>
+          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeVaciado}>
             Cancelar
           </Button>
         </div>

@@ -6,13 +6,15 @@ import { Worker } from 'node:worker_threads'
 const fs = require('fs')
 const { mainMenu } = require('./menuMaker')
 import icon from '../../resources/icon.png?asset'
+import { json } from 'react-router-dom'
+import { Console } from 'console'
 
 const pathIDs = './ids.json'
 const pathProveedores = './proveedores.json'
 const pathInventario = './inventario.json'
 const pathHistorialVaciado = './historialVaciado.json'
 const pathHistorialDirectoNacional= './historialDirectoNacional.json'
-const pathInventarioDesverdizando = './pathInventarioDesverdizado.json'
+const pathInventarioDesverdizando = './inventarioDesverdizado.json'
 
 // const pathIDs = join(__dirname, '../../../ids.json')
 // const pathProveedores = join(__dirname, '../../../proveedores.json')
@@ -376,7 +378,7 @@ ipcMain.handle('obtenerFrutaDesverdizando', async () => {
 ipcMain.handle('guardarLote', async (event, datos) => {
   console.log(datos)
   try {
-    let ID = 'AKfycbze4iDi5-wZeS0om1f17To1pYLzvzP4aA3V2HiNAqJmKLAvOtbn9DiIHwGqOqUsrfoAwQ'
+    let ID = 'AKfycbzbq-ePD4s6U69BSwOmFEVeQ4qbDl4JIemNLx2AEC9ZxPbCx4njL2AH9qiIpAOkMNeKtA'
     let url = 'https://script.google.com/macros/s/' + ID + '/exec'
     const response = await net.fetch(url, {
       method: 'POST',
@@ -466,7 +468,7 @@ ipcMain.handle('guardarLote', async (event, datos) => {
 
 //funcion para vaciar canastillas
 ipcMain.handle('vaciarLote', async (event, datos) => {
-  let ID = 'AKfycbzXGeZQdWCSt5VYJYJU1bBJ7aLGJOTWJbiTusSLJK54u9Zlr9q3RDd-Ay5AUhJsjY5e7g'
+  let ID = 'AKfycbxvljaMDbqzLzCjZsNvXGKEdgGStMhd47eCx94E6nBlqJH1QCSxmeHREs_gt2ViDgl36A'
   let url = 'https://script.google.com/macros/s/' + ID + '/exec'
   try {
     const response = await net.fetch(url, {
@@ -601,7 +603,7 @@ ipcMain.handle('directoNacional', async (event, datos) => {
 
 //funcion para desverdizado
 ipcMain.handle('desverdizado', async (event, datos) => {
-  let ID = "AKfycbzbbFtgHtG4zQ2DnOiZAXG1Dj6PZ19AgjXgj1eLqFWihp-ojPeyW53dgslSKN0jNmU1"
+  let ID = 'AKfycbxESIUbUJ_eBgdl5XrtNCHfk2IkthvmbtmuHi5kzUGcBKCIGb-Ftj-SJijYGj7n9sHi'
   let url = 'https://script.google.com/macros/s/' + ID + '/exec'
   console.log("0")
   try {
@@ -610,7 +612,8 @@ ipcMain.handle('desverdizado', async (event, datos) => {
       body: JSON.stringify({
         action: 'desverdizado',
         canastillas: datos.canastillas,
-        enf: datos.enf
+        enf: datos.enf,
+        cuartoDesverdizado: datos.cuartoDesverdizado
       }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8'
@@ -645,6 +648,7 @@ ipcMain.handle('desverdizado', async (event, datos) => {
         inventarioDesverdizado[datos.enf] = {}
         inventarioDesverdizado[datos.enf]['canastillasIngreso'] = 0
         inventarioDesverdizado[datos.enf]['kilosIngreso'] = 0
+        inventarioDesverdizado[datos.enf]['cuartoDesverdizado'] = ''
       
       }
       
@@ -654,6 +658,7 @@ ipcMain.handle('desverdizado', async (event, datos) => {
       datos.canastillas * (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
       inventarioDesverdizado[datos.enf]['fechaIngreso'] = new Date()
       inventarioDesverdizado[datos.enf]['desverdizando'] = true
+      inventarioDesverdizado[datos.enf]['cuartoDesverdizado'] += datos.cuartoDesverdizado + ' '
 
 
 
@@ -805,6 +810,83 @@ ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
   }
 })
 
+ipcMain.handle('finalizarDesverdizado', async (event, datos) => {
+  let ID = "AKfycbxcFf4UcCOEPyUGLe5xnsxrsVXfJps0vGg6tM_o553IJh1C0Jb3dqvUrUsMn5BDmU7p"
+  let url = "https://script.google.com/macros/s/"+ID+"/exec"
+  console.log(datos)
+  try{
+    const response = await net.fetch(url, {
+      method: 'POST',
+      body:JSON.stringify({
+        action:'finalizarDesverdizado',
+        enf: datos.enf
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+    const responseFetch = await response.json()
+    console.log(responseFetch)
+    if(responseFetch == "Lote" + datos.enf + "desverdizado finalizado"){
+      let inventarioDesverdizadoJSON = fs.readFileSync(pathInventarioDesverdizando)
+      let inventarioDesverdizado = JSON.parse(inventarioDesverdizadoJSON)
+
+      inventarioDesverdizado[datos.enf]['fechaFinalizado'] = new Date();
+
+
+      inventarioDesverdizadoJSON = JSON.stringify(inventarioDesverdizado)
+      fs.writeFileSync(pathInventarioDesverdizando, inventarioDesverdizadoJSON)
+
+    }
+    return responseFetch
+  } catch (e){
+    return `${e.name}:${e.message}`
+  }
+})
+
+ipcMain.handle('setParametrosDesverdizado', async (event, datos) => {
+  const ID = "AKfycbxtiTGK4Z-oto2NwyANdSoes5TpNQpkVmJmiVy7JJ3iT3saVC4ajmjls86gjd_kur0A";
+  const url = "https://script.google.com/macros/s/"+ID+"/exec";
+  try{
+    const response = await net.fetch(url, {
+      method:'POST',
+      body:JSON.stringify({
+        action:'setParametrosDesverdizado',
+        enf: datos.enf,
+        temperatura: datos.temperatura,
+        etileno: datos.etileno,
+        carbono: datos.carbono,
+        humedad: datos.humedad
+      }),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+    const responseFetch = await response.json()
+    console.log(responseFetch)
+    if(responseFetch === "Parametros Guardados con exito"){
+
+      let inventarioDesverdizadoJSON = fs.readFileSync(pathInventarioDesverdizando)
+      let inventarioDesverdizado = JSON.parse(inventarioDesverdizadoJSON)
+
+      if(!inventarioDesverdizado[datos.enf].hasOwnProperty('parametros')){
+        inventarioDesverdizado[datos.enf]['parametros'] = []
+      }
+
+      inventarioDesverdizado[datos.enf]['parametros'].push([new Date(), datos.temperatura, datos.etileno, datos.carbono, datos.humedad]) 
+
+      inventarioDesverdizadoJSON = JSON.stringify(inventarioDesverdizado)
+      fs.writeFileSync(pathInventarioDesverdizando, inventarioDesverdizadoJSON)
+
+    }
+    console.log(responseFetch)
+    return responseFetch
+  } catch(e){
+    console.log(`${e.name}:${e.message}`);
+    return `${e.name}:${e.message}`
+  }
+})
+
 ipcMain.handle('procesarDesverdizado', async (event, datos) => {
   let ID = ""
   let url = ""
@@ -813,7 +895,8 @@ ipcMain.handle('procesarDesverdizado', async (event, datos) => {
       method:'POST',
       body:JSON.stringify({
         action:'procesarDesverdizado',
-        data: datos
+        enf: datos.enf,
+        canastillas: datos.canastillas
       }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8'

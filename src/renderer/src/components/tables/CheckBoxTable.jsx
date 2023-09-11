@@ -20,9 +20,9 @@ import {
 import React, { useEffect, useReducer, useState } from 'react'
 import { format } from 'date-fns'
 import { createPortal } from 'react-dom'
-import Vaciado from '../modals/Vaciado'
-import Directo from '../modals/Directo'
-import Desverdizado from '../modals/Desverdizado'
+import Vaciado from '../modals/inventario/Vaciado'
+import Directo from '../modals/inventario/Directo'
+import Desverdizado from '../modals/inventario/Desverdizado'
 
 export default function CheckBoxTable({ filtro }) {
   const [busqueda, setBusqueda] = useState('')

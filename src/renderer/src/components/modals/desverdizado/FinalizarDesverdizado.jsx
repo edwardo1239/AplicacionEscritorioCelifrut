@@ -1,32 +1,31 @@
 import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
+import ColorLensIcon from '@mui/icons-material/ColorLens'
 import React, { useState } from 'react'
+import CheckIcon from '@mui/icons-material/Check'
 
-export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
-  const [canastillas, setCanastillas] = useState(0)
+export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpenSuccess }) {
   const [openError, setOpenError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const vaciar = async () => {
+  const finalizar = async () => {
     setLoading(true)
-    if (parseInt(canastillas) > parseInt(propsModal.canastillas)) {
-      setErrorMessage('Error en el numero de canastillas')
-      setOpenError(true)
-      setLoading(false)
+
+    let obj = {
+      enf: propsModal.enf
+    }
+   
+    const response = await window.api.finalizarDesverdizado(obj)
+    //console.log(obj)
+    console.log(response)
+    if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
+      funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
+      closeModal()
     } else {
-      let obj = { canastillas: canastillas, enf: propsModal.enf }
-      console.log(obj)
-      const response = await window.api.vaciarLote(obj)
-      console.log(response)
-      if (response == 'Vaciado con exito') {
-        funcOpenSuccess('Vaciado con exito')
-      } else {
-        setErrorMessage('Error al vaciar')
-        setOpenError(true)
-      }
-      closeVaciado()
+      setErrorMessage(response)
+      setOpenError(true)
+      closeModal()
     }
   }
 
@@ -47,14 +46,14 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
       <div
         style={{
           width: 450,
-          height: 300,
+          height: 200,
           backgroundColor: 'white',
           borderRadius: 15,
           overflow: 'hidden'
         }}
       >
         <AppBar position="static">
-          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
+          <Toolbar sx={{ backgroundColor: 'orange', justifyContent: 'space-between' }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
               {propsModal.nombre}
             </Typography>
@@ -62,19 +61,10 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
         </AppBar>
         <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
           <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-            Numero de canastillas en inventario: {propsModal.canastillas}
+            Esta seguro que desea finalizar el desverdizado
           </Typography>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
-          <TextField
-            id="outlined-basic"
-            label="Canastillas"
-            variant="outlined"
-            type="number"
-            inputProps={{ min: 0, step: 1 }}
-            onChange={(e) => setCanastillas(e.target.value)}
-          />
-        </div>
+
         <div
           style={{
             display: 'flex',
@@ -88,14 +78,14 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
             color="primary"
             loading={loading}
             loadingPosition="start"
-            onClick={vaciar}
-            startIcon={<MoveToInboxIcon />}
+            onClick={finalizar}
+            startIcon={<CheckIcon />}
             variant="contained"
-            sx={{ width: '20%', marginBottom: '5rem' }}
+            sx={{ width: 110, height: 38, marginBottom: '5rem' }}
           >
-            <span>Vaciar</span>
+            <span>Aceptar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeVaciado}>
+          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={closeModal}>
             Cancelar
           </Button>
         </div>

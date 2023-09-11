@@ -73,6 +73,14 @@ const api = {
   procesarDesverdizado: async () => {
     const response = await ipcRenderer.invoke('procesarDesverdizado', datos);
     return response
+  },
+  finalizarDesverdizado: async (datos) => {
+    const response = await ipcRenderer.invoke('finalizarDesverdizado', datos);
+    return response
+  },
+  setParametrosDesverdizado: async (datos) => {
+    const response = await ipcRenderer.invoke('setParametrosDesverdizado', datos);
+    return response
   }
 }
 

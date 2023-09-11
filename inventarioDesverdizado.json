@@ -1,0 +1,49 @@
+{
+    "ENF-23091052": {
+        "canastillasIngreso": 10,
+        "cuartoDesverdizado": "2-3 ",
+        "desverdizando": true,
+        "fechaIngreso": "2023-09-11T16:38:43.190Z",
+        "kilosIngreso": 200
+    },
+    "ENF-23091053": {
+        "canastillasIngreso": 5,
+        "cuartoDesverdizado": "2 ",
+        "desverdizando": true,
+        "fechaFinalizado": "2023-09-11T19:38:26.703Z",
+        "fechaIngreso": "2023-09-11T16:44:21.012Z",
+        "kilosIngreso": 100
+    },
+    "ENF-23091054": {
+        "canastillasIngreso": 1,
+        "cuartoDesverdizado": "2 ",
+        "desverdizando": true,
+        "fechaFinalizado": "2023-09-11T19:36:22.751Z",
+        "fechaIngreso": "2023-09-11T19:32:29.032Z",
+        "kilosIngreso": 20
+    },
+    "ENF-23091055": {
+        "canastillasIngreso": 2,
+        "cuartoDesverdizado": "5 ",
+        "desverdizando": true,
+        "fechaFinalizado": "2023-09-11T19:36:10.437Z",
+        "fechaIngreso": "2023-09-11T19:34:22.492Z",
+        "kilosIngreso": 40,
+        "parametros": [
+            [
+                "2023-09-11T21:34:32.582Z",
+                "35.6",
+                "1223",
+                "3210",
+                "35.66"
+            ],
+            [
+                "2023-09-11T21:39:48.726Z",
+                "36",
+                "4987",
+                "6398",
+                "98"
+            ]
+        ]
+    }
+}
