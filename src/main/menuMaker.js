@@ -3,11 +3,15 @@ import { join } from 'path'
 
 const isMac = process.platform === 'darwin'
 
+//produccion
 // const pathIDsDev = join(__dirname, '../../../ids.json')
 // const pathProveedoresDev = join(__dirname, '../../../proveedores.json')
+//const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
 
+//desarrollador
 const pathIDsDev = './ids.json'
 const pathProveedoresDev = './proveedores.json'
+const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbxf8Seb8PcVWcEJ94jBJOjnycQMHw5dm6U4ADJ_wz3ImIujdX2QKXCBxvXAUeQXalIr1w/exec'
 
 const template = [
   // { role: 'appMenu' }
@@ -92,8 +96,7 @@ const template = [
         click: async () => {
           const { net } = require('electron')
           const fs = require('fs')
-          const url =
-            'https://script.google.com/macros/s/AKfycbzNt3WjCm_4A0-KOotz3TfaMnYD4r4VRw_PBq1uuXJt7sYNoDVhraj3MNY272NtECuK/exec'
+          const url = 'https://script.google.com/macros/s/AKfycbzNt3WjCm_4A0-KOotz3TfaMnYD4r4VRw_PBq1uuXJt7sYNoDVhraj3MNY272NtECuK/exec'
           try {
             const responseJSON = await net.fetch(url + '?action=actualizarPredio')
             const predios = await responseJSON.json()
@@ -124,10 +127,9 @@ const template = [
         click: async () => {
           const { net } = require('electron')
           const fs = require('fs')
-          const url =
-            'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
+      
           try {
-            const responseJSON = await net.fetch(url + '?action=actualizarENF')
+            const responseJSON = await net.fetch(urlObtenerENF + '?action=actualizarENF')
             const ENF = await responseJSON.json()
             //console.log(ENF)
             

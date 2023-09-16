@@ -53,7 +53,7 @@ export default function CheckBoxTable({ filtro }) {
           String(action.datos[lote]['ICA'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
-          action.datos[lote]['fechaIngreso'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          action.datos[lote]['fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
           action.datos[lote]['tipoFruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
       )
 
@@ -194,7 +194,7 @@ export default function CheckBoxTable({ filtro }) {
                   <TableCell key={item + 'fecha'}>
                     {format(new Date(tabla[item]['fecha']), 'MM/dd/yyyy')}
                   </TableCell>
-                  <TableCell key={item + 'KilosActual'}>{tabla[item]['KilosActual']}</TableCell>
+                  <TableCell key={item + 'KilosActual'}>{tabla[item]['KilosActual'].toFixed(2)}</TableCell>
                   <TableCell key={item + 'inventario'}>{tabla[item]['inventario']}</TableCell>
                   <TableCell key={item + 'tipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
                   <TableCell key={item + 'observaciones'}>{tabla[item]['observaciones']}</TableCell>

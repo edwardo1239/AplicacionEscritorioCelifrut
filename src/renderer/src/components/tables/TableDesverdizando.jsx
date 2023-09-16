@@ -200,7 +200,7 @@ export default function TableDesverdizando({ filtro }) {
                     <TableCell key={item + 'Canastillas'}>
                       {tabla[item]['canastillasIngreso']}
                     </TableCell>
-                    <TableCell key={item + 'Kilos'}>{tabla[item]['kilosIngreso']}</TableCell>
+                    <TableCell key={item + 'Kilos'}>{tabla[item]['kilosIngreso'].toFixed(2)}</TableCell>
                     <TableCell key={item + 'cuartoDesverdizado'}>
                       {tabla[item]['cuartoDesverdizado']}
                     </TableCell>

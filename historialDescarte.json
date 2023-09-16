@@ -1,0 +1,27 @@
+{
+  "0": {
+    "ENF-23094": {
+      "descarteLavado": { "pareja": 90 },
+      "descarteEncerado": { "descarteGeneral": 86 }
+    }
+  },
+  "1": {
+    "ENF-23094": { "descarteLavado": { "descarteGeneral": 162 }, "descarteEncerado": {} },
+    "ENF-23095": {
+      "descarteLavado": {},
+      "descarteEncerado": { "balin": 43, "pareja": 95, "extra": 94 }
+    }
+  },
+  "2": {
+    "ENF-23095": {
+      "descarteLavado": { "descarteGeneral": 200, "pareja": 100, "balin": 35 },
+      "descarteEncerado": { "descarteGeneral": 129, "pareja": 0, "balin": 0, "extra": 0 }
+    }
+  },
+  "3": {
+    "ENF-23096": {
+      "descarteLavado": { "descarteGeneral": 110, "pareja": 76 },
+      "descarteEncerado": {}
+    }
+  }
+}

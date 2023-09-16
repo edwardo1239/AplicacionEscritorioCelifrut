@@ -70,7 +70,7 @@ const api = {
     const response = await ipcRenderer.invoke('obtenerFrutaDesverdizando');
     return response
   },
-  procesarDesverdizado: async () => {
+  procesarDesverdizado: async (datos) => {
     const response = await ipcRenderer.invoke('procesarDesverdizado', datos);
     return response
   },
@@ -80,6 +80,10 @@ const api = {
   },
   setParametrosDesverdizado: async (datos) => {
     const response = await ipcRenderer.invoke('setParametrosDesverdizado', datos);
+    return response
+  },
+  reprocesarDescarte: async (datos) => {
+    const response = await ipcRenderer.invoke('reprocesarDescarte', datos);
     return response
   }
 }

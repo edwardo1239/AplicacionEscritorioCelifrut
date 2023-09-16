@@ -20,11 +20,11 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
       let obj = { canastillas: canastillas, enf: propsModal.enf }
    
       const response = await window.api.directoNacional(obj)
-      //console.log(response)
+      console.log(response)
       if (response == "Directo nacional con exito") {
         funcOpenSuccess(response)
       } else {
-        setErrorMessage(response)
+        setErrorMessage(`${response.name}: ${response.message}`)
         setOpenError(true)
       }
       closeDirecto()

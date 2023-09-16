@@ -6,8 +6,11 @@ import { Worker } from 'node:worker_threads'
 const fs = require('fs')
 const { mainMenu } = require('./menuMaker')
 import icon from '../../resources/icon.png?asset'
-import { json } from 'react-router-dom'
-import { Console } from 'console'
+
+
+
+//desarrollo
+const ID = 'AKfycbxsLUyPo64MXdmWQNUk8hlGICvj1JBj75VPC12FZIsH-a8VGip8nme7ggjbcX9N5aJfmw'
 
 const pathIDs = './ids.json'
 const pathProveedores = './proveedores.json'
@@ -15,13 +18,23 @@ const pathInventario = './inventario.json'
 const pathHistorialVaciado = './historialVaciado.json'
 const pathHistorialDirectoNacional= './historialDirectoNacional.json'
 const pathInventarioDesverdizando = './inventarioDesverdizado.json'
+const pathHistorialDescarte = './historialDescarte.json'
+
+
+
+///IDs de produccion y de desarrollo
+//produccion
+
+
+
 
 // const pathIDs = join(__dirname, '../../../ids.json')
 // const pathProveedores = join(__dirname, '../../../proveedores.json')
 // const pathInventario = join(__dirname, '../../../inventario.json')
 // const pathHistorialVaciado = join(__dirname, '../../../historialVaciado.json')
 // const pathHistorialDirectoNacional = join(__dirname, '../../../historialDirectoNacional.json')
-// const pathInventarioDesverdizado = join(__dirname, '../../../inventarioDesverdizado.json')
+// const pathInventarioDesverdizando = join(__dirname, '../../../inventarioDesverdizado.json')
+
 
 function createWindow() {
   // Create the browser window.
@@ -225,7 +238,7 @@ ipcMain.handle('obtenerDescarte', async () => {
 //funcion para obtener el descarte en el inventario
 ipcMain.handle('actualizarDescarte', async () => {
   try {
-    const ID = 'AKfycbzjDOayt3ndFtwXz1YJflsmEM9Sjl-IP0iKZ1FXJ4GQholfUef9KhGrUuCZ3UrLCvBQ'
+    //const ID = 'AKfycbzjDOayt3ndFtwXz1YJflsmEM9Sjl-IP0iKZ1FXJ4GQholfUef9KhGrUuCZ3UrLCvBQ'
     const url = 'https://script.google.com/macros/s/' + ID + '/exec'
     const request = '?action=obtenerDescarte'
     const response = await net.fetch(url + request)
@@ -378,7 +391,7 @@ ipcMain.handle('obtenerFrutaDesverdizando', async () => {
 ipcMain.handle('guardarLote', async (event, datos) => {
   console.log(datos)
   try {
-    let ID = 'AKfycbzbq-ePD4s6U69BSwOmFEVeQ4qbDl4JIemNLx2AEC9ZxPbCx4njL2AH9qiIpAOkMNeKtA'
+
     let url = 'https://script.google.com/macros/s/' + ID + '/exec'
     const response = await net.fetch(url, {
       method: 'POST',
@@ -468,7 +481,7 @@ ipcMain.handle('guardarLote', async (event, datos) => {
 
 //funcion para vaciar canastillas
 ipcMain.handle('vaciarLote', async (event, datos) => {
-  let ID = 'AKfycbxvljaMDbqzLzCjZsNvXGKEdgGStMhd47eCx94E6nBlqJH1QCSxmeHREs_gt2ViDgl36A'
+  //let ID = 'AKfycbxvljaMDbqzLzCjZsNvXGKEdgGStMhd47eCx94E6nBlqJH1QCSxmeHREs_gt2ViDgl36A'
   let url = 'https://script.google.com/macros/s/' + ID + '/exec'
   try {
     const response = await net.fetch(url, {
@@ -537,7 +550,7 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
 
 //funcion para directo nacional
 ipcMain.handle('directoNacional', async (event, datos) => {
-  let ID = "AKfycbx-AMW2OtRiln4eo5lI32YMCKhZ_-QogslqgLoCuy0pYJ3VXV3DrMVLoMxGuYqh5-SP"
+ //let ID = "AKfycbx-AMW2OtRiln4eo5lI32YMCKhZ_-QogslqgLoCuy0pYJ3VXV3DrMVLoMxGuYqh5-SP"
   let url = "https://script.google.com/macros/s/"+ID+"/exec"
   try {
     const response = await net.fetch(url, {
@@ -603,7 +616,7 @@ ipcMain.handle('directoNacional', async (event, datos) => {
 
 //funcion para desverdizado
 ipcMain.handle('desverdizado', async (event, datos) => {
-  let ID = 'AKfycbxESIUbUJ_eBgdl5XrtNCHfk2IkthvmbtmuHi5kzUGcBKCIGb-Ftj-SJijYGj7n9sHi'
+  //let ID = 'AKfycbxESIUbUJ_eBgdl5XrtNCHfk2IkthvmbtmuHi5kzUGcBKCIGb-Ftj-SJijYGj7n9sHi'
   let url = 'https://script.google.com/macros/s/' + ID + '/exec'
   console.log("0")
   try {
@@ -683,7 +696,7 @@ ipcMain.handle('desverdizado', async (event, datos) => {
 //funcion para modificar el historial
 
 ipcMain.handle('modificarHistorial', async (event, datos) => {
-  let ID = 'AKfycbwTnPSF89F_GKwqNRmyjJRdT8KXS_o3RWP7Ay5pHJMsRvbbGNyjhNf4QIdXj9Xhph61'
+  //let ID = 'AKfycbwTnPSF89F_GKwqNRmyjJRdT8KXS_o3RWP7Ay5pHJMsRvbbGNyjhNf4QIdXj9Xhph61'
   let url = 'https://script.google.com/macros/s/' + ID + '/exec'
   try {
     const response = await net.fetch(url, {
@@ -728,7 +741,7 @@ ipcMain.handle('modificarHistorial', async (event, datos) => {
 
 ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
   try {
-    let ID = 'AKfycbyZTBrl5SZwpV4W0cPJsSRbWwNHuUB05a_982z1woO1ioR2duQAe7B_DdTLBuHaQ2Bruw'
+    //let ID = 'AKfycbyZTBrl5SZwpV4W0cPJsSRbWwNHuUB05a_982z1woO1ioR2duQAe7B_DdTLBuHaQ2Bruw'
     let url = 'https://script.google.com/macros/s/' + ID + '/exec'
 
     const response = await net.fetch(url, {
@@ -747,14 +760,62 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
       let inventarioJSON = fs.readFileSync(pathInventario)
       let inventario = JSON.parse(inventarioJSON)
 
+      let idsJSON = fs.readFileSync(pathIDs)
+      let ids = JSON.parse(idsJSON)
+
+      //se crea el documento que guarda los datos de la salida de el descarte
+      if(!fs.existsSync(pathHistorialDescarte)){
+        console.log("1")
+        let idsJSON = fs.readFileSync(pathIDs)
+        let ids = JSON.parse(idsJSON)
+        // let historialDescarteJSON = fs.readFileSync(pathHistorialDescarte)
+        // let historialDescarte = JSON.parse(historialDescarteJSON)
+        
+        console.log("2")
+
+        ids['idHistorialDescarte'] = 0;
+        let historialDescarte = {}
+
+
+        idsJSON = JSON.stringify(ids)
+        fs.writeFileSync(pathIDs, idsJSON)
+
+        let historialDescarteJSON = JSON.stringify(historialDescarte)
+        fs.writeFileSync(pathHistorialDescarte, historialDescarteJSON)
+        console.log("3")
+      }
+
+      let historialDescarteJSON = fs.readFileSync(pathHistorialDescarte)
+      let historialDescarte = JSON.parse(historialDescarteJSON)
+
+      historialDescarte[ids['idHistorialDescarte']]={}
+
+
+      Object.keys(datos).map((item) => {
+        let [enf, descarte, tipoDescarte] = item.split('/')
+        historialDescarte[ids['idHistorialDescarte']][enf] = {}
+        historialDescarte[ids['idHistorialDescarte']][enf]['descarteLavado'] = {}
+        historialDescarte[ids['idHistorialDescarte']][enf]['descarteEncerado'] = {}
+      })
+
       Object.keys(datos).map((item) => {
         let [enf, descarte, tipoDescarte] = item.split('/')
         // console.log(enf)
         inventario[enf][descarte][tipoDescarte] -= datos[item]
+        historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[item]
+
       })
+
+      ids['idHistorialDescarte'] +=1
 
       inventarioJSON = JSON.stringify(inventario)
       fs.writeFileSync(pathInventario, inventarioJSON)
+
+      idsJSON = JSON.stringify(ids)
+      fs.writeFileSync(pathIDs, idsJSON)
+
+      historialDescarteJSON = JSON.stringify(historialDescarte)
+      fs.writeFileSync(pathHistorialDescarte, historialDescarteJSON)
     }
     return responseEliminarDescarte
   } catch (e) {
@@ -766,7 +827,7 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
 
 ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
 
-  let ID = "AKfycbyNvCqx8f3_V6kXVx-5BwqArei8xtvO6z0cxMYYpRwGydEBCG0tZ9lIlPgG_qbeRyoR"
+  //let ID = "AKfycbyNvCqx8f3_V6kXVx-5BwqArei8xtvO6z0cxMYYpRwGydEBCG0tZ9lIlPgG_qbeRyoR"
   let url = 'https://script.google.com/macros/s/' + ID + '/exec'
   try {
 
@@ -811,7 +872,7 @@ ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
 })
 
 ipcMain.handle('finalizarDesverdizado', async (event, datos) => {
-  let ID = "AKfycbxcFf4UcCOEPyUGLe5xnsxrsVXfJps0vGg6tM_o553IJh1C0Jb3dqvUrUsMn5BDmU7p"
+  //let ID = "AKfycbxcFf4UcCOEPyUGLe5xnsxrsVXfJps0vGg6tM_o553IJh1C0Jb3dqvUrUsMn5BDmU7p"
   let url = "https://script.google.com/macros/s/"+ID+"/exec"
   console.log(datos)
   try{
@@ -845,7 +906,7 @@ ipcMain.handle('finalizarDesverdizado', async (event, datos) => {
 })
 
 ipcMain.handle('setParametrosDesverdizado', async (event, datos) => {
-  const ID = "AKfycbxtiTGK4Z-oto2NwyANdSoes5TpNQpkVmJmiVy7JJ3iT3saVC4ajmjls86gjd_kur0A";
+  //const ID = "AKfycbxtiTGK4Z-oto2NwyANdSoes5TpNQpkVmJmiVy7JJ3iT3saVC4ajmjls86gjd_kur0A";
   const url = "https://script.google.com/macros/s/"+ID+"/exec";
   try{
     const response = await net.fetch(url, {
@@ -888,8 +949,7 @@ ipcMain.handle('setParametrosDesverdizado', async (event, datos) => {
 })
 
 ipcMain.handle('procesarDesverdizado', async (event, datos) => {
-  let ID = ""
-  let url = ""
+  const url = "https://script.google.com/macros/s/"+ID+"/exec";
   try{
     const fetchResponse = await net.fetch(url, {
       method:'POST',
@@ -903,8 +963,47 @@ ipcMain.handle('procesarDesverdizado', async (event, datos) => {
       }
     }) 
   const responsePorcesarDesverdizado = await fetchResponse.json()
-  return responsePorcesarDesverdizado
+  if(responsePorcesarDesverdizado === ("Lote" + datos.enf + "se a puesto a procesar")){
+
+    let inventarioDesverdizadoJSON = fs.readFileSync(pathInventarioDesverdizando)
+    let inventarioDesverdizado = JSON.parse(inventarioDesverdizadoJSON)
+
+    if((inventarioDesverdizado[datos.enf]['canastillasIngreso'] - datos.canastillas) === 0){
+      inventarioDesverdizado[datos.enf]['desverdizando'] = false
+    }
+    
+
+    inventarioDesverdizadoJSON = JSON.stringify(inventarioDesverdizado)
+    fs.writeFileSync(pathInventarioDesverdizando, inventarioDesverdizadoJSON)
+
+  }
+    console.log(responsePorcesarDesverdizado)
+    return responsePorcesarDesverdizado
   } catch (e){
     return  `${e.name}: ${e.message}`
+  }
+})
+
+ipcMain.handle('reprocesarDescarte', async (event, datos) => {
+
+  const url = "https://script.google.com/macros/s/"+ID+"/exec";
+  try{
+    const response = await net.fetch(url , {
+      method:'POST',
+      body:JSON.stringify({
+        action:'reprocesarDescarte',
+        data: datos
+      }),
+      headers:{
+        'Content-type': 'application/json; charset=UTF-8'
+      }
+    })
+
+    const fetchResponse = await response.json();
+    return fetchResponse
+
+
+  } catch(e){
+    return `${e.name}:${e.message}`
   }
 })

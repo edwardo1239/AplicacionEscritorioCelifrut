@@ -18,16 +18,16 @@ export default function PorcesarDesverdizado({ closeModal, propsModal, funcOpenS
         setLoading(false)
       } else {
         let obj = { canastillas: canastillas, enf: propsModal.enf }
-        //console.log(obj)
+       // console.log(obj)
         const response = await window.api.procesarDesverdizado(obj)
-        //console.log(response)
-        if (response == 'Vaciado con exito') {
-          funcOpenSuccess('Vaciado con exito')
+        console.log(response)
+        if (response == ("Lote" + obj.enf + "se a puesto a procesar")) {
+          funcOpenSuccess(response)
         } else {
-          setErrorMessage('Error al vaciar')
+          setErrorMessage(response)
           setOpenError(true)
         }
-        closeVaciado()
+        closeModal()
       }
     }
   

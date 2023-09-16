@@ -144,7 +144,7 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
                 <TableCell key={item}>{tabla[item]['enf']}</TableCell>
                 <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombre']}</TableCell>
                 <TableCell key={item + 'Canastillas'}>{tabla[item]['canastillas']}</TableCell>
-                <TableCell key={item + 'Kilos'}>{tabla[item]['kilos']}</TableCell>
+                <TableCell key={item + 'Kilos'}>{tabla[item]['kilos'].toFixed(2)}</TableCell>
                 <TableCell key={item + 'TipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
                 <TableCell key={item + 'fecha'}>
                   {format(new Date(tabla[item]['fecha']), 'MM/dd/yyyy')}

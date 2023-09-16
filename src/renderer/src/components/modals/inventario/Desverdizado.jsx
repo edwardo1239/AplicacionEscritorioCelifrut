@@ -20,11 +20,11 @@ export default function Desverdizado({ closeDesverdizado, propsModal, funcOpenSu
         let obj = { canastillas: canastillas, enf: propsModal.enf, cuartoDesverdizado: cuartoDesverdizado }
         const response = await window.api.desverdizado(obj)
         //console.log(obj)
-        //console.log(response)
+        console.log(response)
         if (response == 'Lote se ha puesto a desverdizar') {
           funcOpenSuccess('Lote se ha puesto a desverdizar')
         } else {
-          setErrorMessage('Error al desverdizar el lote')
+          setErrorMessage('API error:' + response)
           setOpenError(true)
         }
         closeDesverdizado()

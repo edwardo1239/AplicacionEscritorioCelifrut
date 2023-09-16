@@ -3,21 +3,17 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpenSuccess }) {
+export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSuccess }) {
   const [openError, setOpenError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const finalizar = async () => {
+  const reprocesar = async () => {
     setLoading(true)
 
-    let obj = {
-      enf: propsModal.enf
-    }
-   
-    const response = await window.api.finalizarDesverdizado(obj)
-    //console.log(obj)
-    console.log(response)
+    //const response = await window.api.reprocesarDescarte(obj)
+
+    console.log(propsModal)
     if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
       funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
       closeModal()
@@ -52,15 +48,12 @@ export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpen
         }}
       >
         <AppBar position="static">
-          <Toolbar sx={{ backgroundColor: 'orange', justifyContent: 'space-between' }}>
-            <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-              {propsModal.nombre}
-            </Typography>
+          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
           </Toolbar>
         </AppBar>
         <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
-          <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-            Esta seguro que desea finalizar el desverdizado
+          <Typography sx={{ flex: '1 1 100%',justifyContent:'center',textAlign:'center' }} variant="h6" id="tableTitle" component="div">
+            ¿Desea reprocesar la fruta?
           </Typography>
         </div>
 
@@ -77,7 +70,7 @@ export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpen
             color="primary"
             loading={loading}
             loadingPosition="start"
-            onClick={finalizar}
+            onClick={reprocesar}
             startIcon={<CheckIcon />}
             variant="contained"
             sx={{ width: 110, height: 38, marginBottom: '5rem' }}
