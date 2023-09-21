@@ -15,7 +15,7 @@ import {
 } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import ReplayIcon from '@mui/icons-material/Replay'
-import RecyclingIcon from '@mui/icons-material/Recycling';
+import RecyclingIcon from '@mui/icons-material/Recycling'
 import React, { useEffect, useReducer, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ReprocesoDescarte from '../modals/ReprocesoDescarte'
@@ -35,7 +35,9 @@ export default function TablaDescarte({ filtro }) {
   const [openSucces, setOpenSuccess] = useState(false)
   const [openError, setOpenError] = useState(false)
   const [message, setMessage] = useState('')
+  const [messageModal, setMessageModal] = useState('')
   const [propsModals, setPropsModals] = useState({})
+
   //el reducer que renderiza la tabla
   const reducer = (tabla, action) => {
     if (busqueda === '') {
@@ -156,6 +158,7 @@ export default function TablaDescarte({ filtro }) {
       checkCheckbox(row)
 
       let x = document.getElementsByClassName(row)
+      console.log(row)
       for (let i = 0; i < x.length; i++) {
         let [enf, descarte, tipoDescarte] = x[i].value.split('/')
         enfObj[x[i].value] = tabla[enf][descarte][tipoDescarte]
@@ -165,6 +168,20 @@ export default function TablaDescarte({ filtro }) {
 
       setBtnReproceso(true)
       setTitleTable(y)
+
+      let enfs = []
+      let keys = Object.keys(enfObj)
+      for (let i = 0; i < keys.length; i++) {
+        let  [enf, descarte, tipoDescarte] = keys[i].split("/")
+        enfs.push(enf)
+      }
+      for (let i = 0; i < enfs.length-1; i++) {
+        if(enfs[i] !== enfs[i+1]){
+          setBtnReproceso(false)
+        }
+      }
+
+   
     } else {
       uncheckCheckBox(row)
       setTitleTable('0')
@@ -173,18 +190,30 @@ export default function TablaDescarte({ filtro }) {
     }
   }
 
+  const reprocesoDescarteUnPredio = () => {
+    setPropsModals(enfObj)
+    setMessageModal('¿Desea reprocesar el descarte del predio seleccionado?')
+    closeModal()
+  }
+
   const closeModal = () => {
     setModal(!modal)
     setPropsModals(enfObj)
   }
 
-    //funcion para mostrar que la accion se llevo acabo con exito
-    const funcOpenSuccess = (message) => {
-      setOpenSuccess(false)
-      setOpenSuccess(true)
-      setMessage(message)
+  //funcion para mostrar que la accion se llevo acabo con exito
+  const funcOpenSuccess = (message) => {
+    setOpenSuccess(false)
+    setOpenSuccess(true)
+    setMessage(message)
+  }
 
-    }
+  const reprocesoCelifrut = async () =>{
+    setPropsModals(enfObj)
+    setMessageModal('¿Desea reprocesar los descartes unificados en forma de Celifrut?')
+    closeModal()
+  }
+
 
   return (
     <Box>
@@ -232,17 +261,29 @@ export default function TablaDescarte({ filtro }) {
           <span>Actualizar</span>
         </LoadingButton>
 
-        {btnReproceso && (
+        {btnReproceso ? (
           <LoadingButton
             color="primary"
             loading={loading}
             loadingPosition="start"
             startIcon={<RecyclingIcon />}
-            onClick={closeModal}
+            onClick={reprocesoDescarteUnPredio}
             variant="contained"
             sx={{ width: '40%', marginRight: '2rem' }}
           >
             <span>Reproceso</span>
+          </LoadingButton>
+        ) : (
+          <LoadingButton
+            color="primary"
+            loading={loading}
+            loadingPosition="start"
+            startIcon={<RecyclingIcon />}
+            onClick={reprocesoCelifrut}
+            variant="contained"
+            sx={{ width: '40%', marginRight: '2rem', fontSize: 8 }}
+          >
+            <span>Reproceso Celifrut</span>
           </LoadingButton>
         )}
 
@@ -449,8 +490,6 @@ export default function TablaDescarte({ filtro }) {
               ))}
           </TableBody>
         </Table>
-
-        
       </TableContainer>
 
       <Snackbar
@@ -467,10 +506,14 @@ export default function TablaDescarte({ filtro }) {
 
       {modal &&
         createPortal(
-          <ReprocesoDescarte closeModal={closeModal} propsModal={propsModals} funcOpenSuccess={funcOpenSuccess} />,
+          <ReprocesoDescarte
+            closeModal={closeModal}
+            propsModal={propsModals}
+            funcOpenSuccess={funcOpenSuccess}
+            messageModal={messageModal}
+          />,
           document.body
         )}
-
     </Box>
   )
 }

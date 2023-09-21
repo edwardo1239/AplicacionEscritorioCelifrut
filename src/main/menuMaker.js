@@ -167,23 +167,27 @@ const template = [
       // {
       //   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //   label: 'Resetear inventario local',
-      //   click: () => {
+      //   click: async () => {
       //     const fs = require('fs')
+      //     const { net } = require('electron')
       //     try {
-      
-      //       let inventario = {}
-      //       inventario['ENF-vaciando'] = ''
-      //       inventario['enf'] = 0
-      //       inventario['idVaciado'] = 0
-      //       inventario['idDirectoNacional'] = 0
-      //       inventario['historialVaciado'] = {}
-      //       console.log(inventario)
-      //       let inventarioJSON = JSON.stringify(inventario)
-      //       fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
-      //       new Notification({
-      //         title: 'Success',
-      //         body: 'Inventario reseteado'
-      //       }).show()
+      //       const response = await net.fetch('https://script.google.com/macros/s/AKfycbzSr3gqvBAb2JhoPPylZlK5W2FnnrGGvbI47ssJgxw0l6M17Ex4kzJNrqrxhaouMCPvgw/exec')
+      //       const datos = await response.json()
+      //       console.log(datos)
+      //       // let inventario = {}
+      //       // inventario['ENF-vaciando'] = ''
+      //       // inventario['enf'] = 0
+      //       // inventario['idVaciado'] = 0
+      //       // inventario['idDirectoNacional'] = 0
+      //       // inventario['historialVaciado'] = {}
+      //       // console.log(inventario)
+      //       // let inventarioJSON = JSON.stringify(inventario)
+      //       // fs.writeFileSync(join(__dirname, '../data/inventario.json'), inventarioJSON)
+      //       // new Notification({
+      //       //   title: 'Success',
+      //       //   body: 'Inventario reseteado'
+      //       // }).show()
+
       //     } catch (e) {
       //       new Notification({
       //         title: 'Error',

@@ -3,25 +3,36 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSuccess }) {
+export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSuccess, messageModal }) {
   const [openError, setOpenError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
   const reprocesar = async () => {
     setLoading(true)
-
-    //const response = await window.api.reprocesarDescarte(obj)
-
-    console.log(propsModal)
-    if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
-      funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
-      closeModal()
-    } else {
-      setErrorMessage(response)
-      setOpenError(true)
+    try{
+      let response
+      if(messageModal === '¿Desea reprocesar el descarte del predio seleccionado?'){
+         response = await window.api.reprocesarDescarteUnPredio(propsModal)
+      } else if (messageModal === '¿Desea reprocesar los descartes unificados en forma de Celifrut?'){
+         response = await window.api.ReprocesarDescarteCelifrut(propsModal)
+      }
+      //console.log(response)
+      console.log(propsModal)
+      if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
+        funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
+        closeModal()
+      } else {
+        setErrorMessage(response)
+        setOpenError(true)
+        closeModal()
+      }
+    } catch(e){
+      console.log(`${e.name}:${e.message}`)
+      setLoading(false)
       closeModal()
     }
+  
   }
 
   return (
@@ -41,7 +52,7 @@ export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSucc
       <div
         style={{
           width: 450,
-          height: 200,
+          height: 250,
           backgroundColor: 'white',
           borderRadius: 15,
           overflow: 'hidden'
@@ -53,7 +64,7 @@ export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSucc
         </AppBar>
         <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
           <Typography sx={{ flex: '1 1 100%',justifyContent:'center',textAlign:'center' }} variant="h6" id="tableTitle" component="div">
-            ¿Desea reprocesar la fruta?
+            {messageModal}
           </Typography>
         </div>
 

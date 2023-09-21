@@ -1,1 +1,8 @@
-{"enf":12,"idDirectoNacional":1,"ENF-vaciando":"ENF-23099","idVaciado":3,"idHistorialDescarte":4}
+{
+    "enf": 15,
+    "ENF-vaciando": "ENF-23099",
+    "idCelifrut": 1,
+    "idDirectoNacional": 1,
+    "idHistorialDescarte": 9,
+    "idVaciado": 9
+}

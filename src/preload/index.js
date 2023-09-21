@@ -82,8 +82,12 @@ const api = {
     const response = await ipcRenderer.invoke('setParametrosDesverdizado', datos);
     return response
   },
-  reprocesarDescarte: async (datos) => {
-    const response = await ipcRenderer.invoke('reprocesarDescarte', datos);
+  reprocesarDescarteUnPredio: async (datos) => {
+    const response = await ipcRenderer.invoke('reprocesarDescarteUnPredio', datos);
+    return response
+  },
+  ReprocesarDescarteCelifrut: async (datos) => {
+    const response = await ipcRenderer.invoke('ReprocesarDescarteCelifrut', datos);
     return response
   }
 }
