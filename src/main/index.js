@@ -9,7 +9,9 @@ import icon from '../../resources/icon.png?asset'
 import { eliminarInventarioDescarte, fetchFunction, functionObtenerDescarte } from './functions'
 
 //desarrollo
-const ID = 'AKfycby6ucrGXMeFQqV_cQBEQYd_FEn3bQeTF-jR2Z1aPw86KMXp1bpEEwZrYW0ssTZHu3p5Mg'
+const ID = 'AKfycbz5FjWgwq1t40FFvQdHhnJcwwu9thOgCK3iXBP8dfYPTHwgBG_vL9Fch77PPGovPorhBQ'
+//produccion
+//  const ID = 'AKfycbxHM6BBe6vG7LUyJHSADB36A3p116A-fO370mazy0qXWs0hUffapnhQFMAlCzsdFZA'
 
 const pathIDs = './ids.json'
 const pathProveedores = './proveedores.json'
@@ -214,13 +216,13 @@ ipcMain.handle('actualizarDescarte', async () => {
     const request = '?action=obtenerDescarte'
     const response = await net.fetch(url + request)
     const descarte = await response.json()
-
+    console.log(descarte)
     let inventarioJSON = fs.readFileSync(pathInventario)
     let inventario = JSON.parse(inventarioJSON)
     // se guarda el descarte en el inventario
     if (typeof descarte === 'object') {
       Object.keys(descarte).map((enf) => {
-        let isCelifrut = item.split('-')
+        let isCelifrut = enf.split('-')
         if (isCelifrut[0] == 'Celifrut') {
           if (
             !(
@@ -236,7 +238,7 @@ ipcMain.handle('actualizarDescarte', async () => {
           inventario[enf]['descarteEncerado'] = descarte[enf]['descarteEncerado']
           inventario[enf]['tipoFruta'] = descarte[enf]['tipoFruta']
 
-        } else {
+        } else if(isCelifrut !== 'Celifrut') {
           if (
             !(
               inventario[enf].hasOwnProperty('descarteLavado') ||
@@ -362,7 +364,7 @@ ipcMain.handle('guardarLote', async (event, datos) => {
     if (responseGuardarLote === 'Guardado con exito') {
       let fecha = new Date()
       let codigoENF =
-        'ENF-' +
+        'EF1-' +
         fecha.getFullYear().toString().slice(-2) +
         String(fecha.getMonth() + 1).padStart(2, '0') +
         datos.enf
@@ -686,7 +688,7 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
       method: 'POST',
       body: JSON.stringify({
         action: 'eliminarFrutaDescarte',
-        objEnf: datos
+        objEnf: datos[0]
       }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8'
@@ -723,18 +725,20 @@ ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
 
       historialDescarte[ids['idHistorialDescarte']] = {}
 
-      Object.keys(datos).map((item) => {
+      Object.keys(datos[0]).map((item) => {
         let [enf, descarte, tipoDescarte] = item.split('/')
         historialDescarte[ids['idHistorialDescarte']][enf] = {}
         historialDescarte[ids['idHistorialDescarte']][enf]['descarteLavado'] = {}
         historialDescarte[ids['idHistorialDescarte']][enf]['descarteEncerado'] = {}
+        historialDescarte[ids['idHistorialDescarte']][enf]['cliente'] = {}
       })
 
-      Object.keys(datos).map((item) => {
+      Object.keys(datos[0]).map((item) => {
         let [enf, descarte, tipoDescarte] = item.split('/')
         // console.log(enf)
-        inventario[enf][descarte][tipoDescarte] -= datos[item]
-        historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[item]
+        inventario[enf][descarte][tipoDescarte] -= datos[0][item]
+        historialDescarte[ids['idHistorialDescarte']][enf]['cliente'] = datos[1]
+        historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[0][item]
       })
 
       ids['idHistorialDescarte'] += 1
@@ -980,34 +984,77 @@ ipcMain.handle('reprocesarDescarteUnPredio', async (event, datos) => {
 
 ipcMain.handle('ReprocesarDescarteCelifrut', async (event, datos) => {
   try {
+    //funcion que hace el fecth
     const response = await fetchFunction('ReprocesarDescarteCelifrut', datos)
-    const responseInv = await eliminarInventarioDescarte(datos)
-
+    
+    if(response === 200){
+        //se leen los archivos json
     let inventarioJSON = fs.readFileSync(pathInventario)
     let inventario = JSON.parse(inventarioJSON)
 
-    let enfJSON = fs.readFileSync(pathIDs)
-    let enf = JSON.parse(enfJSON)
+    let idsJSON = fs.readFileSync(pathIDs)
+    let ids = JSON.parse(idsJSON)
 
+    let historialDescarteJSON = fs.readFileSync(pathHistorialDescarte)
+    let historialDescarte = JSON.parse(historialDescarteJSON)
 
-    inventario['Celifrut-' + enf.idCelifrut] = {}
-    inventario['Celifrut-' + enf.idCelifrut]['fecha'] = new Date()
+    // se agrega los datos al historiald de descarte
+    historialDescarte[ids['idHistorialDescarte']] = {}
 
+    //se crean los objetos que tendran los datos del historiald e vaciado
+    Object.keys(datos).map((item) => {
+      let [enf, descarte, tipoDescarte] = item.split('/')
+      historialDescarte[ids['idHistorialDescarte']][enf] = {}
+      historialDescarte[ids['idHistorialDescarte']][enf]['descarteLavado'] = {}
+      historialDescarte[ids['idHistorialDescarte']][enf]['descarteEncerado'] = {}
+    })
+
+    // se elimina la fruta del inventario y se mete en el historial
+    Object.keys(datos).map((item) => {
+      let [enf, descarte, tipoDescarte] = item.split('/')
+      // console.log(enf)
+      inventario[enf][descarte][tipoDescarte] -= datos[item]
+      historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[item]
+    })
+
+    //se crea en el inventario el item correspondiente a celifrut
+    inventario['Celifrut-' + ids.idCelifrut] = {}
+    inventario['Celifrut-' + ids.idCelifrut]['fecha'] = new Date()
+
+    // se suma el id del historial descarte
+    ids['idHistorialDescarte'] += 1
+    ids['idCelifrut'] += 1
 
 
     inventarioJSON = JSON.stringify(inventario)
     fs.writeFileSync(pathInventario, inventarioJSON)
 
-    if (response == 200) {
-      if (responseInv == 200) {
-        return 200
-      } else {
-        return 'Error al modificar el inventario' + responseInv
-      }
+    idsJSON = JSON.stringify(ids)
+    fs.writeFileSync(pathIDs, idsJSON)
+
+    historialDescarteJSON = JSON.stringify(historialDescarte)
+    fs.writeFileSync(pathHistorialDescarte, historialDescarteJSON)
+      console.log(response)
+      return 200
     } else {
       return 'Error cargar datos' + response
+      console.log(response)
     }
   } catch (e) {
     return `${e.name}:${e.message}`
+    console.log(e)
+  }
+})
+
+ipcMain.handle('crearContenedor', async (event, datos) =>{
+  try{
+
+    const response = await fetchFunction('crearContenedor', datos)
+    console.log(response)
+    return response;
+
+  } catch(e){
+    console.log(e)
+    return e
   }
 })

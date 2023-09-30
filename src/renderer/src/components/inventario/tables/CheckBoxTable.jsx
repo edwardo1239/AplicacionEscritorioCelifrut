@@ -20,9 +20,9 @@ import {
 import React, { useEffect, useReducer, useState } from 'react'
 import { format } from 'date-fns'
 import { createPortal } from 'react-dom'
-import Vaciado from '../modals/inventario/Vaciado'
-import Directo from '../modals/inventario/Directo'
-import Desverdizado from '../modals/inventario/Desverdizado'
+import Vaciado from '../../modals/inventario/Vaciado'
+import Directo from '../../modals/inventario/Directo'
+import Desverdizado from '../../modals/inventario/Desverdizado'
 
 export default function CheckBoxTable({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
@@ -192,7 +192,7 @@ export default function CheckBoxTable({ filtro }) {
                   <TableCell key={item + 'nombre'}>{tabla[item]['nombre']}</TableCell>
                   <TableCell key={item + 'ica'}>{tabla[item]['ICA']}</TableCell>
                   <TableCell key={item + 'fecha'}>
-                    {format(new Date(tabla[item]['fecha']), 'MM/dd/yyyy')}
+                    {format(new Date(tabla[item]['fecha']), 'dd/MM/yyyy')}
                   </TableCell>
                   <TableCell key={item + 'KilosActual'}>{tabla[item]['KilosActual'].toFixed(2)}</TableCell>
                   <TableCell key={item + 'inventario'}>{tabla[item]['inventario']}</TableCell>

@@ -1,39 +1,35 @@
-import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
+import { AppBar, Toolbar, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSuccess, messageModal }) {
+export default function EnvioDescarte({ closeModalEnviar, propsModal, funcOpenSuccess, messageModal }) {
   const [openError, setOpenError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [cliente, setCliente] = useState('')
 
-  const reprocesar = async () => {
-    setLoading(true)
-    try{
-      let response
-      console.log(propsModal)
-      if(messageModal === '¿Desea reprocesar el descarte del predio seleccionado?'){
-         response = await window.api.reprocesarDescarteUnPredio(propsModal)
-      } else if (messageModal === '¿Desea reprocesar los descartes unificados en forma de Celifrut?'){
-         response = await window.api.ReprocesarDescarteCelifrut(propsModal)
-      }
+  const clickEliminarFrutaDescarte = async () => {
+    try {
+      setLoading(true)
+      let datos = [propsModal, cliente]
+      const response = await window.api.eliminarFrutaDescarte(datos)
       console.log(response)
-      console.log(propsModal)
-      if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
-        funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
-        closeModal()
+      if (response === 'Enviado con exito') {
+        uncheckCheckBox()
+        setLoading(false)
+        setOpenSuccess(true)
+        setMessage(response)
+        enfObj = {}
       } else {
-        setErrorMessage(response)
+        setLoading(false)
         setOpenError(true)
-        closeModal()
+        setMessage(response)
       }
-    } catch(e){
-      console.log(`${e.name}:${e.message}`)
+    } catch (e) {
+      console.log(e)
       setLoading(false)
-      closeModal()
     }
-  
   }
 
   return (
@@ -60,13 +56,16 @@ export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSucc
         }}
       >
         <AppBar position="static">
-          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
-          </Toolbar>
+          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}></Toolbar>
         </AppBar>
-        <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
-          <Typography sx={{ flex: '1 1 100%',justifyContent:'center',textAlign:'center' }} variant="h6" id="tableTitle" component="div">
-            {messageModal}
-          </Typography>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+          <TextField
+            id="outlined-basic"
+            label="Cliente"
+            variant="outlined"
+            type="text"
+            onChange={(e) => setCliente(e.target.value)}
+          />
         </div>
 
         <div
@@ -82,14 +81,14 @@ export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSucc
             color="primary"
             loading={loading}
             loadingPosition="start"
-            onClick={reprocesar}
+            onClick={clickEliminarFrutaDescarte}
             startIcon={<CheckIcon />}
             variant="contained"
             sx={{ width: 110, height: 38, marginBottom: '5rem' }}
           >
             <span>Aceptar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={closeModal}>
+          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={closeModalEnviar}>
             Cancelar
           </Button>
         </div>

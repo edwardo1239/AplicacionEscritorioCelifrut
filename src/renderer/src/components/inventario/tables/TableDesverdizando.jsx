@@ -20,9 +20,9 @@ import SettingsIcon from '@mui/icons-material/Settings'
 import React, { useReducer, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
-import PorcesarDesverdizado from '../modals/desverdizado/PorcesarDesverdizado'
-import FinalizarDesverdizado from '../modals/desverdizado/FinalizarDesverdizado'
-import Parametros from '../modals/desverdizado/Parametros'
+import PorcesarDesverdizado from '../../modals/desverdizado/PorcesarDesverdizado'
+import FinalizarDesverdizado from '../../modals/desverdizado/FinalizarDesverdizado'
+import Parametros from '../../modals/desverdizado/Parametros'
 
 export default function TableDesverdizando({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
@@ -205,7 +205,7 @@ export default function TableDesverdizando({ filtro }) {
                       {tabla[item]['cuartoDesverdizado']}
                     </TableCell>
                     <TableCell key={item + 'fechaIngreso'}>
-                      {format(new Date(tabla[item]['fechaIngreso']), 'MM/dd/yyyy')}
+                      {format(new Date(tabla[item]['fechaIngreso']), 'dd/MM/yyyy')}
                     </TableCell>
                   </TableRow>
                 ))}

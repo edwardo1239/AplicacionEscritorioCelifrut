@@ -18,7 +18,8 @@ import ReplayIcon from '@mui/icons-material/Replay'
 import RecyclingIcon from '@mui/icons-material/Recycling'
 import React, { useEffect, useReducer, useState } from 'react'
 import { createPortal } from 'react-dom'
-import ReprocesoDescarte from '../modals/ReprocesoDescarte'
+import ReprocesoDescarte from '../../modals/ReprocesoDescarte'
+import EnvioDescarte from '../../modals/EnvioDescarte'
 
 let enfObj = {}
 
@@ -31,6 +32,7 @@ export default function TablaDescarte({ filtro }) {
   const [btnReproceso, setBtnReproceso] = useState(false)
   //states de los modales
   const [modal, setModal] = useState(false)
+  const [modalEnviar, setModalEnviar] = useState(false)
   //props para los modales y de los modales
   const [openSucces, setOpenSuccess] = useState(false)
   const [openError, setOpenError] = useState(false)
@@ -94,29 +96,8 @@ export default function TablaDescarte({ filtro }) {
     }
   }
 
-  // funcion donde se elimina la fruta descarte
-  const clickEliminarFrutaDescarte = async () => {
-    try {
-      setLoading(true)
-      console.log(enfObj)
-      const response = await window.api.eliminarFrutaDescarte(enfObj)
-      console.log(response)
-      if (response === 'Enviado con exito') {
-        uncheckCheckBox()
-        setLoading(false)
-        setOpenSuccess(true)
-        setMessage(response)
-        enfObj = {}
-      } else {
-        setLoading(false)
-        setOpenError(true)
-        setMessage(response)
-      }
-    } catch (e) {
-      console.log(e)
-      setLoading(false)
-    }
-  }
+
+
   //el nombre es la ENF que a su vez es la key de el objeto tabla
   const seleccionarDescarte = (e) => {
     const [enf, descarte, tipoDescarte] = e.value.split('/')
@@ -199,6 +180,13 @@ export default function TablaDescarte({ filtro }) {
   const closeModal = () => {
     setModal(!modal)
     setPropsModals(enfObj)
+    
+  }
+
+  const closeModalEnviar = () =>{
+    setModalEnviar(!modalEnviar)
+    setPropsModals(enfObj)
+
   }
 
   //funcion para mostrar que la accion se llevo acabo con exito
@@ -291,12 +279,12 @@ export default function TablaDescarte({ filtro }) {
           color="primary"
           loading={loading}
           loadingPosition="start"
-          onClick={clickEliminarFrutaDescarte}
+          onClick={closeModalEnviar}
           startIcon={<SendIcon />}
           variant="contained"
           sx={{ width: '25%' }}
         >
-          <span>Enviar</span>
+          <span>Salida</span>
         </LoadingButton>
       </Toolbar>
       <TableContainer>
@@ -511,6 +499,15 @@ export default function TablaDescarte({ filtro }) {
             propsModal={propsModals}
             funcOpenSuccess={funcOpenSuccess}
             messageModal={messageModal}
+          />,
+          document.body
+        )}
+      {modalEnviar &&
+        createPortal(
+          <EnvioDescarte
+            closeModalEnviar={closeModalEnviar}
+            propsModal={propsModals}
+            funcOpenSuccess={funcOpenSuccess}
           />,
           document.body
         )}

@@ -6,7 +6,7 @@ const isMac = process.platform === 'darwin'
 //produccion
 // const pathIDsDev = join(__dirname, '../../../ids.json')
 // const pathProveedoresDev = join(__dirname, '../../../proveedores.json')
-//const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
+// const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
 
 //desarrollador
 const pathIDsDev = './ids.json'
@@ -153,7 +153,7 @@ const template = [
             
             new Notification({
               title: 'Success',
-              body: "ENF actualizada"
+              body: "EF1 actualizada"
             }).show()
           } catch (e) {
             console.log(`${e.name}: ${e.message}`)

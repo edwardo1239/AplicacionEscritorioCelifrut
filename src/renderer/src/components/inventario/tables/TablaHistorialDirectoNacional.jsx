@@ -15,9 +15,10 @@ import RestoreIcon from '@mui/icons-material/Restore'
 import React, { useReducer, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { format } from 'date-fns'
-import ModificarHistorial from '../modals/ModificarHistorial'
 
-export default function TablaHistorialVaciado({ filtro }) {
+import ModificarDirectoNacional from '../../modals/ModificarDirectoNacional'
+
+export default function TablaHistorialDirectoNacional({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
   const [titleTable, setTitleTable] = useState('Lotes')
   const [showBtnModificar, setShowBtnModificar] = useState(false)
@@ -36,8 +37,8 @@ export default function TablaHistorialVaciado({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['enf'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
-          String(action.datos[lote]['nombre'])
+          action.datos[lote]['ENF'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          String(action.datos[lote]['nombrePredio'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
           action.datos[lote]['fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
@@ -60,8 +61,7 @@ export default function TablaHistorialVaciado({ filtro }) {
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const interval = setInterval(async () => {
-      const frutaActual = await window.api.obtenerHistorialProceso()
-      //console.log(frutaActual)
+      const frutaActual = await window.api.obtenerHistorialDirectoNacional()
       dispatch({ datos: frutaActual })
     }, 500)
     return () => clearInterval(interval)
@@ -129,8 +129,8 @@ export default function TablaHistorialVaciado({ filtro }) {
           </TableHead>
           <TableBody>
             {tabla && Object.keys(tabla).reverse().map((item) => (
-              <TableRow key={item+'tableRow'}>
-                <TableCell padding="checkbox" key={item+'tablecellInput'}>
+              <TableRow>
+                <TableCell padding="checkbox">
                   {/* <input type="checkbox" id={item} style={{ width: '2rem' }} onClick={clickLote} value={item} /> */}
                   <input
                     type="radio"
@@ -139,7 +139,6 @@ export default function TablaHistorialVaciado({ filtro }) {
                     onClick={clickLote}
                     value={item}
                     name="lote"
-                    key={item+'input'}
                   />
                 </TableCell>
                 <TableCell key={item}>{tabla[item]['enf']}</TableCell>
@@ -148,7 +147,7 @@ export default function TablaHistorialVaciado({ filtro }) {
                 <TableCell key={item + 'Kilos'}>{tabla[item]['kilos'].toFixed(2)}</TableCell>
                 <TableCell key={item + 'TipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
                 <TableCell key={item + 'fecha'}>
-                  {format(new Date(tabla[item]['fecha']), 'MM/dd/yyyy')}
+                  {format(new Date(tabla[item]['fecha']), 'dd/MM/yyyy')}
                 </TableCell>
               </TableRow>
             ))}
@@ -157,7 +156,7 @@ export default function TablaHistorialVaciado({ filtro }) {
       </TableContainer>
       {modalModificar &&
         createPortal(
-          <ModificarHistorial closeModal={closeModal} propsModal={propsModal} funcOpenSuccess={funcOpenSuccess} />,
+          <ModificarDirectoNacional closeModal={closeModal} propsModal={propsModal} funcOpenSuccess={funcOpenSuccess} />,
           document.body
         )}
     </Box>

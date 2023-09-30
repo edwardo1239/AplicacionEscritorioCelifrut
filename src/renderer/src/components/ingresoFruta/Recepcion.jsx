@@ -118,7 +118,7 @@ export default function Recepcion() {
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Typography variant="h6" component="h6">
-          ENF-{fecha.getFullYear().toString().slice(-2)+String(fecha.getMonth() + 1).padStart(2, "0")+enf}
+          EF1-{fecha.getFullYear().toString().slice(-2)+String(fecha.getMonth() + 1).padStart(2, "0")+enf}
           </Typography>
 
         </Grid>
@@ -234,9 +234,9 @@ export default function Recepcion() {
         </AppBar>
         </Grid>
       </Grid>
+      //alertas
       <Snackbar open={openError} autoHideDuration={6000} onClose={() => setOpenError(false)}>
         <Alert severity="error">{errorMessage}</Alert>
-  
       </Snackbar>
       <Snackbar open={openSuccess} autoHideDuration={6000} onClose={() => setOpenSuccess(false)}>
         <Alert severity="success">{successMessage}</Alert>

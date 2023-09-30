@@ -1,6 +1,8 @@
 const { net } = require('electron')
-const fs = require('fs')
-const ID = 'AKfycbxUbww4_8uzbiLnYSIajaBERrWSCYs9sEQ-DSOMRVCYqSE1rYRRk29MHRGBpVykHFJUNw'
+//Desarrollo
+//const ID = 'AKfycbyiBw89AxnnRw6QAgrPr1vNJbKK1-SN-6dyslBVK_ru4TjpepbJInF7wRcV1y2Dw9tOSg'
+//Produccion
+const ID = 'AKfycbz5FjWgwq1t40FFvQdHhnJcwwu9thOgCK3iXBP8dfYPTHwgBG_vL9Fch77PPGovPorhBQ'
 let url = 'https://script.google.com/macros/s/' + ID + '/exec'
 
 export const fetchFunction = async (action, datos) => {
@@ -17,50 +19,6 @@ export const fetchFunction = async (action, datos) => {
     })
     const data = await response.json()
     return data
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-}
-
-export const eliminarInventarioDescarte = async (datos) => {
-  try {
-    let inventarioJSON = fs.readFileSync(pathInventario)
-    let inventario = JSON.parse(inventarioJSON)
-
-    let idsJSON = fs.readFileSync(pathIDs)
-    let ids = JSON.parse(idsJSON)
-
-    let historialDescarteJSON = fs.readFileSync(pathHistorialDescarte)
-    let historialDescarte = JSON.parse(historialDescarteJSON)
-
-    historialDescarte[ids['idHistorialDescarte']] = {}
-
-    Object.keys(datos).map((item) => {
-      let [enf, descarte, tipoDescarte] = item.split('/')
-      historialDescarte[ids['idHistorialDescarte']][enf] = {}
-      historialDescarte[ids['idHistorialDescarte']][enf]['descarteLavado'] = {}
-      historialDescarte[ids['idHistorialDescarte']][enf]['descarteEncerado'] = {}
-    })
-
-    Object.keys(datos).map((item) => {
-      let [enf, descarte, tipoDescarte] = item.split('/')
-      // console.log(enf)
-      inventario[enf][descarte][tipoDescarte] -= datos[item]
-      historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[item]
-    })
-
-    ids['idHistorialDescarte'] += 1
-
-    inventarioJSON = JSON.stringify(inventario)
-    fs.writeFileSync(pathInventario, inventarioJSON)
-
-    idsJSON = JSON.stringify(ids)
-    fs.writeFileSync(pathIDs, idsJSON)
-
-    historialDescarteJSON = JSON.stringify(historialDescarte)
-    fs.writeFileSync(pathHistorialDescarte, historialDescarteJSON)
-
-    return 200
   } catch (e) {
     return `${e.name}:${e.message}`
   }

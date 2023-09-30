@@ -89,6 +89,10 @@ const api = {
   ReprocesarDescarteCelifrut: async (datos) => {
     const response = await ipcRenderer.invoke('ReprocesarDescarteCelifrut', datos);
     return response
+  },
+  crearContenedor: async (datos) => {
+    const response = await ipcRenderer.invoke('crearContenedor', datos);
+    return response
   }
 }
 
