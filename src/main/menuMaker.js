@@ -4,14 +4,14 @@ import { join } from 'path'
 const isMac = process.platform === 'darwin'
 
 //produccion
-// const pathIDsDev = join(__dirname, '../../../ids.json')
-// const pathProveedoresDev = join(__dirname, '../../../proveedores.json')
-// const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
+const pathIDsDev = join(__dirname, '../../../ids.json')
+const pathProveedoresDev = join(__dirname, '../../../proveedores.json')
+const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
 
 //desarrollador
-const pathIDsDev = './ids.json'
-const pathProveedoresDev = './proveedores.json'
-const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbxf8Seb8PcVWcEJ94jBJOjnycQMHw5dm6U4ADJ_wz3ImIujdX2QKXCBxvXAUeQXalIr1w/exec'
+// const pathIDsDev = './ids.json'
+// const pathProveedoresDev = './proveedores.json'
+// const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbxf8Seb8PcVWcEJ94jBJOjnycQMHw5dm6U4ADJ_wz3ImIujdX2QKXCBxvXAUeQXalIr1w/exec'
 
 const template = [
   // { role: 'appMenu' }
@@ -102,10 +102,10 @@ const template = [
             const predios = await responseJSON.json()
             let nombrepredios = JSON.stringify(predios)
             ///para dev
-            fs.writeFileSync(pathProveedoresDev, nombrepredios)
+            // fs.writeFileSync(pathProveedoresDev, nombrepredios)
 
             ////////// para produccion
-            //fs.writeFileSync(join(__dirname, '../../../proveedores.json'), nombrepredios)
+            fs.writeFileSync(join(__dirname, '../../../proveedores.json'), nombrepredios)
 
 
             new Notification({

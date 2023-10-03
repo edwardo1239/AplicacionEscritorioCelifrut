@@ -1,37 +1,40 @@
-import { app, shell, BrowserWindow, net, ipcMain, Menu } from 'electron'
+import { app, shell, BrowserWindow, net, ipcMain, Menu, Notification } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { autoUpdater, AppUpdater } from 'electron-updater'
 import { resolve } from 'node:path'
 import { Worker } from 'node:worker_threads'
 const fs = require('fs')
 const { mainMenu } = require('./menuMaker')
 import icon from '../../resources/icon.png?asset'
 import { eliminarInventarioDescarte, fetchFunction, functionObtenerDescarte } from './functions'
+import { info } from 'console'
 
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
 //desarrollo
 const ID = 'AKfycbz5FjWgwq1t40FFvQdHhnJcwwu9thOgCK3iXBP8dfYPTHwgBG_vL9Fch77PPGovPorhBQ'
 //produccion
 //  const ID = 'AKfycbxHM6BBe6vG7LUyJHSADB36A3p116A-fO370mazy0qXWs0hUffapnhQFMAlCzsdFZA'
 
-const pathIDs = './ids.json'
-const pathProveedores = './proveedores.json'
-const pathInventario = './inventario.json'
-const pathHistorialVaciado = './historialVaciado.json'
-const pathHistorialDirectoNacional = './historialDirectoNacional.json'
-const pathInventarioDesverdizando = './inventarioDesverdizado.json'
-const pathHistorialDescarte = './historialDescarte.json'
+// const pathIDs = './ids.json'
+// const pathProveedores = './proveedores.json'
+// const pathInventario = './inventario.json'
+// const pathHistorialVaciado = './historialVaciado.json'
+// const pathHistorialDirectoNacional = './historialDirectoNacional.json'
+// const pathInventarioDesverdizando = './inventarioDesverdizado.json'
+// const pathHistorialDescarte = './historialDescarte.json'
 
 
 ///IDs de produccion y de desarrollo
 //produccion
 
-// const pathIDs = join(__dirname, '../../../ids.json')
-// const pathProveedores = join(__dirname, '../../../proveedores.json')
-// const pathInventario = join(__dirname, '../../../inventario.json')
-// const pathHistorialVaciado = join(__dirname, '../../../historialVaciado.json')
-// const pathHistorialDirectoNacional = join(__dirname, '../../../historialDirectoNacional.json')
-// const pathInventarioDesverdizando = join(__dirname, '../../../inventarioDesverdizado.json')
-
+const pathIDs = join(__dirname, '../../../ids.json')
+const pathProveedores = join(__dirname, '../../../proveedores.json')
+const pathInventario = join(__dirname, '../../../inventario.json')
+const pathHistorialVaciado = join(__dirname, '../../../historialVaciado.json')
+const pathHistorialDirectoNacional = join(__dirname, '../../../historialDirectoNacional.json')
+const pathInventarioDesverdizando = join(__dirname, '../../../inventarioDesverdizado.json')
 
 function createWindow() {
   // Create the browser window.
@@ -76,13 +79,14 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.electronRecepcionApp')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+
   })
 
   createWindow()
@@ -92,7 +96,9 @@ app.whenReady().then(async () => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+  autoUpdater.checkForUpdates();
 })
+
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -102,6 +108,41 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+autoUpdater.on('error',(info) =>{
+  new Notification({
+    title: 'Error',
+    body: info.message
+  }).show()
+})
+
+autoUpdater.on("update-available", (info) => {
+  new Notification({
+    title: 'update',
+    body: info.stagingPercentage
+  }).show()
+  let pth = autoUpdater.downloadUpdate();
+  new Notification({
+    title: 'response',
+    body: pth
+  }).show()
+});
+
+autoUpdater.on("update-not-available", (info) => {
+  new Notification({
+    title: 'no avaiable',
+    body: info.version
+  }).show()
+});
+
+/*Download Completion Message*/
+autoUpdater.on("update-downloaded", (info) => {
+  new Notification({
+    title: 'update downloaded',
+    body: info.downloadedFile
+  }).show()
+});
+
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.

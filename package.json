@@ -1,5 +1,17 @@
 {
-  "author": "Edwar",
+  "author": "SistemaCelifrut",
+  "build": {
+    "appId": "com.celifrut.recepcionapp",
+    "productName": "recepcionapp",
+    "publish": [
+      {
+        "owner": "SistemaCelifrut",
+        "provider": "github",
+        "repo": "recepcionapp",
+        "token": "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"
+      }
+    ]
+  },
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^1.0.2",
@@ -11,7 +23,9 @@
     "@mui/material": "^5.14.4",
     "@mui/styled-engine-sc": "^5.12.0",
     "date-fns": "^2.30.0",
+    "electron-updater": "^6.1.4",
     "react-router-dom": "^6.14.2",
+    "realm": "^12.2.0",
     "styled-components": "^5.3.11"
   },
   "description": "An Electron application with React",
@@ -30,7 +44,6 @@
     "react-dom": "^18.2.0",
     "vite": "^4.4.2"
   },
-  "homepage": "https://www.electronjs.org",
   "main": "./out/main/index.js",
   "name": "recepcionapp",
   "scripts": {

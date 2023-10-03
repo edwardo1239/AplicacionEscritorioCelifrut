@@ -26,6 +26,7 @@ import CrearContenedor from './Contenedores/components/CrearContenedor'
 const drawerWidth = 240
 
 const encabezados = ['Ingreso de fruta','Inventario','Contenedores']
+//const encabezados = ['Contenedores']
 
 export default function Nav() {
 
@@ -35,6 +36,15 @@ export default function Nav() {
     setState(nombre)
     console.log(nombre)
   }
+
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     const frutaActual = await window.api.obtenerFrutaActual()
+
+  //     dispatch({ datos: frutaActual })
+  //   }, 500)
+  //   return () => clearInterval(interval)
+  // }, [])
  
   return (
     <Box sx={{ display: 'flex' }}>
