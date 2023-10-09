@@ -21,92 +21,91 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useEffect, useState } from 'react'
 
 export default function Recepcion() {
-  let fecha = new Date();
-  const [prediosDatos, setPrediosData] = useState([])
-  const [enf, setEnf] = useState('')
-  const [loading, setLoadin] = useState(false)
-  const [tipoFruta, setTipoFruta] = useState('')
-  const [nombrePredio, setNombrePredio] = useState('')
-  const [canastillas, setCanastillas] = useState('')
-  const [kilos, setKilos] = useState('')
-  const [placa, setPlaca] = useState('')
+  const fecha = new Date();
+  const [prediosDatos, setPrediosData] = useState([]);
+  const [enf, setEnf] = useState('');
+  const [loading, setLoadin] = useState(false);
+  const [tipoFruta, setTipoFruta] = useState('');
+  const [nombrePredio, setNombrePredio] = useState('');
+  const [canastillas, setCanastillas] = useState('');
+  const [kilos, setKilos] = useState('');
+  const [placa, setPlaca] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [openError, setOpenError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [openSuccess, setOpenSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [saveRender, setSaveRender] = useState(false)
+  const [saveRender, setSaveRender] = useState(false);
 
   useEffect(() => {
     const obtenerPredios = async () => {
-      let predios = []
-      const prediosData = await window.api.obtenerPredios()
-      //console.log(prediosData)
-      predios = Object.keys(prediosData.predios)
-      setPrediosData(predios)
-      setEnf(prediosData.enf)
-    }
-    obtenerPredios()
-  }, [saveRender])
+      const prediosData = await window.api.obtenerPredios();
+      const predios = Object.keys(prediosData.predios);
+      setPrediosData(predios);
+      setEnf(prediosData.enf);
+    };
+    obtenerPredios();
+  }, [saveRender]);
+
+  const setError = (message) => {
+    setErrorMessage(message);
+    setOpenError(true);
+    setLoadin(false);
+  };
+  
 
   const guardarLote = async () => {
-    try{
-      event.preventDefault()
-     setLoadin(true)
-    let datos = {
-      nombre: nombrePredio,
-      canastillas: canastillas,
-      kilos: kilos,
-      placa: placa,
-      tipoFruta: tipoFruta,
-      observaciones: observaciones,
-      enf: enf
-    }
-    
-    datos.promedio = datos.kilos / datos.canastillas
- 
-    if (datos.promedio < 15) {
-      setErrorMessage("Error, los kilos no corresponden a las canastillas")
-      setOpenError(true)
-      setLoadin(false)
-      return 0;
-    }
-    if (datos.tipoFruta == "") {
-      setErrorMessage("Seleccione el tipo de fruta del lote")
-      setOpenError(true)
-      setLoadin(false)
-      return 0;
-    }
-    //console.log(datos)
-    const response =  await window.api.guardarLote(datos);
-    if(response == "Guardado con exito"){
-      setSaveRender(!saveRender);
-      setSuccessMessage(response);
-      setOpenSuccess(true);
-    }
-    else{
-      //console.log(response)
-      setErrorMessage(response)
-      setOpenError(true)
-    }
-    
-
-    reiniciarCampos()
-    setLoadin(false)
-    } catch(e){
-      console.log("Recepcion" + e)
+    try {
+      event.preventDefault();
+      setLoadin(true);
+  
+      let datos = {
+        nombre: nombrePredio,
+        canastillas: canastillas,
+        kilos: kilos,
+        placa: placa,
+        tipoFruta: tipoFruta,
+        observaciones: observaciones,
+        enf: enf,
+        promedio: kilos / canastillas
+      };
+  
+      if (datos.promedio < 15) {
+        setError("Error, los kilos no corresponden a las canastillas");
+        return;
+      }
+  
+      if (!datos.tipoFruta) {
+        setError("Seleccione el tipo de fruta del lote");
+        return;
+      }
+  
+      const response = await window.api.guardarLote(datos);
+  
+      if (response === "Guardado con exito") {
+        setSaveRender(!saveRender);
+        setSuccessMessage(response);
+        setOpenSuccess(true);
+      } else {
+        setError(response);
+      }
+  
+      reiniciarCampos();
+    } catch (e) {
+      console.log("Recepcion" + e);
+    } finally {
       setLoadin(false);
     }
-    
-  }
-
-  const reiniciarCampos = () =>{
+  };
+  
+  const reiniciarCampos = () => {
     setNombrePredio('');
-    setCanastillas('')
-    setKilos('')
-    setPlaca('')
-    setObservaciones('')
-  }
+    setCanastillas('');
+    setKilos('');
+    setPlaca('');
+    setObservaciones('');
+  };
+  
   return (
     <form onSubmit={guardarLote} >
       <Grid container spacing={2} sx={{ padding: '1rem',  overflow: 'auto' }}>

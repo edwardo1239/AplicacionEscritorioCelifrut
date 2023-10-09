@@ -12,34 +12,50 @@ import {
   AppBar,
   Toolbar,
   Alert,
-  Snackbar
+  Snackbar,
+  Autocomplete
 } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import SaveIcon from '@mui/icons-material/Save'
 import NumbersRoundedIcon from '@mui/icons-material/NumbersRounded'
-import PersonIcon from '@mui/icons-material/Person'
 import AppsIcon from '@mui/icons-material/Apps'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import Api from '../../../../../preload/types'
 
 export default function CrearContenedor() {
-  const [numeroContenedor, setNumeroContenedor] = useState('')
-  const [cliente, setCliente] = useState('')
-  const [tipoFruta, setTipoFruta] = useState('')
-  const [pallets, setPallets] = useState('')
-  const [desverdizado, setDesverdizado] = useState(false)
-  const [observaciones, setObservaciones] = useState('');
-  const [loading, setLoading] = useState(false)
+  const [numeroContenedor, setNumeroContenedor] = useState<string>('');
+  const [cliente, setCliente] = useState<string>('');
+  const [tipoFruta, setTipoFruta] = useState<string>('');
+  const [pallets, setPallets] = useState<string>('');
+  const [desverdizado, setDesverdizado] = useState<boolean>(false)
+  const [observaciones, setObservaciones] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [clientesDatos, setClientesDatos] = useState<string[]>([])
 
   //mensajes 
-  const [openError, setOpenError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [openSuccess, setOpenSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [openError, setOpenError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [openSuccess, setOpenSuccess] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+
+  useEffect(() => {
+    const obtenerDatos = async () =>{
+      try{
+        const response = await window.api.obtenerClientes();
+        const nombreClientes:string[] = Object.keys(response);
+        setClientesDatos(nombreClientes);
+        console.log(response)
+      }catch(e){
+        console.log(e)
+      }
+    }
+    obtenerDatos();
+  },[]);
 
   const handleChange = () => {
     setDesverdizado(!desverdizado)
   }
-  const guardarDatos = async () => {
+  const guardarDatos: React.FormEventHandler<HTMLFormElement> = async (event)  => {
     try{
         event.preventDefault()
         setLoading(true)
@@ -94,21 +110,15 @@ export default function CrearContenedor() {
         </Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={8} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <TextField
-            required
-            type="text"
-            inputProps={{ min: 0, step: 1 }}
-            label="Cliente"
-            id="cliente"
-            value={cliente}
-            onChange={(e) => setCliente(e.target.value)}
-            sx={{ m: 1, width: '100%' }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon />
-                </InputAdornment>
-              )
+        <Autocomplete
+            disablePortal
+            inputValue={cliente}
+            id="nombre-predio"
+            options={clientesDatos}
+            sx={{ width: '100%' }}
+            renderInput={(params) => <TextField {...params} label="Cliente" value={clientesDatos} required/>}
+            onInputChange={(event, newValue) => {
+              setCliente(newValue)
             }}
           />
          

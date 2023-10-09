@@ -93,6 +93,14 @@ const api = {
   crearContenedor: async (datos) => {
     const response = await ipcRenderer.invoke('crearContenedor', datos);
     return response
+  },
+  logIn: async (datos) =>{
+    const response = await ipcRenderer.invoke('logIn', datos);
+    return response;
+  },
+  obtenerClientes: async() => {
+    const response = await ipcRenderer.invoke('obtenerClientes');
+    return response;
   }
 }
 

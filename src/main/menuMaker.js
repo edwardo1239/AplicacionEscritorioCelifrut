@@ -1,18 +1,6 @@
 import { Menu, app, Notification } from 'electron'
-import { join } from 'path'
-
+import { actualizarClientes, actualizarProveedores, obtenerENF } from './functions'
 const isMac = process.platform === 'darwin'
-
-//produccion
-const pathIDsDev = join(__dirname, '../../../ids.json')
-const pathProveedoresDev = join(__dirname, '../../../proveedores.json')
-const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbzeSuR-qsx9ye-AMk1-hJ98t7RdmOIJzHcPXxPiOQUaxDs8--ut_RPGyIG-uOOFZwU8aQ/exec'
-
-//desarrollador
-// const pathIDsDev = './ids.json'
-// const pathProveedoresDev = './proveedores.json'
-// const urlObtenerENF = 'https://script.google.com/macros/s/AKfycbxf8Seb8PcVWcEJ94jBJOjnycQMHw5dm6U4ADJ_wz3ImIujdX2QKXCBxvXAUeQXalIr1w/exec'
-
 const template = [
   // { role: 'appMenu' }
   ...(isMac
@@ -94,24 +82,38 @@ const template = [
       {
         label: 'Actualizar Proveedores',
         click: async () => {
-          const { net } = require('electron')
-          const fs = require('fs')
-          const url = 'https://script.google.com/macros/s/AKfycbzNt3WjCm_4A0-KOotz3TfaMnYD4r4VRw_PBq1uuXJt7sYNoDVhraj3MNY272NtECuK/exec'
           try {
-            const responseJSON = await net.fetch(url + '?action=actualizarPredio')
-            const predios = await responseJSON.json()
-            let nombrepredios = JSON.stringify(predios)
-            ///para dev
-            // fs.writeFileSync(pathProveedoresDev, nombrepredios)
-
-            ////////// para produccion
-            fs.writeFileSync(join(__dirname, '../../../proveedores.json'), nombrepredios)
-
-
+            const response = await actualizarProveedores()
+            if (response == 200) {
+              new Notification({
+                title: 'Success',
+                body: 'Data saved'
+              }).show()
+            } else {
+              new Notification({
+                title: 'Error',
+                body: response
+              }).show()
+            }
+          } catch (e) {
+            console.log(`${e.name}: ${e.message}`)
             new Notification({
-              title: 'Success',
-              body: 'Data saved'
+              title: 'Error',
+              body: `${e.name}: ${e.message}`
             }).show()
+          }
+        }
+      },
+      {
+        label: 'Actualizar Clientes',
+        click: async () => {
+          try {
+            const response = await actualizarClientes()
+              new Notification({
+                title: 'Done',
+                body: "clientes actualizados"
+              }).show()
+
           } catch (e) {
             console.log(`${e.name}: ${e.message}`)
             new Notification({
@@ -125,35 +127,17 @@ const template = [
         /////obtener ENF
         label: 'Obtener ENF',
         click: async () => {
-          const { net } = require('electron')
-          const fs = require('fs')
-      
           try {
-            const responseJSON = await net.fetch(urlObtenerENF + '?action=actualizarENF')
-            const ENF = await responseJSON.json()
-            //console.log(ENF)
-            
-            if(fs.existsSync(pathIDsDev)){
-              let inventarioJSON = fs.readFileSync(pathIDsDev)
-              let inventario = JSON.parse(inventarioJSON)
-
-              inventario['enf'] = ENF
-
-              inventarioJSON = JSON.stringify(inventario)
-              fs.writeFileSync(pathIDsDev, inventarioJSON)
+            const response = await obtenerENF()
+            if(response === 200){
+              new Notification({
+                title: 'Success',
+                body: 'EF1 actualizada'
+              }).show()
             }
-
-            else{
-              let inventario = {}
-              inventario['enf'] = ENF
-              let inventarioJSON = JSON.stringify(inventario)
-              fs.writeFileSync(pathIDsDev, inventarioJSON)
-            }
-
-            
             new Notification({
-              title: 'Success',
-              body: "EF1 actualizada"
+              title: 'Error',
+              body: response
             }).show()
           } catch (e) {
             console.log(`${e.name}: ${e.message}`)
@@ -163,7 +147,7 @@ const template = [
             }).show()
           }
         }
-      },
+      }
       // {
       //   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //   label: 'Resetear inventario local',

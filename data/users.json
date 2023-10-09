@@ -1,0 +1,30 @@
+{
+    "admin": {
+        "clave": "admin123",
+        "permisos": [
+            "Ingreso de fruta",
+            "Inventario",
+            "Contenedores"
+        ]
+    },
+    "Coordinadora calidad": {
+        "clave": "ceocalidad123",
+        "permisos": [
+            "Inventario",
+            "Contenedores"
+        ]
+    },
+    "Directora produccion": {
+        "clave": "produccion123",
+        "permisos": [
+            "Contenedores"
+        ]
+    },
+    "recepcion": {
+        "clave": "recepcion123",
+        "permisos": [
+            "Ingreso de fruta",
+            "Inventario"
+        ]
+    }
+}

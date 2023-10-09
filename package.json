@@ -2,7 +2,7 @@
   "author": "SistemaCelifrut",
   "build": {
     "appId": "com.celifrut.recepcionapp",
-    "productName": "recepcionapp",
+    "productName": "Celifrut",
     "publish": [
       {
         "owner": "SistemaCelifrut",
@@ -24,15 +24,14 @@
     "@mui/styled-engine-sc": "^5.12.0",
     "date-fns": "^2.30.0",
     "electron-updater": "^6.1.4",
-    "react-router-dom": "^6.14.2",
-    "realm": "^12.2.0",
     "styled-components": "^5.3.11"
   },
   "description": "An Electron application with React",
   "devDependencies": {
     "@electron/notarize": "^1.2.3",
+    "@testing-library/react": "^14.0.0",
     "@vitejs/plugin-react": "^4.0.3",
-    "electron": "^25.3.2",
+    "electron": "^26.3.0",
     "electron-builder": "^23.6.0",
     "electron-vite": "^1.0.25",
     "eslint": "^8.44.0",
@@ -42,7 +41,8 @@
     "prettier": "^2.8.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "vite": "^4.4.2"
+    "vite": "^4.4.2",
+    "vitest": "^0.34.6"
   },
   "main": "./out/main/index.js",
   "name": "recepcionapp",
@@ -55,7 +55,8 @@
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "postinstall": "electron-builder install-app-deps",
-    "start": "electron-vite preview"
+    "start": "electron-vite preview",
+    "test": "vitest"
   },
-  "version": "1.0.2"
+  "version": "1.0.5"
 }

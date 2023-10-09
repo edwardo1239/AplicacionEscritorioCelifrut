@@ -1,34 +1,53 @@
 import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
-import React, { useState } from 'react'
+import React, {  useState } from 'react'
+import Api from '../../../../../preload/types'
 
-export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
-  const [canastillas, setCanastillas] = useState(0)
-  const [openError, setOpenError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [loading, setLoading] = useState(false)
+type vaciadoType = {
+  closeVaciado: () => void
+  propsModal: { nombre: string, canastillas: number, enf:string}
+  funcOpenSuccess: (message:string) => void
+}
+
+export default function Vaciado(props:vaciadoType) {
+  const [canastillas, setCanastillas] = useState<number>(0)
+  const [openError, setOpenError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   const vaciar = async () => {
-    setLoading(true)
-    if (parseInt(canastillas) > parseInt(propsModal.canastillas)) {
-      setErrorMessage('Error en el numero de canastillas')
-      setOpenError(true)
-      setLoading(false)
-    } else {
-      let obj = { canastillas: canastillas, enf: propsModal.enf }
-      //console.log(obj)
-      const response = await window.api.vaciarLote(obj)
-      //console.log(response)
-      if (response == 'Vaciado con exito') {
-        funcOpenSuccess(response)
+    try {
+      setLoading(true)
+      const canastillasInt = canastillas;
+      const propsCanastillasInt = props.propsModal.canastillas;
+
+      if (canastillasInt > propsCanastillasInt) {
+        funcOpenError(true, 'Error en el numero de canastillas');
       } else {
-        setErrorMessage(response)
-        setOpenError(true)
+        const obj = { canastillas: canastillas, enf: props.propsModal.enf }
+        const response = await window.api.vaciarLote(obj);
+        console.log(response)
+        if (response === 200) {
+          props.funcOpenSuccess('Vaciado con exito');
+          props.closeVaciado();
+        } else {
+          funcOpenError(true, response);
+        }
+     
       }
-      closeVaciado()
+    } catch (e) {
+      funcOpenError(true, `${e.name}:${e.message}`);
     }
-  }
+    finally{
+      setLoading(false);
+    }
+  };
+
+  const funcOpenError = (open:boolean, message:string):void => {
+    setErrorMessage(message)
+    setOpenError(open)
+  };
 
   return (
     <div
@@ -56,13 +75,13 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
         <AppBar position="static">
           <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-              {propsModal.nombre}
+              {props.propsModal.nombre}
             </Typography>
           </Toolbar>
         </AppBar>
         <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
           <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-            Numero de canastillas en inventario: {propsModal.canastillas}
+            Numero de canastillas en inventario: {props.propsModal.canastillas}
           </Typography>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
@@ -72,7 +91,7 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
             variant="outlined"
             type="number"
             inputProps={{ min: 0, step: 1 }}
-            onChange={(e) => setCanastillas(e.target.value)}
+            onChange={(e) => setCanastillas(Number(e.target.value))}
           />
         </div>
         <div
@@ -95,7 +114,7 @@ export default function Vaciado({ closeVaciado, propsModal, funcOpenSuccess }) {
           >
             <span>Vaciar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeVaciado}>
+          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={props.closeVaciado}>
             Cancelar
           </Button>
         </div>
