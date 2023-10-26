@@ -72,15 +72,29 @@ export default function CheckBoxTable({ filtro }) {
     setBusqueda(filtro)
   }, [filtro])
 
-  //useEffect donde se obtiene la informacion de el Main
+    //useEffect donde se obtiene la informacion de el Main
+    useEffect(() => {
+      const asyncFunction = async () => {
+      const frutaActual = await window.api.reqObtenerFrutaActual()
+        dispatch({ datos: frutaActual })
+      }
+      asyncFunction()
+    }, [])
+
+
+        //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const interval = setInterval(async () => {
-      const frutaActual = await window.api.obtenerFrutaActual()
-
-      dispatch({ datos: frutaActual })
+      try {
+        const frutaActual = await window.api.obtenerFrutaActual()
+        dispatch({ datos: frutaActual })
+      } catch (e) {
+        alert(e)
+      }
     }, 500)
     return () => clearInterval(interval)
   }, [])
+  
 
   // funcion donde se selecciona el lote 
   //se obtiene el nombre del radio button

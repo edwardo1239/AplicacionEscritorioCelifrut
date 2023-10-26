@@ -12,16 +12,15 @@ export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSucc
     setLoading(true)
     try{
       let response
-      console.log(propsModal)
+
       if(messageModal === '¿Desea reprocesar el descarte del predio seleccionado?'){
          response = await window.api.reprocesarDescarteUnPredio(propsModal)
       } else if (messageModal === '¿Desea reprocesar los descartes unificados en forma de Celifrut?'){
          response = await window.api.ReprocesarDescarteCelifrut(propsModal)
       }
-      console.log(response)
-      console.log(propsModal)
-      if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
-        funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
+
+      if (response === 200) {
+        funcOpenSuccess("Reproceso con exito")
         closeModal()
       } else {
         setErrorMessage(response)

@@ -2,6 +2,7 @@ import { Box } from '@mui/material'
 import React, { useState } from 'react'
 import BarraDeBusqueda from '../../utils/BarraDeBusqueda'
 import TablaDescarte from '../tables/TablaDescarte';
+import TablaHistorialDescarte from '../tables/TablaHistorialDescarte';
 
 export default function FrutaDescarte() {
   const [filtro, setFiltro] = useState('')
@@ -15,7 +16,7 @@ export default function FrutaDescarte() {
     setState(title)
   }
 
-  const opcionesMenu = ['Descarte']
+  const opcionesMenu = ['Descarte', 'Historial Descarte']
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -27,6 +28,8 @@ export default function FrutaDescarte() {
       />
 
       {state === 'Descarte' && <TablaDescarte filtro={filtro} />}
+      {state === 'Historial Descarte' && <TablaHistorialDescarte filtro={filtro} />}
+      
      
     </Box>
   )

@@ -11,20 +11,15 @@ export default function EnvioDescarte({ closeModalEnviar, propsModal, funcOpenSu
 
   const clickEliminarFrutaDescarte = async () => {
     try {
-      setLoading(true)
+   
       let datos = [propsModal, cliente]
       const response = await window.api.eliminarFrutaDescarte(datos)
-      console.log(response)
-      if (response === 'Enviado con exito') {
-        uncheckCheckBox()
-        setLoading(false)
-        setOpenSuccess(true)
-        setMessage(response)
-        enfObj = {}
+     
+      if (response === 200) {
+        closeModalEnviar()
       } else {
-        setLoading(false)
-        setOpenError(true)
-        setMessage(response)
+        
+        closeModalEnviar()
       }
     } catch (e) {
       console.log(e)

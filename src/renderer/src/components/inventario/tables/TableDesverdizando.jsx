@@ -35,7 +35,7 @@ export default function TableDesverdizando({ filtro }) {
   const [modalProcesar, setModalProcesar] = useState(false)
   const [modalParametros, setModalParametros] = useState(false)
   //props para los modales y de los modales
-  const [propsModal, setPropsModal] = useState({ nombre: '', canastillas: 0 })
+  const [propsModal, setPropsModal] = useState({ nombrePredio: '', canastillas: 0 })
   const [openSucces, setOpenSuccess] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -69,9 +69,18 @@ export default function TableDesverdizando({ filtro }) {
 
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
+    const asyncFunction = async () => {
+      const frutaActual = await window.api.reqObtenerFrutaDesverdizando()
+      dispatch({ datos: frutaActual })
+    }
+    asyncFunction()
+  }, [])
+
+  //useEffect donde se obtiene la informacion de el Main
+  useEffect(() => {
     const interval = setInterval(async () => {
       const frutaActual = await window.api.obtenerFrutaDesverdizando()
-      //console.log(frutaActual)
+      console.log(frutaActual)
       dispatch({ datos: frutaActual })
     }, 500)
     return () => clearInterval(interval)
@@ -80,12 +89,12 @@ export default function TableDesverdizando({ filtro }) {
   const clickLote = (e) => {
     let lote = e.target.value
     setPropsModal(() => ({
-      nombre: tabla[lote]['nombre'],
-      canastillas: tabla[lote]['canastillasIngreso'],
+      nombre: tabla[lote]['nombrePredio'],
+      canastillas: tabla[lote]['canastillas'],
       enf: lote
     }))
     if (e.target.checked) {
-      setTitleTable(lote + ' ' + tabla[lote]['nombre'])
+      setTitleTable(lote + ' ' + tabla[lote]['nombrePredio'])
       if (!tabla[lote].hasOwnProperty('fechaFinalizado')) {
         setShowFinalizar(true)
         setShowProcesar(false)
@@ -196,11 +205,9 @@ export default function TableDesverdizando({ filtro }) {
                       />
                     </TableCell>
                     <TableCell key={item}>{item}</TableCell>
-                    <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombre']}</TableCell>
-                    <TableCell key={item + 'Canastillas'}>
-                      {tabla[item]['canastillasIngreso']}
-                    </TableCell>
-                    <TableCell key={item + 'Kilos'}>{tabla[item]['kilosIngreso'].toFixed(2)}</TableCell>
+                    <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombrePredio']}</TableCell>
+                    <TableCell key={item + 'Canastillas'}>{tabla[item]['canastillas']}</TableCell>
+                    <TableCell key={item + 'Kilos'}>{tabla[item]['kilos'].toFixed(2)}</TableCell>
                     <TableCell key={item + 'cuartoDesverdizado'}>
                       {tabla[item]['cuartoDesverdizado']}
                     </TableCell>

@@ -20,6 +20,12 @@ export default function BotonContenedores(props) {
               <ListItemText primary={"Crear Contenedor"} />
           </ListItemButton>
         </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton sx={{gap:2}} onClick={() => clickInventario("Listas de Empaque")}>
+              <DirectionsBoatIcon />
+              <ListItemText primary={"Ver listas de empaque"} />
+          </ListItemButton>
+        </ListItem>
       </List>
     </div>
   )

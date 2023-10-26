@@ -2,41 +2,33 @@ import { app, shell, BrowserWindow, ipcMain, Menu, Notification } from 'electron
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater, AppUpdater } from 'electron-updater'
-import os from 'os'
-import { resolve } from 'node:path'
-import { Worker, isMainThread } from 'node:worker_threads'
+import { io } from 'socket.io-client'
 const fs = require('fs')
 const { mainMenu } = require('./menuMaker')
 import icon from '../../resources/icon.png?asset'
 import {
-  actualizarDescarte,
-  eliminarInventarioDescarte,
-  fetchFunction,
-  functionObtenerDescarte,
-  guardarDesverdizado,
-  guardarHistorialDescarte,
-  guardarHistorialDirectoNacional,
-  guardarHistorialVaciado,
   guardarIDs,
-  guardarInventario,
   logInProcess,
   obtenerClientes,
-  obtenerDesverdizado,
-  obtenerENF,
-  obtenerHistorialDescarte,
-  obtenerHistorialDirectoNacional,
-  obtenerHistorialVaciado,
   obtenerIDs,
-  obtenerIdCelifrut,
-  obtenerInventario,
+  obtenerListaEmpaque,
   obtenerProveedores
 } from './functions'
-import { info } from 'console'
+
+
+//globals
+let frutaActual = {}
+let historialProceso = {}
+let historialDirectoNacional = {}
+let frutaDesverdizando = {}
+let descarteInventario = {}
+let historialDescarte = {}
+let lotesCalidadInterna = {}
+let clasificacionCalidad = {}
 
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
-const _cuentas = 'admin'
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -49,7 +41,9 @@ function createWindow() {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
-      nodeIntegrationInWorker: true
+      nodeIntegrationInWorker: true,
+      nodeIntegration: true,
+      contextIsolation: false
     }
   })
 
@@ -73,6 +67,8 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+
 }
 
 // This method will be called when Electron has finished
@@ -97,22 +93,7 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
   autoUpdater.checkForUpdates()
-  await obtenerENF()
-  await obtenerIdCelifrut()
 
-  if (!fs.existsSync(join(__dirname, '../../../../../data'))) {
-    fs.mkdirSync(join(__dirname, '../../../../../data'))
-  }
-  //se crearan carpetas diferentes cada mes
-  // let fecha = new Date();
-  // let year = fecha.getFullYear().toString();
-  // let month = String(Number(fecha.getMonth()) + 1)
-  // let path = "../../../../../data/" + month + year + "carpeta"
-
-  // if(!fs.existsSync(join(__dirname, path))) {
-
-  //   fs.mkdirSync(join(__dirname, path))
-  // }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -173,144 +154,86 @@ ipcMain.handle('obtenerPredios', async () => {
 })
 //funcion para obtener la fruta sin procesar
 ipcMain.handle('obtenerFrutaActual', async () => {
-  const inventario = await obtenerInventario()
-  const proveedores = await obtenerProveedores()
-
-  let objFrutaActual = {}
-
-  if (Object.keys(inventario).length !== 0) {
-    Object.keys(inventario).forEach((item) => {
-      if (inventario[item].hasOwnProperty('inventario') && inventario[item]['inventario'] > 0) {
-        objFrutaActual[item] = {
-          ICA: proveedores[inventario[item]['nombre']]['ICA'],
-          nombre: inventario[item]['nombre'],
-          fecha: inventario[item]['fecha'],
-          inventario: inventario[item]['inventario'],
-          observaciones: inventario[item]['observaciones'],
-          tipoFruta: inventario[item]['tipoFruta'],
-          KilosActual:
-            (inventario[item]['kilos'] / inventario[item]['canastillas']) *
-            inventario[item]['inventario']
-        }
-      }
-    })
+  try {
+    return frutaActual
+  } catch (e) {
+    console.log(e.message)
   }
-
-  return objFrutaActual
+})
+//funcion para obtener la fruta sin procesar
+ipcMain.handle('reqObtenerFrutaActual', async () => {
+  try {
+    socket.emit('obtenerFrutaActual', 200)
+    return frutaActual
+  } catch (e) {
+    console.log(e.message)
+  }
 })
 //funcion para obtener el historial de vaciado
+ipcMain.handle('reqObtenerHistorialProceso', async () => {
+  try {
+    socket.emit('obtenerHistorialProceso')
+    return historialProceso
+  } catch (e) {
+    console.log(`${e.name}: ${e.message}`)
+  }
+})
 ipcMain.handle('obtenerHistorialProceso', async () => {
   try {
-    const historialVaciado = await obtenerHistorialVaciado()
-    const inventario = await obtenerInventario()
-    const enf = await obtenerIDs()
-
-    let datos = {}
-    let id = enf.idVaciado
-    let rango = Math.max(0, id - 200)
-
-    for (let i = id - 1; i >= rango; i--) {
-      datos[i] = {
-        enf: historialVaciado[i]['enf'],
-        nombre: inventario[historialVaciado[i]['enf']]['nombre'],
-        canastillas: historialVaciado[i]['canastillas'],
-        kilos: historialVaciado[i]['kilos'],
-        tipoFruta: inventario[historialVaciado[i]['enf']]['tipoFruta'],
-        fecha: historialVaciado[i]['fecha']
-      }
-    }
-
-    return datos
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-//funcion para obtener el descarte de la base de datos local en el inventario
-ipcMain.handle('obtenerDescarte', async () => {
-  try {
-    const inventario = await obtenerInventario()
-    const descarteObj = await functionObtenerDescarte(inventario)
-    return descarteObj
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-//funcion para obtener el descarte en el inventario
-ipcMain.handle('actualizarDescarte', async () => {
-  try {
-    const descarte = await actualizarDescarte()
-    console.log(descarte)
-    const inventario = await obtenerInventario()
-
-    // se guarda el descarte en el inventario
-    if (typeof descarte === 'object') {
-      Object.keys(descarte).forEach((enf) => {
-        if (
-          !inventario[enf].hasOwnProperty('descarteLavado') ||
-          !inventario[enf].hasOwnProperty('descarteEncerado')
-        ) {
-          inventario[enf]['descarteLavado'] = {}
-          inventario[enf]['descarteEncerado'] = {}
-        }
-
-        inventario[enf]['descarteLavado'] = descarte[enf]['descarteLavado']
-        inventario[enf]['descarteEncerado'] = descarte[enf]['descarteEncerado']
-        inventario[enf]['tipoFruta'] = descarte[enf]['tipoFruta']
-      })
-    }
-
-    let descarteObj = await functionObtenerDescarte(inventario)
-    await guardarInventario(inventario)
-    return descarteObj
+    return historialProceso
   } catch (e) {
     console.log(`${e.name}: ${e.message}`)
   }
 })
 //funcion para obtener el historial de directo nacional
+ipcMain.handle('reqObtenerHistorialDirectoNacional', async () => {
+  try {
+    socket.emit('obtenerHistorialDirectoNacional')
+    return historialDirectoNacional
+  } catch (e) {
+    console.log(`${e.name}: ${e.message}`)
+  }
+})
 ipcMain.handle('obtenerHistorialDirectoNacional', async () => {
   try {
-    const historialDirectoNacional = await obtenerHistorialDirectoNacional()
-    const inventario = await obtenerInventario()
-    const enf = await obtenerIDs()
-
-    let datos = {}
-    let id = enf.idDirectoNacional
-    let rango = Math.max(0, id - 200)
-
-    for (let i = id - 1; i >= rango; i--) {
-      datos[i] = {
-        enf: historialDirectoNacional[i]['enf'],
-        nombre: inventario[historialDirectoNacional[i]['enf']]['nombre'],
-        canastillas: historialDirectoNacional[i]['canastillas'],
-        kilos: historialDirectoNacional[i]['kilos'],
-        tipoFruta: inventario[historialDirectoNacional[i]['enf']]['tipoFruta'],
-        fecha: historialDirectoNacional[i]['fecha']
-      }
-    }
-
-    return datos
+    return historialDirectoNacional
   } catch (e) {
     console.log(`${e.name}: ${e.message}`)
   }
 })
 //funcion para obtener la fruta sin procesar
-ipcMain.handle('obtenerFrutaDesverdizando', async () => {
-  const inventario = await obtenerInventario()
-  const desverdizado = await obtenerDesverdizado()
-
-  let objDesverdizando = {}
-
-  Object.keys(desverdizado).forEach((enf) => {
-    if (desverdizado[enf]['desverdizando'] === true) {
-      objDesverdizando[enf] = {
-        nombre: inventario[enf]['nombre'],
-        ...desverdizado[enf]
-      }
-    }
-  })
-
-  return objDesverdizando
+ipcMain.handle('reqObtenerFrutaDesverdizando', async () => {
+  try {
+    socket.emit('obtenerFrutaDesverdizado')
+    return frutaDesverdizando
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
 })
+ipcMain.handle('obtenerFrutaDesverdizando', async () => {
+  try {
+    return frutaDesverdizando
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
+})
+//funcion para obtener el descarte de la base de datos local en el inventario
+ipcMain.handle('reqObtenerDescarte', async () => {
+  try {
+    socket.emit('obtenerDescarte')
+    return descarteInventario
+  } catch (e) {
+    console.log(`${e.name}: ${e.message}`)
+  }
+})
+ipcMain.handle('obtenerDescarte', async () => {
+  try {
+    return descarteInventario
+  } catch (e) {
+    console.log(`${e.name}: ${e.message}`)
+  }
+})
+//funcion que envia al front la informacion de los clientes
 ipcMain.handle('obtenerClientes', async () => {
   try {
     const clientes = await obtenerClientes()
@@ -319,67 +242,118 @@ ipcMain.handle('obtenerClientes', async () => {
     return `${e.name}:${e.message}`
   }
 })
-
-// funcion que hace fetch de los datos
-const server = async () => {
+//funcion que envia al front los datos del descarte que se ha procesado
+ipcMain.handle('obtenerHistorialDescarte', async () => {
   try {
-      // This re-loads the current file inside a Worker instance.
-      const worker = new Worker(resolve(__dirname, './worker.js'), {})
-      worker.once('message', (data) => {
-        console.log(data)
-      });
+    return historialDescarte
   } catch (e) {
-    console.log(e)
+    console.log(`${e.name}:${e.message}`)
+    return `${e.name}:${e.message}`
   }
-}
-server();
-
-//Se guarda data en la nube
-setInterval(async () => {
+})
+ipcMain.handle('reqObtenerHistorialDescarte', async () => {
   try {
-    // This re-loads the current file inside a Worker instance.
-    const nombreDelEquipo = os.hostname();
-    const inventario = await obtenerInventario()
-    const data = [nombreDelEquipo, inventario]
-    let response = await fetchFunction('uploadAppData', data)
-    console.log(response)
-
+    socket.emit('obtenerHistorialDescarte')
+    return historialDescarte
   } catch (e) {
-    console.log(e)
+    console.log(`${e.name}:${e.message}`)
+    return `${e.name}:${e.message}`
   }
-}, 10_400_000);
+})
+
+//funcion que envia los lotes que aun no tienen la calidad interna
+ipcMain.handle('obtenerLotesCalidadInterna', async () => {
+  try {
+    socket.emit('obtenerLotesCalidadInterna')
+    return lotesCalidadInterna
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
+})
+ipcMain.handle('lotesCalidadInterna', async () => {
+  try {
+    return lotesCalidadInterna
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
+})
+//funciones que envian los lotes que hay pendientes para clasificacion de calidad
+ipcMain.handle('obtenerLotesClasificacionCalidad', async () => {
+  try {
+    socket.emit('obtenerClasificacionCalidad')
+    return clasificacionCalidad
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
+})
+ipcMain.handle('lotesClasificacionCalidad', async () => {
+  try {
+    return clasificacionCalidad
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
+})
+//funcion que obtiene los contenedores que se estan llenando
+ipcMain.handle('obtenerContenedoresListaEmpaque', async () => {
+  try {
+    const listaEmpaque = await obtenerListaEmpaque()
+    return listaEmpaque
+  } catch (e) {
+    return `${e.name}:${e.message}`
+  }
+})
+
+
+
+const socket = io('ws://192.168.0.168:3000/')
+
+socket.on('frutaActual', (data) => {
+  frutaActual = data
+})
+
+socket.on('loteVaciando', (data) => {
+  console.log(data)
+})
+
+socket.on('historialProceso', (data) => {
+  historialProceso = data
+})
+
+socket.on('historialDirectoNacional', (data) => {
+  historialDirectoNacional = data
+})
+
+socket.on('frutaDesverdizando', (data) => {
+  frutaDesverdizando = data
+})
+
+socket.on('descarteInventario', (data) => {
+  descarteInventario = data
+})
+
+socket.on('historialDescarte', (data) => {
+  historialDescarte = data
+})
+
+socket.on('lotesCalidadInterna', (data) => {
+  lotesCalidadInterna = data
+})
+
+socket.on('lotesClasificacionCalidad', (data) => {
+  console.log(data)
+  clasificacionCalidad = data
+})
+
 
 //funcion para guardar un nuevo lote
 ipcMain.handle('guardarLote', async (event, datos) => {
   try {
-    const responseGuardarLote = await fetchFunction('ingresarLote', datos)
-    if (responseGuardarLote === 'Guardado con exito') {
-      const fecha = new Date()
-      const codigoENF =
-        'EF1-' +
-        fecha.getFullYear().toString().slice(-2) +
-        String(fecha.getMonth() + 1).padStart(2, '0') +
-        datos.enf
+    socket.emit('guardarLote', datos)
+    const ids = await obtenerIDs()
+    ids.enf += 1
 
-      const enf = await obtenerIDs()
-      const inventario = await obtenerInventario()
-
-      inventario[codigoENF] = {
-        inventario: datos.canastillas,
-        canastillas: datos.canastillas,
-        kilos: datos.kilos,
-        nombre: datos.nombre,
-        tipoFruta: datos.tipoFruta,
-        observaciones: datos.observaciones,
-        fecha: fecha
-      }
-
-      enf.enf += 1
-
-      await guardarInventario(inventario)
-      await guardarIDs(enf)
-    }
-    return responseGuardarLote
+    await guardarIDs(ids)
+    return 200
   } catch (e) {
     console.error(e)
   }
@@ -387,33 +361,8 @@ ipcMain.handle('guardarLote', async (event, datos) => {
 //funcion para vaciar canastillas
 ipcMain.handle('vaciarLote', async (event, datos) => {
   try {
-    const responseGuardarLote = await fetchFunction('vaciarLote', datos)
-    if (responseGuardarLote === 200) {
-      const inventario = await obtenerInventario()
-      const enf = await obtenerIDs()
-      const historialVaciado = await obtenerHistorialVaciado()
-
-      enf['ENF-vaciando'] = datos.enf
-      inventario[datos.enf]['inventario'] -= Number(datos.canastillas)
-
-      historialVaciado[enf['idVaciado']] = {
-        enf: datos.enf,
-        canastillas: datos.canastillas,
-        kilos:
-          datos.canastillas *
-          (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas']),
-        fecha: new Date()
-      }
-
-      enf['idVaciado'] += 1
-
-      await guardarInventario(inventario)
-      await guardarIDs(enf)
-      await guardarHistorialVaciado(historialVaciado)
-    } else if (responseGuardarLote === 401) {
-      return 'No se ha terminado de vacear el lote anterior'
-    }
-    return responseGuardarLote
+    socket.emit('vaciarLote', datos)
+    return 200
   } catch (e) {
     return `${e.name}: ${e.message}`
   }
@@ -421,31 +370,8 @@ ipcMain.handle('vaciarLote', async (event, datos) => {
 //funcion para directo nacional
 ipcMain.handle('directoNacional', async (event, datos) => {
   try {
-    const responseDirectoNacional = await fetchFunction('directoNacional', datos)
-
-    if (responseDirectoNacional === 'Directo nacional con exito') {
-      const [inventario, enf, historialDirectoNacional] = await Promise.all([
-        obtenerInventario(),
-        obtenerIDs(),
-        obtenerHistorialDirectoNacional()
-      ])
-      inventario[datos.enf]['inventario'] -= Number(datos.canastillas)
-      historialDirectoNacional[enf['idDirectoNacional']] = {
-        enf: datos.enf,
-        canastillas: datos.canastillas,
-        kilos:
-          datos.canastillas *
-          (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas']),
-        fecha: new Date()
-      }
-      enf['idDirectoNacional'] += 1
-      await Promise.all([
-        guardarInventario(inventario),
-        guardarIDs(enf),
-        guardarHistorialDirectoNacional(historialDirectoNacional)
-      ])
-    }
-    return responseDirectoNacional
+    socket.emit('directoNacional', datos)
+    return 200
   } catch (e) {
     console.log(`${e.name}: ${e.message}`)
     return `${e.name}: ${e.message}`
@@ -454,39 +380,8 @@ ipcMain.handle('directoNacional', async (event, datos) => {
 //funcion para desverdizado
 ipcMain.handle('desverdizado', async (event, datos) => {
   try {
-    const response = await fetchFunction('desverdizado', datos)
-    console.log(response)
-    console.log(datos)
-    if (response === 'Lote' + datos.enf + 'Ingreado a desverdizado') {
-      const [inventario, inventarioDesverdizado] = await Promise.all([
-        obtenerInventario(),
-        obtenerDesverdizado()
-      ])
-
-      inventario[datos.enf]['inventario'] -= Number(datos.canastillas)
-
-      if (!inventarioDesverdizado.hasOwnProperty(datos.enf)) {
-        inventarioDesverdizado[datos.enf] = {
-          canastillasIngreso: 0,
-          kilosIngreso: 0,
-          cuartoDesverdizado: ''
-        }
-      }
-
-      inventarioDesverdizado[datos.enf]['canastillasIngreso'] += Number(datos.canastillas)
-      inventarioDesverdizado[datos.enf]['kilosIngreso'] +=
-        datos.canastillas * (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
-      inventarioDesverdizado[datos.enf]['fechaIngreso'] = new Date()
-      inventarioDesverdizado[datos.enf]['desverdizando'] = true
-      inventarioDesverdizado[datos.enf]['cuartoDesverdizado'] += datos.cuartoDesverdizado + ' '
-
-      await Promise.all([
-        guardarInventario(inventario),
-        guardarDesverdizado(inventarioDesverdizado)
-      ])
-    }
-
-    return response
+    socket.emit('desverdizado', datos)
+    return 200
   } catch (e) {
     console.error(`${e.name}: ${e.message}`)
     return `${e.name}: ${e.message}`
@@ -495,275 +390,114 @@ ipcMain.handle('desverdizado', async (event, datos) => {
 //funcion para modificar el historial
 ipcMain.handle('modificarHistorial', async (event, datos) => {
   try {
-    console.log(datos)
-    const response = await fetchFunction('modificarHistorial', datos)
-    if (response === 200) {
-      const [inventario, historialVaciado] = await Promise.all([
-        obtenerInventario(),
-        obtenerHistorialVaciado()
-      ])
-
-      inventario[datos.enf]['inventario'] += Number(datos.canastillas)
-      historialVaciado[datos.id]['canastillas'] -= datos.canastillas
-      historialVaciado[datos.id]['modificado'] = datos.canastillas
-      historialVaciado[datos.id]['kilos'] =
-        historialVaciado[datos.id]['canastillas'] *
-        (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
-
-      await Promise.all([guardarInventario(inventario), guardarHistorialVaciado(historialVaciado)])
-    }
-    return response
+    socket.emit('modificarHistorialVaciado', datos)
+    return 200
   } catch (e) {
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion para enviar la fruta en el inventario de descarte
-ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
-  try {
-    const response = await fetchFunction('eliminarFrutaDescarte', datos[0])
-    if (response === 200) {
-      const [inventario, ids, historialDescarte] = await Promise.all([
-        obtenerInventario(),
-        obtenerIDs(),
-        obtenerHistorialDescarte()
-      ])
-
-      historialDescarte[ids['idHistorialDescarte']] = {}
-
-      Object.keys(datos[0]).map((item) => {
-        let [enf, descarte, tipoDescarte] = item.split('/')
-        historialDescarte[ids['idHistorialDescarte']][enf] = {}
-        historialDescarte[ids['idHistorialDescarte']][enf]['descarteLavado'] = {}
-        historialDescarte[ids['idHistorialDescarte']][enf]['descarteEncerado'] = {}
-        historialDescarte[ids['idHistorialDescarte']][enf]['cliente'] = {}
-      })
-
-      Object.keys(datos[0]).map((item) => {
-        let [enf, descarte, tipoDescarte] = item.split('/')
-        // console.log(enf)
-        inventario[enf][descarte][tipoDescarte] -= datos[0][item]
-        historialDescarte[ids['idHistorialDescarte']][enf]['cliente'] = datos[1]
-        historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[0][item]
-      })
-
-      ids['idHistorialDescarte'] += 1
-
-      await Promise.all([
-        guardarInventario(inventario),
-        guardarIDs(ids),
-        guardarHistorialDescarte(historialDescarte)
-      ])
-    }
-    return response
-  } catch (e) {
-    console.error(`${e.name}: ${e.message}`)
     return `${e.name}: ${e.message}`
   }
 })
 //funcion para modificar el historial de directo nacional
 ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
   try {
-    const response = await fetchFunction('modificarHistorialDirecto', datos)
-
-    if (response === 200) {
-      const [inventario, historialDirectoNacional] = await Promise.all([
-        obtenerInventario(),
-        obtenerHistorialDirectoNacional()
-      ])
-
-      inventario[datos.enf]['inventario'] += Number(datos.canastillas)
-      historialDirectoNacional[datos.id]['canastillas'] -= datos.canastillas
-      historialDirectoNacional[datos.id]['modificado'] = datos.canastillas
-      historialDirectoNacional[datos.id]['kilos'] =
-        historialDirectoNacional[datos.id]['canastillas'] *
-        (inventario[datos.enf]['kilos'] / inventario[datos.enf]['canastillas'])
-      //console.log(inventario);
-
-      await Promise.all([
-        guardarInventario(inventario),
-        guardarHistorialDirectoNacional(historialDirectoNacional)
-      ])
-    }
-    return response
+    socket.emit('modificarHistorialDirectoNacional', datos)
+    return 200
   } catch (e) {
     return `${e.name}: ${e.message}`
   }
 })
-
+//funcion que finaliza el desverdizado, es decir que pone la bandera de desverdizando en false
 ipcMain.handle('finalizarDesverdizado', async (event, datos) => {
   try {
-    const response = await fetchFunction('finalizarDesverdizado', datos)
-    if (response === 200) {
-      const inventarioDesverdizado = await obtenerDesverdizado()
-      inventarioDesverdizado[datos.enf]['fechaFinalizado'] = new Date()
-      await guardarDesverdizado(inventarioDesverdizado)
-    }
-    return response
+    socket.emit('finalizarDesverdizado', datos)
+    return 200
   } catch (e) {
     return `${e.name}:${e.message}`
   }
 })
-
+//funcion que guarda los datos de parametrizado
 ipcMain.handle('setParametrosDesverdizado', async (event, datos) => {
   try {
-    const response = await fetchFunction('setParametrosDesverdizado', datos)
-    if (response === 200) {
-      const inventarioDesverdizado = await obtenerDesverdizado()
-
-      if (!inventarioDesverdizado[datos.enf].hasOwnProperty('parametros')) {
-        inventarioDesverdizado[datos.enf]['parametros'] = []
-      }
-
-      inventarioDesverdizado[datos.enf]['parametros'].push([
-        new Date(),
-        datos.temperatura,
-        datos.etileno,
-        datos.carbono,
-        datos.humedad
-      ])
-
-      await guardarDesverdizado(inventarioDesverdizado)
-    }
-    return response
+    socket.emit('setParametrosDesverdizado', datos)
+    return 200
   } catch (e) {
     console.log(`${e.name}:${e.message}`)
     return `${e.name}:${e.message}`
   }
 })
-
+//funcion que procesa la fruta en el inventario de desverdizado
 ipcMain.handle('procesarDesverdizado', async (event, datos) => {
   try {
-    const response = await fetchFunction('procesarDesverdizado', datos)
-
-    if (response === 200) {
-      const inventarioDesverdizado = await obtenerDesverdizado()
-
-      if (inventarioDesverdizado[datos.enf]['canastillasIngreso'] - datos.canastillas === 0) {
-        inventarioDesverdizado[datos.enf]['desverdizando'] = false
-      }
-      await guardarDesverdizado(inventarioDesverdizado)
-    }
-    return response
+    socket.emit('procesarDesverdizado', datos)
+    return 200
   } catch (e) {
     return `${e.name}: ${e.message}`
   }
 })
-
+//funcion que reprocesa solo un predio, cambiando la informacion del descarte del lote
 ipcMain.handle('reprocesarDescarteUnPredio', async (event, datos) => {
   try {
-    const response = fetchFunction('reprocesarDescarteUnPredio', datos)
-    if (response === 200) {
-      let keys = Object.keys(datos)
-      let [enf, descarte, tipoDescarte] = keys[0].split('/')
-
-      const [inventario, ids, historialDescarte] = await Promise.all([
-        obtenerInventario(),
-        obtenerIDs(),
-        obtenerHistorialDescarte()
-      ])
-
-      historialDescarte[ids['idHistorialDescarte']] = {}
-
-      Object.keys(datos).forEach((item) => {
-        let [enf, descarte, tipoDescarte] = item.split('/')
-        historialDescarte[ids['idHistorialDescarte']][enf] = {
-          descarteLavado: {},
-          descarteEncerado: {}
-        }
-      })
-
-      Object.keys(datos).forEach((item) => {
-        let [enf, descarte, tipoDescarte] = item.split('/')
-        // console.log(enf)
-        inventario[enf][descarte][tipoDescarte] -= datos[item]
-        historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[item]
-      })
-
-      ids['idHistorialDescarte'] += 1
-
-      await Promise.all([
-        guardarInventario(inventario),
-        guardarIDs(ids),
-        guardarHistorialDescarte(historialDescarte)
-      ])
-    }
-    return fetchResponse
+    socket.emit('reprocesarDescarteUnPredio', datos)
+    return 200
   } catch (e) {
     return `${e.name}:${e.message}`
   }
 })
-
+//funcion para enviar la fruta en el inventario de descarte
+ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
+  try {
+    socket.emit('eliminarFrutaDescarte', datos)
+    return 200
+  } catch (e) {
+    console.error(`${e.name}: ${e.message}`)
+    return `${e.name}: ${e.message}`
+  }
+})
+//funcion que reprocesa varios predios unidos
 ipcMain.handle('ReprocesarDescarteCelifrut', async (event, datos) => {
   try {
-    //funcion que hace el fecth
-    const ids = await obtenerIDs()
-    const vec = [datos, ids['idCelifrut']]
-    const response = await fetchFunction('ReprocesarDescarteCelifrut', vec)
-    console.log(response)
-
-    if (response === 200) {
-      //se leen los archivos json
-      const [inventario, historialDescarte] = await Promise.all([
-        obtenerInventario(),
-        obtenerHistorialDescarte()
-      ])
-      // se agrega los datos al historiald de descarte
-      historialDescarte[ids['idHistorialDescarte']] = {}
-
-      //se crean los objetos que tendran los datos del historiald e vaciado
-      Object.keys(datos).forEach((item) => {
-        let [enf, descarte, tipoDescarte] = item.split('/')
-        historialDescarte[ids['idHistorialDescarte']][enf] = {
-          descarteLavado: {},
-          descarteEncerado: {}
-        }
-      })
-
-      // se elimina la fruta del inventario y se mete en el historial
-      Object.keys(datos).forEach((item) => {
-        let [enf, descarte, tipoDescarte] = item.split('/')
-        // console.log(enf)
-        inventario[enf][descarte][tipoDescarte] -= datos[item]
-        historialDescarte[ids['idHistorialDescarte']][enf][descarte][tipoDescarte] = datos[item]
-      })
-
-      //se crea en el inventario el item correspondiente a celifrut
-      inventario['Celifrut-' + ids.idCelifrut] = { fecha: new Date() }
-
-      // se suma el id del historial descarte
-      ids['idHistorialDescarte'] += 1
-      ids['idCelifrut'] += 1
-
-      await Promise.all([
-        guardarInventario(inventario),
-        guardarIDs(ids),
-        guardarHistorialDescarte(historialDescarte)
-      ])
-
-      return 200
-    }
+    socket.emit('reprocesarDescarteCelifrut', datos)
+    return 200
+    //}
   } catch (e) {
     return `${e.name}:${e.message}`
   }
 })
-
+//fncion que crea el contenedor
 ipcMain.handle('crearContenedor', async (event, datos) => {
   try {
-    console.log(datos)
-    const response = await fetchFunction('crearContenedor', datos)
-    console.log(response)
-    return response
+    socket.emit('crearContenedor', datos)
+    return 200
   } catch (e) {
     console.log(e)
     return e
   }
 })
-
+//la funcion que loguea la cuenta
 ipcMain.handle('logIn', async (event, datos) => {
   try {
-    const response = await logInProcess(datos)
-    return response
+    const [userLogin, permisos] = await logInProcess(datos)
+
+    return permisos
   } catch (e) {
     return `${e.name}:${e.message}`
+  }
+})
+//guardar calidad interna
+ipcMain.handle('guardarCalidadInterna', async (event, datos) => {
+  try {
+   socket.emit('guardarCalidadInterna', datos)
+    return 200
+  } catch (e) {
+    console.log(`${e.name}:${e.message}`)
+    return `${e.name}:${e.message}`
+  }
+})
+//guarda la clasificacion calidad
+ipcMain.handle('guardarClasificacionCalidad', (event, datos) => {
+  try{
+    socket.emit('guardarClasificacionCalidad', datos)
+    return 200
+  } catch(e) {
+    console.log(e.message)
   }
 })

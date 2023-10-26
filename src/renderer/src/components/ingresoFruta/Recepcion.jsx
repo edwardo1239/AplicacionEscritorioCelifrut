@@ -28,6 +28,7 @@ export default function Recepcion() {
   const [tipoFruta, setTipoFruta] = useState('');
   const [nombrePredio, setNombrePredio] = useState('');
   const [canastillas, setCanastillas] = useState('');
+  const [canastillasVacias, setCanastillasVacias] = useState('');
   const [kilos, setKilos] = useState('');
   const [placa, setPlaca] = useState('');
   const [observaciones, setObservaciones] = useState('');
@@ -67,7 +68,8 @@ export default function Recepcion() {
         tipoFruta: tipoFruta,
         observaciones: observaciones,
         enf: enf,
-        promedio: kilos / canastillas
+        promedio: kilos / canastillas,
+        canastillasVacias: canastillasVacias
       };
   
       if (datos.promedio < 15) {
@@ -81,10 +83,12 @@ export default function Recepcion() {
       }
   
       const response = await window.api.guardarLote(datos);
+      console.log(response)
+      console.log(typeof(response))
   
-      if (response === "Guardado con exito") {
+      if (response === 200) {
         setSaveRender(!saveRender);
-        setSuccessMessage(response);
+        setSuccessMessage("Guardado con exito");
         setOpenSuccess(true);
       } else {
         setError(response);
@@ -104,6 +108,7 @@ export default function Recepcion() {
     setKilos('');
     setPlaca('');
     setObservaciones('');
+    setCanastillasVacias('');
   };
   
   return (
@@ -201,6 +206,25 @@ export default function Recepcion() {
               <FormControlLabel value="Limon" control={<Radio />} label="Limon" />
             </RadioGroup>
           </FormControl>
+        </Grid>
+        <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+        <TextField
+          required
+          type='number'
+          inputProps={{min:0, step:1}}
+            label="Canastillas vacias"
+            id="canastillasVacias"
+            value={canastillasVacias}
+            onChange={(e) => setCanastillasVacias(e.target.value)}
+            sx={{ m: 1, width: '100%' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <NumbersRoundedIcon />
+                </InputAdornment>
+              )
+            }}
+          />
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField

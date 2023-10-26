@@ -21,6 +21,10 @@ import FrutaDescarte from './inventario/components/FrutaDescarte'
 import DesverdizadoInv from './inventario/components/DesverdizadoInv'
 import BotonContenedores from './Contenedores/BotonContenedores'
 import CrearContenedor from './Contenedores/components/CrearContenedor'
+import BotonesCalidad from './Calidad/BotonesCalidad'
+import CalidadInterna from './Calidad/components/CalidadInterna'
+import VerListasEmpaque from './Contenedores/components/VerListasEmpaque'
+import ClasificacionCalidad from './Calidad/components/ClasificacionCalidad'
 
 
 const drawerWidth = 240
@@ -39,7 +43,7 @@ export default function Nav() {
     setEncabezados(permisos)
  }
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', margin:0 }}>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -66,6 +70,7 @@ export default function Nav() {
                     {text === 'Ingreso de fruta' && <BotonIngresoFruta seleccion={seleccion} />}
                     {text === 'Inventario' && <ListaBotonesInventario seleccion={seleccion}/>}
                     {text === 'Contenedores' && <BotonContenedores seleccion={seleccion}/>}
+                    {text === 'Calidad' && <BotonesCalidad seleccion={seleccion}/>}
   
                   </ListItemIcon>
               </ListItem>
@@ -77,7 +82,7 @@ export default function Nav() {
 
 
       
-      <Box component="main" sx={{ flexGrow: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1 }} >
         <Toolbar />
 
         {state === '' && <Index permisosSesion={permisosSesion} />}
@@ -86,6 +91,9 @@ export default function Nav() {
         {state === 'Descarte' && <FrutaDescarte />}
         {state === 'Desverdizado' && <DesverdizadoInv />}
         {state === 'Crear Contenedor' && <CrearContenedor />}
+        {state === 'Listas de Empaque' && <VerListasEmpaque />}
+        {state === 'Calidad interna' && <CalidadInterna />}
+        {state === 'Clasificacion calidad' && <ClasificacionCalidad />}
       </Box>
     </Box>
   )

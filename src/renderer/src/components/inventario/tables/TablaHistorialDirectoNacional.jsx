@@ -9,7 +9,9 @@ import {
   Typography,
   TableCell,
   TableBody,
-  Button
+  Button,
+  Snackbar,
+  Alert
 } from '@mui/material'
 import RestoreIcon from '@mui/icons-material/Restore'
 import React, { useReducer, useState, useEffect } from 'react'
@@ -57,6 +59,16 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
   useEffect(() => {
     setBusqueda(filtro)
   }, [filtro])
+
+   //useEffect donde se obtiene la informacion de el servidor
+   useEffect(() => {
+    const makeReq = async () => {
+      const frutaActual = await window.api.reqObtenerHistorialDirectoNacional()
+      //console.log(frutaActual)
+      dispatch({ datos: frutaActual })
+    }
+    makeReq()
+  }, [])
 
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
@@ -159,6 +171,15 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
           <ModificarDirectoNacional closeModal={closeModal} propsModal={propsModal} funcOpenSuccess={funcOpenSuccess} />,
           document.body
         )}
+
+        <Snackbar
+        open={openSucces}
+        autoHideDuration={6000}
+        onClose={() => setOpenSuccess(false)}
+        sx={{ marginLeft: '50%' }}
+      >
+        <Alert severity="success">{message}</Alert>
+      </Snackbar>
     </Box>
   )
 }

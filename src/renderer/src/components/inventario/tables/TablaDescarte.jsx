@@ -69,6 +69,15 @@ export default function TablaDescarte({ filtro }) {
 
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
+    const asyncFunction = async () => {
+      const frutaActual = await window.api.reqObtenerDescarte()
+      dispatch({ datos: frutaActual })
+    }
+    asyncFunction()
+  }, [])
+
+  //useEffect donde se obtiene la informacion de el Main
+  useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const frutaActual = await window.api.obtenerDescarte()
@@ -95,8 +104,6 @@ export default function TablaDescarte({ filtro }) {
       console.log(`${e.name}: ${e.message}`)
     }
   }
-
-
 
   //el nombre es la ENF que a su vez es la key de el objeto tabla
   const seleccionarDescarte = (e) => {
@@ -153,16 +160,14 @@ export default function TablaDescarte({ filtro }) {
       let enfs = []
       let keys = Object.keys(enfObj)
       for (let i = 0; i < keys.length; i++) {
-        let  [enf, descarte, tipoDescarte] = keys[i].split("/")
+        let [enf, descarte, tipoDescarte] = keys[i].split('/')
         enfs.push(enf)
       }
-      for (let i = 0; i < enfs.length-1; i++) {
-        if(enfs[i] !== enfs[i+1]){
+      for (let i = 0; i < enfs.length - 1; i++) {
+        if (enfs[i] !== enfs[i + 1]) {
           setBtnReproceso(false)
         }
       }
-
-   
     } else {
       uncheckCheckBox(row)
       setTitleTable('0')
@@ -178,15 +183,16 @@ export default function TablaDescarte({ filtro }) {
   }
 
   const closeModal = () => {
+    if (modal === true) enfObj = {}
     setModal(!modal)
     setPropsModals(enfObj)
-    
   }
 
-  const closeModalEnviar = () =>{
+  const closeModalEnviar = () => {
+    console.log(modalEnviar)
+    if (modalEnviar === true) enfObj = {}
     setModalEnviar(!modalEnviar)
     setPropsModals(enfObj)
-
   }
 
   //funcion para mostrar que la accion se llevo acabo con exito
@@ -196,12 +202,11 @@ export default function TablaDescarte({ filtro }) {
     setMessage(message)
   }
 
-  const reprocesoCelifrut = async () =>{
+  const reprocesoCelifrut = async () => {
     setPropsModals(enfObj)
     setMessageModal('¿Desea reprocesar los descartes unificados en forma de Celifrut?')
     closeModal()
   }
-
 
   return (
     <Box>
@@ -236,7 +241,7 @@ export default function TablaDescarte({ filtro }) {
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable + 'Kg'}
         </Typography>
-
+        {/* 
         <LoadingButton
           color="primary"
           loading={loading}
@@ -247,7 +252,7 @@ export default function TablaDescarte({ filtro }) {
           sx={{ width: '35%', marginRight: '2rem' }}
         >
           <span>Actualizar</span>
-        </LoadingButton>
+        </LoadingButton> */}
 
         {btnReproceso ? (
           <LoadingButton

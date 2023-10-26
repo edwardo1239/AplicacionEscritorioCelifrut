@@ -2,32 +2,44 @@ import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from 
 import LoadingButton from '@mui/lab/LoadingButton'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import React, { useState } from 'react'
+import Api from '../../../../../preload/types'
 
-export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
-  const [canastillas, setCanastillas] = useState(0)
-  const [openError, setOpenError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [loading, setLoading] = useState(false)
+type propsType = {
+  closeDirecto: () => void
+  propsModal: { nombre: string; canastillas: number; enf: string }
+  funcOpenSuccess: (message: string) => void
+}
+
+export default function Directo(props: propsType) {
+  const [canastillas, setCanastillas] = useState<number>(0)
+  const [openError, setOpenError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   const directo = async () => {
-    setLoading(true)
-    if (parseInt(canastillas) > parseInt(propsModal.canastillas)) {
-      setErrorMessage('Error en el numero de canastillas')
-      setOpenError(true)
-      setLoading(false)
-    } else {
-
-      let obj = { canastillas: canastillas, enf: propsModal.enf }
-   
-      const response = await window.api.directoNacional(obj)
-      console.log(response)
-      if (response == "Directo nacional con exito") {
-        funcOpenSuccess(response)
-      } else {
-        setErrorMessage(`${response.name}: ${response.message}`)
+    try {
+      setLoading(true)
+      if (canastillas > props.propsModal.canastillas) {
+        setErrorMessage('Error en el numero de canastillas')
         setOpenError(true)
+        setLoading(false)
+      } else {
+        let obj = { canastillas: canastillas, enf: props.propsModal.enf }
+
+        const response = await window.api.directoNacional(obj)
+        await window.api.reqObtenerFrutaActual()
+
+        if (response === 200) {
+          props.funcOpenSuccess('Directo nacional con éxito')
+        } else {
+          setErrorMessage(`${response.name}: ${response.message}`)
+          setOpenError(true)
+        }
+        props.closeDirecto()
       }
-      closeDirecto()
+    } catch (error) {
+      setErrorMessage('Ha ocurrido un error inesperado')
+      setOpenError(true)
     }
   }
 
@@ -57,13 +69,13 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
         <AppBar position="static">
           <Toolbar sx={{ backgroundColor: '#9E3C29', justifyContent: 'space-between' }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-              {propsModal.nombre}
+              {props.propsModal.nombre}
             </Typography>
           </Toolbar>
         </AppBar>
         <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
           <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-            Numero de canastillas en inventario: {propsModal.canastillas}
+            Numero de canastillas en inventario: {props.propsModal.canastillas}
           </Typography>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
@@ -73,7 +85,7 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
             variant="outlined"
             type="number"
             inputProps={{ min: 0, step: 1 }}
-            onChange={(e) => setCanastillas(e.target.value)}
+            onChange={(e) => setCanastillas(Number(e.target.value))}
           />
         </div>
         <div
@@ -96,7 +108,7 @@ export default function Directo({ closeDirecto, propsModal, funcOpenSuccess }) {
           >
             <span>Enviar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={closeDirecto}>
+          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={props.closeDirecto}>
             Cancelar
           </Button>
         </div>

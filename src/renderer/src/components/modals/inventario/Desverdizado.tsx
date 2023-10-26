@@ -1,54 +1,53 @@
 import { AppBar, Toolbar, Typography, TextField, Button, Snackbar, Alert } from '@mui/material'
 import LoadingButton from '@mui/lab/LoadingButton'
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
-import React, {  useState } from 'react'
+import ColorLensIcon from '@mui/icons-material/ColorLens'
+import React, { useState } from 'react'
 import Api from '../../../../../preload/types'
 
-type vaciadoType = {
-  closeVaciado: () => void
-  propsModal: { nombre: string, canastillas: number, enf:string}
-  funcOpenSuccess: (message:string) => void
+type propsType = {
+  closeDesverdizado: () => void
+  propsModal: { nombre: string; canastillas: number; enf: string }
+  funcOpenSuccess: (message: string) => void
 }
 
-export default function Vaciado(props:vaciadoType) {
+export default function Desverdizado(props: propsType) {
   const [canastillas, setCanastillas] = useState<number>(0)
+  const [cuartoDesverdizado, setCuartoDesverdizado] = useState<string>('')
   const [openError, setOpenError] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
 
-  const vaciar = async () => {
+  const desverdizado = async () => {
     try {
       setLoading(true)
-      const canastillasInt = canastillas;
-      const propsCanastillasInt = props.propsModal.canastillas;
-
-      if (canastillasInt > propsCanastillasInt) {
-        funcOpenError(true, 'Error en el numero de canastillas');
+      if (canastillas > props.propsModal.canastillas) {
+        setErrorMessage('Error en el numero de canastillas')
+        setOpenError(true)
+        setLoading(false)
       } else {
-        const obj = { canastillas: canastillas, enf: props.propsModal.enf }
-        const response = await window.api.vaciarLote(obj);
-        await window.api.reqObtenerFrutaActual();
-        console.log(response)
-        if (response === 200) {
-          props.funcOpenSuccess('Vaciado con exito');
-          props.closeVaciado();
-        } else {
-          funcOpenError(true, response);
+        let obj = {
+          canastillas: canastillas,
+          enf: props.propsModal.enf,
+          cuartoDesverdizado: cuartoDesverdizado
         }
-     
+        const response = await window.api.desverdizado(obj)
+        await window.api.reqObtenerFrutaActual()
+        //console.log(obj)
+        //console.log(response)
+        if (response === 200) {
+          props.funcOpenSuccess('Lote se ha puesto a desverdizar')
+          props.closeDesverdizado()
+        } else {
+          setErrorMessage('API error:' + response)
+          setOpenError(true)
+        }
+        
       }
-    } catch (e) {
-      funcOpenError(true, `${e.name}:${e.message}`);
+    } catch (error) {
+      setErrorMessage('Ha ocurrido un error inesperado')
+      setOpenError(true)
     }
-    finally{
-      setLoading(false);
-    }
-  };
-
-  const funcOpenError = (open:boolean, message:string):void => {
-    setErrorMessage(message)
-    setOpenError(open)
-  };
+  }
 
   return (
     <div
@@ -67,14 +66,14 @@ export default function Vaciado(props:vaciadoType) {
       <div
         style={{
           width: 450,
-          height: 300,
+          height: 400,
           backgroundColor: 'white',
           borderRadius: 15,
           overflow: 'hidden'
         }}
       >
         <AppBar position="static">
-          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
+          <Toolbar sx={{ backgroundColor: 'orange', justifyContent: 'space-between' }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
               {props.propsModal.nombre}
             </Typography>
@@ -95,6 +94,15 @@ export default function Vaciado(props:vaciadoType) {
             onChange={(e) => setCanastillas(Number(e.target.value))}
           />
         </div>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+          <TextField
+            id="outlined-basic"
+            label="Cuarto Desverdizado"
+            variant="outlined"
+            type="text"
+            onChange={(e) => setCuartoDesverdizado(e.target.value)}
+          />
+        </div>
         <div
           style={{
             display: 'flex',
@@ -108,14 +116,14 @@ export default function Vaciado(props:vaciadoType) {
             color="primary"
             loading={loading}
             loadingPosition="start"
-            onClick={vaciar}
-            startIcon={<MoveToInboxIcon />}
+            onClick={desverdizado}
+            startIcon={<ColorLensIcon />}
             variant="contained"
             sx={{ width: '20%', marginBottom: '5rem' }}
           >
-            <span>Vaciar</span>
+            <span>Enviar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={props.closeVaciado}>
+          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={props.closeDesverdizado}>
             Cancelar
           </Button>
         </div>

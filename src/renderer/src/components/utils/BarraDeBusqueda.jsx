@@ -34,7 +34,7 @@ export default function BarraDeBusqueda({ changeFilter, opcionesMenu, seleccion,
 
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" >
       <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
         <IconButton
           onClick={handleClick}
@@ -58,9 +58,9 @@ export default function BarraDeBusqueda({ changeFilter, opcionesMenu, seleccion,
         >
           <List>
             {opcionesMenu.map((text, index) => (
-              <ListItem key={text + index} disablePadding>
+              <ListItem key={text + index} disablePadding sx={{width:'auto'}}>
                 <ListItemIcon>
-                  <ListItemButton sx={{ gap: 2 }} onClick={() => seleccion(text)}>
+                  <ListItemButton sx={{ gap: 2 }} onClick={() =>{ seleccion(text); handleClose()}}>
                     <RestoreIcon />
                     <ListItemText primary={text} />
                   </ListItemButton>

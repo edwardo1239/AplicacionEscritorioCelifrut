@@ -1,0 +1,153 @@
+
+
+.containerC {
+  max-width: 1000px; /* Ajusta el ancho máximo según tus necesidades */
+  margin: 0 auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.details-container {
+  display: grid; /* Cambia a un grid layout */
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px; /* Espacio entre los detalles */
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  margin-bottom: 15px;
+}
+
+.detail-item {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.detail-item h3 {
+  font-size: 10px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.empty-cells {
+  width: 25%; /* Ajusta el ancho según tus necesidades */
+}
+.sub-label {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.input {
+  height: 20px;
+  border: 1px solid #7d9f3a;
+  padding: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Estilos cuando el campo se enfoca */
+.input:focus {
+  border-color: #ff8000;
+  box-shadow: 0 0 10px rgba(255, 128, 0, 0.5);
+}
+
+.button {
+  background-color: #ff8000;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 16px;
+}
+
+/* Estilos para el botón al pasar el cursor */
+.button:hover {
+  background-color: #7d9f3a;
+}
+
+.empty-cells{
+  width: 25%;
+}
+
+
+
+@media screen and (min-width: 600px) {
+  .details-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .details-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media screen and (max-width: 700px) {
+  .detail-item h3 {
+    font-size: 10px; /* Ajusta el tamaño de fuente según tus necesidades */
+  }
+}
+
+
+
+.details-container {
+  display: grid; /* Cambia a un grid layout */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; /* Espacio entre los detalles */
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  margin-bottom: 15px;
+}
+
+.details-containerC {
+  display: grid; /* Cambia a un grid layout */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; /* Espacio entre los detalles */
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  margin-bottom: 15px;
+}
+
+
+
+
+.floating-percentage {
+  position: fixed;
+  top: 125px;
+  left: 80%;
+  width: 10rem;
+  height: 5rem;
+  border-radius: 15px;
+  font-weight: bold;
+  background-color: white;
+  color: black; /* Color del texto */
+  padding: 10px;
+  text-align: center;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  margin-top: 1000;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+}
+
+/* Estilo para el progreso */
+progress {
+  width: 100%;
+}

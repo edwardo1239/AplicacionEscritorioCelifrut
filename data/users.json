@@ -4,7 +4,8 @@
         "permisos": [
             "Ingreso de fruta",
             "Inventario",
-            "Contenedores"
+            "Contenedores",
+            "Calidad"
         ]
     },
     "Coordinadora calidad": {

@@ -26,10 +26,10 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
 
         const response = await window.api.setParametrosDesverdizado(obj);
         
-        if(response == "Parametros Guardados con exito"){
+        if(response === 200){
             setLoading(false)
             closeModal()
-            funcOpenSuccess(response)
+            funcOpenSuccess('Parametros guardados con exito')
         }
         else{
             setLoading(false)

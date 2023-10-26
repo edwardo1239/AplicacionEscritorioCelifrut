@@ -22,7 +22,7 @@ export default function ModificarDirectoNacional({ closeModal, propsModal, funcO
         const response = await window.api.modificarHistorialDirectoNacional(obj)
         
         console.log(response)
-        if (response == 'Historial modificado con exito!') {
+        if (response === 200) {
           funcOpenSuccess('Historial modificado con exito!')
         } else {
           setErrorMessage('Error al modificar el historial')
