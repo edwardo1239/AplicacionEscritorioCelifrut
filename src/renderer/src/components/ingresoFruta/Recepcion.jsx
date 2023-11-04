@@ -21,45 +21,45 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useEffect, useState } from 'react'
 
 export default function Recepcion() {
-  const fecha = new Date();
-  const [prediosDatos, setPrediosData] = useState([]);
-  const [enf, setEnf] = useState('');
-  const [loading, setLoadin] = useState(false);
-  const [tipoFruta, setTipoFruta] = useState('');
-  const [nombrePredio, setNombrePredio] = useState('');
-  const [canastillas, setCanastillas] = useState('');
-  const [canastillasVacias, setCanastillasVacias] = useState('');
-  const [kilos, setKilos] = useState('');
-  const [placa, setPlaca] = useState('');
-  const [observaciones, setObservaciones] = useState('');
-  const [openError, setOpenError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [openSuccess, setOpenSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [saveRender, setSaveRender] = useState(false);
+  const fecha = new Date()
+  const [prediosDatos, setPrediosData] = useState([])
+  const [enf, setEnf] = useState('')
+  const [loading, setLoadin] = useState(false)
+  const [tipoFruta, setTipoFruta] = useState('')
+  const [nombrePredio, setNombrePredio] = useState('')
+  const [canastillas, setCanastillas] = useState('')
+  const [canastillasVacias, setCanastillasVacias] = useState('')
+  const [kilos, setKilos] = useState('')
+  const [placa, setPlaca] = useState('')
+  const [observaciones, setObservaciones] = useState('')
+  const [openError, setOpenError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [openSuccess, setOpenSuccess] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [saveRender, setSaveRender] = useState(false)
 
   useEffect(() => {
     const obtenerPredios = async () => {
-      const prediosData = await window.api.obtenerPredios();
-      const predios = Object.keys(prediosData.predios);
-      setPrediosData(predios);
-      setEnf(prediosData.enf);
-    };
-    obtenerPredios();
-  }, [saveRender]);
+      const request = {action:'obtenerProveedores'}
+      const response = await window.api.ingresoFruta(request)
+      const predios = response.data
+      console.log(predios)
+      setPrediosData(predios)
+    }
+    obtenerPredios()
+  }, [saveRender])
 
   const setError = (message) => {
-    setErrorMessage(message);
-    setOpenError(true);
-    setLoadin(false);
-  };
-  
+    setErrorMessage(message)
+    setOpenError(true)
+    setLoadin(false)
+  }
 
   const guardarLote = async () => {
     try {
-      event.preventDefault();
-      setLoadin(true);
-  
+      event.preventDefault()
+      setLoadin(true)
+
       let datos = {
         nombre: nombrePredio,
         canastillas: canastillas,
@@ -70,61 +70,53 @@ export default function Recepcion() {
         enf: enf,
         promedio: kilos / canastillas,
         canastillasVacias: canastillasVacias
-      };
-  
+      }
+
       if (datos.promedio < 15) {
-        setError("Error, los kilos no corresponden a las canastillas");
-        return;
+        setError('Error, los kilos no corresponden a las canastillas')
+        return
       }
-  
+
       if (!datos.tipoFruta) {
-        setError("Seleccione el tipo de fruta del lote");
-        return;
+        setError('Seleccione el tipo de fruta del lote')
+        return
       }
-  
-      const response = await window.api.guardarLote(datos);
+      const request = {action:'guardarLote', data:datos}
+      const response = await window.api.ingresoFruta(request)
       console.log(response)
-      console.log(typeof(response))
-  
-      if (response === 200) {
-        setSaveRender(!saveRender);
-        setSuccessMessage("Guardado con exito");
-        setOpenSuccess(true);
+ 
+      if (response.status === 200) {
+        setSaveRender(!saveRender)
+        setSuccessMessage('Guardado con exito')
+        setOpenSuccess(true)
       } else {
-        setError(response);
+        setError(response.action)
       }
-  
-      reiniciarCampos();
+
+      reiniciarCampos()
     } catch (e) {
-      console.log("Recepcion" + e);
+      console.log('Recepcion' + e)
     } finally {
-      setLoadin(false);
+      setLoadin(false)
     }
-  };
-  
+  }
+
   const reiniciarCampos = () => {
-    setNombrePredio('');
-    setCanastillas('');
-    setKilos('');
-    setPlaca('');
-    setObservaciones('');
-    setCanastillasVacias('');
-  };
-  
+    setNombrePredio('')
+    setCanastillas('')
+    setKilos('')
+    setPlaca('')
+    setObservaciones('')
+    setCanastillasVacias('')
+  }
+
   return (
-    <form onSubmit={guardarLote} >
-      <Grid container spacing={2} sx={{ padding: '1rem',  overflow: 'auto' }}>
+    <form onSubmit={guardarLote}>
+      <Grid container spacing={2} sx={{ padding: '1rem', overflow: 'auto' }}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Typography variant="h4" component="h2">
-            Recepcion 
+            Recepcion
           </Typography>
-      
-        </Grid>
-        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Typography variant="h6" component="h6">
-          EF1-{fecha.getFullYear().toString().slice(-2)+String(fecha.getMonth() + 1).padStart(2, "0")+enf}
-          </Typography>
-
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Autocomplete
@@ -133,7 +125,9 @@ export default function Recepcion() {
             id="nombre-predio"
             options={prediosDatos}
             sx={{ width: '100%' }}
-            renderInput={(params) => <TextField {...params} label="Predio" value={nombrePredio} required/>}
+            renderInput={(params) => (
+              <TextField {...params} label="Predio" value={nombrePredio} required />
+            )}
             onInputChange={(event, newValue) => {
               setNombrePredio(newValue)
             }}
@@ -141,9 +135,9 @@ export default function Recepcion() {
         </Grid>
         <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
-          required
-          type='number'
-          inputProps={{min:0, step:1}}
+            required
+            type="number"
+            inputProps={{ min: 0, step: 1 }}
             label="Numero de canastillas"
             id="canastillas"
             value={canastillas}
@@ -160,9 +154,9 @@ export default function Recepcion() {
         </Grid>
         <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
-          required
-          type='number'
-            inputProps={{min:0, step:0.1}}
+            required
+            type="number"
+            inputProps={{ min: 0, step: 0.1 }}
             label="Kilos"
             id="kilos"
             value={kilos}
@@ -175,8 +169,7 @@ export default function Recepcion() {
         </Grid>
         <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
-          required
-          
+            required
             label="Placa"
             id="placa"
             value={placa}
@@ -195,7 +188,6 @@ export default function Recepcion() {
           <FormControl>
             <FormLabel id="tipo_de_fruta_form">Tipo de Fruta</FormLabel>
             <RadioGroup
-            
               row
               aria-labelledby="demo-row-radio-buttons-group-label"
               name="row-radio-buttons-group"
@@ -208,10 +200,10 @@ export default function Recepcion() {
           </FormControl>
         </Grid>
         <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <TextField
-          required
-          type='number'
-          inputProps={{min:0, step:1}}
+          <TextField
+            required
+            type="number"
+            inputProps={{ min: 0, step: 1 }}
             label="Canastillas vacias"
             id="canastillasVacias"
             value={canastillasVacias}
@@ -228,7 +220,7 @@ export default function Recepcion() {
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
-          required
+            required
             id="observaciones"
             label="Observaciones"
             value={observaciones}
@@ -246,15 +238,15 @@ export default function Recepcion() {
             loadingPosition="start"
             startIcon={<SaveIcon />}
             variant="contained"
-            sx={{ width: '20%', marginBottom:'5rem' }}
+            sx={{ width: '20%', marginBottom: '5rem' }}
           >
             <span>Save</span>
           </LoadingButton>
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-        <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#7D9F3A' }}>
-          <Toolbar></Toolbar>
-        </AppBar>
+          <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#7D9F3A' }}>
+            <Toolbar></Toolbar>
+          </AppBar>
         </Grid>
       </Grid>
       //alertas

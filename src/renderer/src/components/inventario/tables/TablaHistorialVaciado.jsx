@@ -42,7 +42,9 @@ export default function TablaHistorialVaciado({ filtro }) {
           String(action.datos[lote]['nombre'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
-          action.datos[lote]['fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          format(new Date(action.datos[lote]['fecha']), 'dd-MM-yyyy')
+            .toLowerCase()
+            .indexOf(busqueda.toLowerCase()) !== -1 ||
           action.datos[lote]['tipoFruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
       )
       tablaFiltrada.map((item) => {
@@ -62,25 +64,29 @@ export default function TablaHistorialVaciado({ filtro }) {
   //useEffect donde se obtiene la informacion de el servidor
   useEffect(() => {
     const makeReq = async () => {
-      const frutaActual = await window.api.reqObtenerHistorialProceso()
-      //console.log(frutaActual)
-      dispatch({ datos: frutaActual })
+      try {
+        const request = { action: 'obtenerHistorialProceso' }
+        const descarte = await window.api.inventario(request)
+        dispatch({ datos: descarte.data })
+      } catch (e) {
+        alert(`Historial vaciado ${e.name}:${e.message}`)
+      }
     }
     makeReq()
   }, [])
 
-  //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const makeReq = async () => {
       try {
-        const frutaActual = await window.api.obtenerHistorialProceso()
-        dispatch({ datos: frutaActual })
+        const request = { action: 'obtenerHistorialProceso' }
+        const descarte = await window.api.inventario(request)
+        dispatch({ datos: descarte.data })
       } catch (e) {
-        alert(e)
+        alert(`Historial vaciado ${e.name}:${e.message}`)
       }
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
+    }
+    makeReq()
+  }, [modalModificar])
 
   const clickLote = (e) => {
     let lote = e.target.value
@@ -119,6 +125,12 @@ export default function TablaHistorialVaciado({ filtro }) {
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable}
         </Typography>
+        <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
+          Kilos Total
+          {tabla &&
+            ' ' + Object.keys(tabla).reduce((acu, enf) => (acu += tabla[enf]['kilos']), 0)}{' '}
+          Kg
+        </Typography>
 
         {showBtnModificar && (
           <Button variant="contained" endIcon={<RestoreIcon />} onClick={closeModal}>
@@ -138,6 +150,7 @@ export default function TablaHistorialVaciado({ filtro }) {
               <TableCell>Nombre del Predio</TableCell>
               <TableCell>Canastillas</TableCell>
               <TableCell>Kilos</TableCell>
+              <TableCell>Rendimiento</TableCell>
               <TableCell>Tipo Fruta</TableCell>
               <TableCell>Fecha</TableCell>
             </TableRow>
@@ -163,10 +176,18 @@ export default function TablaHistorialVaciado({ filtro }) {
                     <TableCell key={item}>{tabla[item]['enf']}</TableCell>
                     <TableCell key={item + 'NombrePredio'}>{tabla[item]['nombre']}</TableCell>
                     <TableCell key={item + 'Canastillas'}>{tabla[item]['canastillas']}</TableCell>
-                    <TableCell key={item + 'Kilos'}>{tabla[item]['kilos'].toFixed(2)}</TableCell>
+                    <TableCell key={item + 'Kilos'}>
+                      {tabla[item]['kilos'] !== undefined ? tabla[item]['kilos'].toFixed(2) : 0}
+                    </TableCell>
+                    <TableCell key={item + 'rendimiento'}>
+                      {tabla[item]['rendimiento'] !== undefined
+                        ? tabla[item]['rendimiento'].toFixed(2)
+                        : 0}
+                      %
+                    </TableCell>
                     <TableCell key={item + 'TipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
                     <TableCell key={item + 'fecha'}>
-                      {format(new Date(tabla[item]['fecha']), 'dd/MM/yyyy')}
+                      {format(new Date(tabla[item]['fecha']), 'dd-MM-yyyy')}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -183,7 +204,7 @@ export default function TablaHistorialVaciado({ filtro }) {
           document.body
         )}
 
-        <Snackbar
+      <Snackbar
         open={openSucces}
         autoHideDuration={6000}
         onClose={() => setOpenSuccess(false)}

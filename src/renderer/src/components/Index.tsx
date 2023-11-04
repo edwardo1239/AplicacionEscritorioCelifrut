@@ -1,9 +1,9 @@
 import LoadingButton from '@mui/lab/LoadingButton'
 import { InputAdornment, TextField, Typography } from '@mui/material'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
-import Api from '../../../preload/types';
+import Api from '../../../preload/types'
 
 type indexType = {
   permisosSesion: (permisos: string[]) => void
@@ -12,6 +12,12 @@ type indexType = {
 type datosLogInType = {
   user: string
   password: string
+}
+
+type loginResponseType = {
+  status: number
+  user: string
+  permisos: string[]
 }
 
 export default function Index(props: indexType) {
@@ -23,7 +29,7 @@ export default function Index(props: indexType) {
   const [errorClave, setErrorClave] = useState<boolean>(false)
   const [isLogged, setIsLogged] = useState<boolean>(false)
 
-  const login: React.FormEventHandler<HTMLFormElement> = async (event) => {
+  const login: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault()
     try {
       setLoading(true)
@@ -31,24 +37,25 @@ export default function Index(props: indexType) {
         user: usuario,
         password: password
       }
-
-      const response = await window.api.logIn(datosLogIn)
-      if (typeof response === 'string') {
-        if (response === 'Error en la contraseña') {
-          setErrorClave(true)
-          setIsLogged(false)
-        } else {
+      window.api.logIn(datosLogIn).then( (response) =>{
+        console.log(response)
+        if (response.status === 200) {
+          props.permisosSesion(response.permisos)
+          setIsLogged(true)
+          setErrorUser(false)
+          setErrorClave(false)
+        } else if (response.status === 401) {
           setErrorUser(true)
           setIsLogged(false)
+        } else if (response.status === 402) {
+          setErrorUser(false)
+          setIsLogged(true)
+        } else {
+          setErrorUser(false)
+          setErrorClave(false)
+          alert('Error al intentar inciar sesion')
         }
-      } else {
-        console.log(response)
-        props.permisosSesion(response)
-        setIsLogged(true)
-        setErrorUser(false)
-        setErrorClave(false)
-      }
-      //const response = await window.api.login(datos)
+      })
     } catch (e) {
       console.log(`${e.name}:${e.message}`)
     } finally {
@@ -89,16 +96,23 @@ export default function Index(props: indexType) {
           boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px'
         }}
       >
-        {isLogged ? 
-        
-        <>
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem',height:275,paddingTop:100}}>
+        {isLogged ? (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                margin: '1.5rem',
+                height: 275,
+                paddingTop: 100
+              }}
+            >
               <Typography variant="h2" component="h2">
                 Bienvenido
               </Typography>
             </div>
-        </>
-        : (
+          </>
+        ) : (
           <>
             <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem' }}>
               <Typography variant="h5" component="h2">

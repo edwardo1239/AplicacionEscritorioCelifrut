@@ -25,7 +25,7 @@ let enfObj = {}
 
 export default function TablaDescarte({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
-  const [titleTable, setTitleTable] = useState('0')
+  const [titleTable, setTitleTable] = useState(0)
 
   //states de los botones
   const [loading, setLoading] = useState(false)
@@ -70,24 +70,34 @@ export default function TablaDescarte({ filtro }) {
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const asyncFunction = async () => {
-      const frutaActual = await window.api.reqObtenerDescarte()
-      dispatch({ datos: frutaActual })
+      try {
+        const request = { action: 'obtenerDescarte' }
+        const frutaActual = await window.api.inventario(request)
+        dispatch({ datos: frutaActual.data })
+      } catch (e) {
+        alert(`Fruta actual ${e.name}: ${e.message}`)
+      }
     }
     asyncFunction()
+    
+  window.api.descartes('descartes', (data) =>{
+    dispatch({ datos: data })
+  })
   }, [])
 
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const asyncFunction = async () => {
       try {
-        const frutaActual = await window.api.obtenerDescarte()
-        dispatch({ datos: frutaActual })
+        const request = { action: 'obtenerDescarte' }
+        const frutaActual = await window.api.inventario(request)
+        dispatch({ datos: frutaActual.data })
       } catch (e) {
-        alert(e)
+        alert(`Fruta actual ${e.name}: ${e.message}`)
       }
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
+    }
+    asyncFunction()
+  }, [modal, modalEnviar])
 
   //poner en 0 todos los valores
   useEffect(() => {
@@ -95,20 +105,10 @@ export default function TablaDescarte({ filtro }) {
     enfObj = {}
   }, [])
 
-  //funcion para actualizar el descarte
-  const clickActualizarDescarte = async () => {
-    try {
-      const response = await window.api.actualizarDescarte()
-      dispatch({ datos: response })
-    } catch (e) {
-      console.log(`${e.name}: ${e.message}`)
-    }
-  }
-
   //el nombre es la ENF que a su vez es la key de el objeto tabla
   const seleccionarDescarte = (e) => {
     const [enf, descarte, tipoDescarte] = e.value.split('/')
-    setBtnReproceso(false)
+
     if (e.checked) {
       enfObj[e.value] = tabla[enf][descarte][tipoDescarte]
     } else {
@@ -121,6 +121,13 @@ export default function TablaDescarte({ filtro }) {
     if (Object.keys(enfObj).length !== 0) {
       let x = Object.keys(enfObj).reduce((acu, item) => acu + enfObj[item], 0)
       setTitleTable(x)
+    }
+    const keys = Object.keys(enfObj)
+    if (keys.length > 0) {
+      const enf = keys.map((item) => item.split('/')[0])
+      const set = new Set(enf)
+      if(set.size == 1) setBtnReproceso(true)
+      else setBtnReproceso(false)
     }
   }
   //funciones que cierra los modales
@@ -141,38 +148,34 @@ export default function TablaDescarte({ filtro }) {
 
   const clickRadioButton = (row, index) => {
     let rowButton = document.getElementsByClassName(index)
-    //console.log(rowButton[0].checked)
     if (rowButton[0].checked == true) {
       checkCheckbox(row)
 
       let x = document.getElementsByClassName(row)
-      console.log(row)
       for (let i = 0; i < x.length; i++) {
         let [enf, descarte, tipoDescarte] = x[i].value.split('/')
         enfObj[x[i].value] = tabla[enf][descarte][tipoDescarte]
       }
-      console.log(enfObj)
       let y = Object.keys(enfObj).reduce((acu, item) => acu + enfObj[item], 0)
 
-      setBtnReproceso(true)
       setTitleTable(y)
-
-      let enfs = []
-      let keys = Object.keys(enfObj)
-      for (let i = 0; i < keys.length; i++) {
-        let [enf, descarte, tipoDescarte] = keys[i].split('/')
-        enfs.push(enf)
-      }
-      for (let i = 0; i < enfs.length - 1; i++) {
-        if (enfs[i] !== enfs[i + 1]) {
-          setBtnReproceso(false)
-        }
-      }
     } else {
       uncheckCheckBox(row)
-      setTitleTable('0')
-      setBtnReproceso(false)
-      enfObj = {}
+      let x = document.getElementsByClassName(row)
+      for (let i = 0; i < x.length; i++) {
+        let [enf, descarte, tipoDescarte] = x[i].value.split('/')
+        delete enfObj[x[i].value]
+      }
+      let y = Object.keys(enfObj).reduce((acu, item) => acu + enfObj[item], 0)
+      setTitleTable(y)
+    }
+
+    const keys = Object.keys(enfObj)
+    if (keys.length > 0) {
+      const enf = keys.map((item) => item.split('/')[0])
+      const set = new Set(enf)
+      if(set.size == 1) setBtnReproceso(true)
+      else setBtnReproceso(false)
     }
   }
 

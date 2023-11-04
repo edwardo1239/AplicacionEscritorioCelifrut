@@ -24,12 +24,14 @@ export default function Directo(props: propsType) {
         setOpenError(true)
         setLoading(false)
       } else {
-        let obj = { canastillas: canastillas, enf: props.propsModal.enf }
+        const obj = {
+          canastillas: canastillas,
+          enf: props.propsModal.enf,
+          action: 'directoNacional'
+        }
+        const response = await window.api.inventario(obj)
 
-        const response = await window.api.directoNacional(obj)
-        await window.api.reqObtenerFrutaActual()
-
-        if (response === 200) {
+        if (response.status === 200) {
           props.funcOpenSuccess('Directo nacional con éxito')
         } else {
           setErrorMessage(`${response.name}: ${response.message}`)

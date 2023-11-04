@@ -1,27 +1,30 @@
-export interface contenedoresObj {
-  [key: string]: contenedorType
+interface liberarPallet {
+  rotulado: boolean;
+  paletizado: boolean;
+  enzunchado: boolean;
+  estadoCajas: boolean;
+  estiba: boolean;
+  
+}
+interface settings {
+  tipoCaja: string;
+  calidad: number;
+  calibre: number;
 }
 
-interface contenedorType {
-  pallets: { [key: string]: pallet }
-  infoContenedor: typeInfoContenedor
-}
-
-interface typeInfoContenedor {
-  nombreCliente: string
-  tipoFruta: 'Limon' | 'Naranja'
-}
+type ENFArray = [string, number, string, number, number, string][];
 
 interface pallet {
-  items : {[key: string]: CustomArray}
-  settings: settings
-  cajasTotal: number
+  settings: settings;
+  [key: string]: ENFArray | settings | number | liberarPallet | boolean;
+  cajasTotal: number;
+  listaLiberarPallet: liberarPallet;
+  liberado: boolean;
 }
 
-interface settings {
-  tipoCaja: string
-  calibre: number
-  calidad: number
-}
 
-type CustomArray = (string | number | Date)[]
+export interface ContenedoresObj {
+  [key: number]: {
+    [key: number]: pallet
+  }
+}

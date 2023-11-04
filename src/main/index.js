@@ -5,26 +5,9 @@ import { autoUpdater, AppUpdater } from 'electron-updater'
 import { io } from 'socket.io-client'
 const fs = require('fs')
 const { mainMenu } = require('./menuMaker')
-import icon from '../../resources/icon.png?asset'
-import {
-  guardarIDs,
-  logInProcess,
-  obtenerClientes,
-  obtenerIDs,
-  obtenerListaEmpaque,
-  obtenerProveedores
-} from './functions'
+//import icon from '../../resources/icon.png?asset'
 
-
-//globals
-let frutaActual = {}
-let historialProceso = {}
-let historialDirectoNacional = {}
-let frutaDesverdizando = {}
-let descarteInventario = {}
-let historialDescarte = {}
-let lotesCalidadInterna = {}
-let clasificacionCalidad = {}
+import icon from '../renderer/src/assets/CELIFRUT.jpg'
 
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
@@ -34,10 +17,10 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
+    icon: icon,
     show: false,
     autoHideMenuBar: false,
 
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -68,7 +51,11 @@ function createWindow() {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-
+  socket.on('descartesInfo', (data) => {
+    console.log(data)
+    if (data.status === 200) mainWindow.webContents.send('descartes', data.data)
+    else console.log('error')
+  })
 }
 
 // This method will be called when Electron has finished
@@ -93,7 +80,6 @@ app.whenReady().then(async () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
   autoUpdater.checkForUpdates()
-
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -142,362 +128,140 @@ autoUpdater.on('update-downloaded', (info) => {
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-//funcion para obtener el nombre de los predios
-ipcMain.handle('obtenerPredios', async () => {
-  try {
-    const proveedores = await obtenerProveedores()
-    const ids = await obtenerIDs()
-    return { predios: proveedores, enf: ids.enf }
-  } catch (e) {
-    console.error(`${e.name}: ${e.message}`)
-  }
-})
-//funcion para obtener la fruta sin procesar
-ipcMain.handle('obtenerFrutaActual', async () => {
-  try {
-    return frutaActual
-  } catch (e) {
-    console.log(e.message)
-  }
-})
-//funcion para obtener la fruta sin procesar
-ipcMain.handle('reqObtenerFrutaActual', async () => {
-  try {
-    socket.emit('obtenerFrutaActual', 200)
-    return frutaActual
-  } catch (e) {
-    console.log(e.message)
-  }
-})
-//funcion para obtener el historial de vaciado
-ipcMain.handle('reqObtenerHistorialProceso', async () => {
-  try {
-    socket.emit('obtenerHistorialProceso')
-    return historialProceso
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-ipcMain.handle('obtenerHistorialProceso', async () => {
-  try {
-    return historialProceso
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-//funcion para obtener el historial de directo nacional
-ipcMain.handle('reqObtenerHistorialDirectoNacional', async () => {
-  try {
-    socket.emit('obtenerHistorialDirectoNacional')
-    return historialDirectoNacional
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-ipcMain.handle('obtenerHistorialDirectoNacional', async () => {
-  try {
-    return historialDirectoNacional
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-//funcion para obtener la fruta sin procesar
-ipcMain.handle('reqObtenerFrutaDesverdizando', async () => {
-  try {
-    socket.emit('obtenerFrutaDesverdizado')
-    return frutaDesverdizando
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-ipcMain.handle('obtenerFrutaDesverdizando', async () => {
-  try {
-    return frutaDesverdizando
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//funcion para obtener el descarte de la base de datos local en el inventario
-ipcMain.handle('reqObtenerDescarte', async () => {
-  try {
-    socket.emit('obtenerDescarte')
-    return descarteInventario
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-ipcMain.handle('obtenerDescarte', async () => {
-  try {
-    return descarteInventario
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-  }
-})
-//funcion que envia al front la informacion de los clientes
-ipcMain.handle('obtenerClientes', async () => {
-  try {
-    const clientes = await obtenerClientes()
-    return clientes
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//funcion que envia al front los datos del descarte que se ha procesado
-ipcMain.handle('obtenerHistorialDescarte', async () => {
-  try {
-    return historialDescarte
-  } catch (e) {
-    console.log(`${e.name}:${e.message}`)
-    return `${e.name}:${e.message}`
-  }
-})
-ipcMain.handle('reqObtenerHistorialDescarte', async () => {
-  try {
-    socket.emit('obtenerHistorialDescarte')
-    return historialDescarte
-  } catch (e) {
-    console.log(`${e.name}:${e.message}`)
-    return `${e.name}:${e.message}`
-  }
-})
-
-//funcion que envia los lotes que aun no tienen la calidad interna
-ipcMain.handle('obtenerLotesCalidadInterna', async () => {
-  try {
-    socket.emit('obtenerLotesCalidadInterna')
-    return lotesCalidadInterna
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-ipcMain.handle('lotesCalidadInterna', async () => {
-  try {
-    return lotesCalidadInterna
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//funciones que envian los lotes que hay pendientes para clasificacion de calidad
-ipcMain.handle('obtenerLotesClasificacionCalidad', async () => {
-  try {
-    socket.emit('obtenerClasificacionCalidad')
-    return clasificacionCalidad
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-ipcMain.handle('lotesClasificacionCalidad', async () => {
-  try {
-    return clasificacionCalidad
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//funcion que obtiene los contenedores que se estan llenando
-ipcMain.handle('obtenerContenedoresListaEmpaque', async () => {
-  try {
-    const listaEmpaque = await obtenerListaEmpaque()
-    return listaEmpaque
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-
-
-
-const socket = io('ws://192.168.0.168:3000/')
-
-socket.on('frutaActual', (data) => {
-  frutaActual = data
-})
-
-socket.on('loteVaciando', (data) => {
-  console.log(data)
-})
-
-socket.on('historialProceso', (data) => {
-  historialProceso = data
-})
-
-socket.on('historialDirectoNacional', (data) => {
-  historialDirectoNacional = data
-})
-
-socket.on('frutaDesverdizando', (data) => {
-  frutaDesverdizando = data
-})
-
-socket.on('descarteInventario', (data) => {
-  descarteInventario = data
-})
-
-socket.on('historialDescarte', (data) => {
-  historialDescarte = data
-})
-
-socket.on('lotesCalidadInterna', (data) => {
-  lotesCalidadInterna = data
-})
-
-socket.on('lotesClasificacionCalidad', (data) => {
-  console.log(data)
-  clasificacionCalidad = data
-})
-
-
-//funcion para guardar un nuevo lote
-ipcMain.handle('guardarLote', async (event, datos) => {
-  try {
-    socket.emit('guardarLote', datos)
-    const ids = await obtenerIDs()
-    ids.enf += 1
-
-    await guardarIDs(ids)
-    return 200
-  } catch (e) {
-    console.error(e)
-  }
-})
-//funcion para vaciar canastillas
-ipcMain.handle('vaciarLote', async (event, datos) => {
-  try {
-    socket.emit('vaciarLote', datos)
-    return 200
-  } catch (e) {
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion para directo nacional
-ipcMain.handle('directoNacional', async (event, datos) => {
-  try {
-    socket.emit('directoNacional', datos)
-    return 200
-  } catch (e) {
-    console.log(`${e.name}: ${e.message}`)
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion para desverdizado
-ipcMain.handle('desverdizado', async (event, datos) => {
-  try {
-    socket.emit('desverdizado', datos)
-    return 200
-  } catch (e) {
-    console.error(`${e.name}: ${e.message}`)
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion para modificar el historial
-ipcMain.handle('modificarHistorial', async (event, datos) => {
-  try {
-    socket.emit('modificarHistorialVaciado', datos)
-    return 200
-  } catch (e) {
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion para modificar el historial de directo nacional
-ipcMain.handle('modificarHistorialDirectoNacional', async (event, datos) => {
-  try {
-    socket.emit('modificarHistorialDirectoNacional', datos)
-    return 200
-  } catch (e) {
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion que finaliza el desverdizado, es decir que pone la bandera de desverdizando en false
-ipcMain.handle('finalizarDesverdizado', async (event, datos) => {
-  try {
-    socket.emit('finalizarDesverdizado', datos)
-    return 200
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//funcion que guarda los datos de parametrizado
-ipcMain.handle('setParametrosDesverdizado', async (event, datos) => {
-  try {
-    socket.emit('setParametrosDesverdizado', datos)
-    return 200
-  } catch (e) {
-    console.log(`${e.name}:${e.message}`)
-    return `${e.name}:${e.message}`
-  }
-})
-//funcion que procesa la fruta en el inventario de desverdizado
-ipcMain.handle('procesarDesverdizado', async (event, datos) => {
-  try {
-    socket.emit('procesarDesverdizado', datos)
-    return 200
-  } catch (e) {
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion que reprocesa solo un predio, cambiando la informacion del descarte del lote
-ipcMain.handle('reprocesarDescarteUnPredio', async (event, datos) => {
-  try {
-    socket.emit('reprocesarDescarteUnPredio', datos)
-    return 200
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//funcion para enviar la fruta en el inventario de descarte
-ipcMain.handle('eliminarFrutaDescarte', async (event, datos) => {
-  try {
-    socket.emit('eliminarFrutaDescarte', datos)
-    return 200
-  } catch (e) {
-    console.error(`${e.name}: ${e.message}`)
-    return `${e.name}: ${e.message}`
-  }
-})
-//funcion que reprocesa varios predios unidos
-ipcMain.handle('ReprocesarDescarteCelifrut', async (event, datos) => {
-  try {
-    socket.emit('reprocesarDescarteCelifrut', datos)
-    return 200
-    //}
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})
-//fncion que crea el contenedor
-ipcMain.handle('crearContenedor', async (event, datos) => {
-  try {
-    socket.emit('crearContenedor', datos)
-    return 200
-  } catch (e) {
-    console.log(e)
-    return e
-  }
+const socket = io('ws://192.168.0.162:3000/', {
+  rejectUnauthorized: false
 })
 //la funcion que loguea la cuenta
 ipcMain.handle('logIn', async (event, datos) => {
   try {
-    const [userLogin, permisos] = await logInProcess(datos)
-
-    return permisos
+    const request = { data: datos, id: socket.id }
+    const user = await new Promise((resolve, reject) => {
+      socket.emit('logIn', request, (response) => {
+        if (typeof response === 'object') {
+          resolve(response)
+        } else {
+          resolve({ status: 400, user: '', permisos: [] })
+        }
+      })
+    })
+    return user
   } catch (e) {
     return `${e.name}:${e.message}`
   }
 })
-//guardar calidad interna
-ipcMain.handle('guardarCalidadInterna', async (event, datos) => {
+
+// funcion encargada para enviar y recibir los datos de ingreso de fruta
+ipcMain.handle('ingresoFruta', async (event, data) => {
   try {
-   socket.emit('guardarCalidadInterna', datos)
-    return 200
+    console.log(data)
+    const request = { data: data, id: socket.id }
+    const response = await new Promise((resolve, reject) => {
+      socket.emit('celifrutListen', request, (serverResponse) => {
+        if (typeof serverResponse === 'object') {
+          resolve(serverResponse)
+        } else {
+          resolve({ status: 400 })
+        }
+      })
+    })
+    console.log(response)
+    return response
   } catch (e) {
     console.log(`${e.name}:${e.message}`)
-    return `${e.name}:${e.message}`
   }
 })
+//seccion inventario
+ipcMain.handle('inventario', async (event, data) => {
+  try {
+    const request = { data: data, id: socket.id }
+    console.log(request)
+    const response = await new Promise((resolve, reject) => {
+      socket.emit('celifrutListen', request, (serverResponse) => {
+        if (typeof serverResponse === 'object') {
+          resolve(serverResponse)
+        } else {
+          resolve({ status: 400 })
+        }
+      })
+    })
+    console.log(response)
+    return response
+  } catch (e) {
+    return { status: 400 }
+  }
+})
+
+// funcion encargada para enviar y tecibir los datos del area de contenedores
+ipcMain.handle('contenedores', async (event, data) => {
+  try {
+    const request = { data: data, id: socket.id }
+    console.log(request)
+    const response = await new Promise((resolve, reject) => {
+      socket.emit('contenedoresService', request, (serverResponse) => {
+        if (typeof serverResponse === 'object') {
+          resolve(serverResponse)
+        } else {
+          resolve({ status: 400 })
+        }
+      })
+    })
+    console.log(response)
+    return response
+  } catch (e) {
+    return { status: 400 }
+  }
+})
+
+// funcion encargada para enviar y tecibir los datos del area de calidad
+ipcMain.handle('calidad', async (event, data) => {
+  try {
+    const request = { data: data, id: socket.id }
+    console.log(request)
+    const response = await new Promise((resolve, reject) => {
+      socket.emit('calidad', request, (serverResponse) => {
+        if (typeof serverResponse === 'object') {
+          resolve(serverResponse)
+        } else {
+          resolve({ status: 400 })
+        }
+      })
+    })
+    console.log(response)
+    return response
+  } catch (e) {
+    return { status: 400 }
+  }
+})
+
+// const socket = io('ws://localhost:3000/',{
+//   rejectUnauthorized: false,
+// });
+
+socket.on('serverResponse', async (data) => {
+  try {
+    console.log(data)
+    if (data.status === 401) return data.data
+    const response = await server[data.action](data.data)
+  } catch (e) {
+    return { status: 401, message: e.message }
+  }
+})
+
 //guarda la clasificacion calidad
 ipcMain.handle('guardarClasificacionCalidad', (event, datos) => {
-  try{
+  try {
     socket.emit('guardarClasificacionCalidad', datos)
     return 200
-  } catch(e) {
+  } catch (e) {
     console.log(e.message)
+  }
+})
+//funcion que obtiene el rendimiento del lote o lotes que se requiera
+ipcMain.handle('obtenerRendimientoLote', async (event, datos) => {
+  try {
+    const request = { action: 'obtenerRendimientoLote', data: datos }
+    socket.emit('celifrutListen', request)
+  } catch (e) {
+    return `${e.name}:${e.message}`
   }
 })

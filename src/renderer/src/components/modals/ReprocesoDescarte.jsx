@@ -3,36 +3,45 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSuccess, messageModal }) {
+export default function ReprocesoDescarte({
+  closeModal,
+  propsModal,
+  funcOpenSuccess,
+  messageModal
+}) {
   const [openError, setOpenError] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
   const reprocesar = async () => {
     setLoading(true)
-    try{
+    try {
       let response
 
-      if(messageModal === '¿Desea reprocesar el descarte del predio seleccionado?'){
-         response = await window.api.reprocesarDescarteUnPredio(propsModal)
-      } else if (messageModal === '¿Desea reprocesar los descartes unificados en forma de Celifrut?'){
-         response = await window.api.ReprocesarDescarteCelifrut(propsModal)
+      if (messageModal === '¿Desea reprocesar el descarte del predio seleccionado?') {
+        const request = { action: 'reprocesarDescarteUnPredio', data: propsModal }
+        response = await window.api.inventario(request)
+      } else if (
+        messageModal === '¿Desea reprocesar los descartes unificados en forma de Celifrut?'
+      ) {
+        const request = { action: 'ReprocesarDescarteCelifrut', data: propsModal }
+        response = await window.api.inventario(request)
       }
+      await window.api.obtenerDescarte()
 
-      if (response === 200) {
-        funcOpenSuccess("Reproceso con exito")
+      if (response.status === 200) {
+        funcOpenSuccess('Reproceso con exito')
         closeModal()
       } else {
         setErrorMessage(response)
         setOpenError(true)
         closeModal()
       }
-    } catch(e){
+    } catch (e) {
       console.log(`${e.name}:${e.message}`)
       setLoading(false)
       closeModal()
     }
-  
   }
 
   return (
@@ -59,11 +68,15 @@ export default function ReprocesoDescarte({ closeModal, propsModal, funcOpenSucc
         }}
       >
         <AppBar position="static">
-          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
-          </Toolbar>
+          <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}></Toolbar>
         </AppBar>
         <div style={{ display: 'flex', justifyContent: 'center', paddingLeft: 10, paddingTop: 15 }}>
-          <Typography sx={{ flex: '1 1 100%',justifyContent:'center',textAlign:'center' }} variant="h6" id="tableTitle" component="div">
+          <Typography
+            sx={{ flex: '1 1 100%', justifyContent: 'center', textAlign: 'center' }}
+            variant="h6"
+            id="tableTitle"
+            component="div"
+          >
             {messageModal}
           </Typography>
         </div>

@@ -70,21 +70,31 @@ export default function TableDesverdizando({ filtro }) {
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const asyncFunction = async () => {
-      const frutaActual = await window.api.reqObtenerFrutaDesverdizando()
-      dispatch({ datos: frutaActual })
+      try {
+        const request = {action:'obtenerFrutaDesverdizando'}
+        const frutaActual = await window.api.inventario(request)
+        dispatch({ datos: frutaActual.data })
+      } catch (e) {
+        alert(`Fruta actual ${e.name}: ${e.message}`)
+      }
     }
     asyncFunction()
   }, [])
 
-  //useEffect donde se obtiene la informacion de el Main
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const frutaActual = await window.api.obtenerFrutaDesverdizando()
-      console.log(frutaActual)
-      dispatch({ datos: frutaActual })
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
+   //useEffect donde se obtiene la informacion de el Main
+   useEffect(() => {
+    const asyncFunction = async () => {
+      try {
+        const request = {action:'obtenerFrutaDesverdizando'}
+        const frutaActual = await window.api.inventario(request)
+        dispatch({ datos: frutaActual.data })
+      } catch (e) {
+        alert(`Fruta actual ${e.name}: ${e.message}`)
+      }
+    }
+    asyncFunction()
+  }, [modalFinalizar, modalParametros, modalProcesar])
+
 
   const clickLote = (e) => {
     let lote = e.target.value

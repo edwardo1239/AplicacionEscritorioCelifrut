@@ -25,17 +25,14 @@ export default function Vaciado(props:vaciadoType) {
       if (canastillasInt > propsCanastillasInt) {
         funcOpenError(true, 'Error en el numero de canastillas');
       } else {
-        const obj = { canastillas: canastillas, enf: props.propsModal.enf }
-        const response = await window.api.vaciarLote(obj);
-        await window.api.reqObtenerFrutaActual();
-        console.log(response)
-        if (response === 200) {
+        const obj = { canastillas:canastillas, enf:props.propsModal.enf, action:'vaciarLote' }
+        const response = await window.api.inventario(obj);
+        if (response.status === 200) {
           props.funcOpenSuccess('Vaciado con exito');
           props.closeVaciado();
         } else {
           funcOpenError(true, response);
         }
-     
       }
     } catch (e) {
       funcOpenError(true, `${e.name}:${e.message}`);

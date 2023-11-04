@@ -53,23 +53,14 @@ export default function TablaHistorialDescarte(props: propsType) {
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const asyncFunction = async () => {
-      const descarte = await window.api.reqObtenerHistorialDescarte()
-
-      dispatch({ datos: descarte })
+      const request = {action:'obtenerHistorialDescarte'}
+      const descarte =  await window.api.inventario(request)
+      console.log(descarte)
+      dispatch({ datos: descarte.data })
     }
     asyncFunction()
   }, [])
 
-  //useEffect donde se obtiene la informacion de el Main
-  useEffect(() => {
-    const interval: NodeJS.Timeout = setInterval(async () => {
-      const descarte = await window.api.obtenerHistorialDescarte()
-      console.log(descarte)
-      // console.log(tabla)
-      dispatch({ datos: descarte })
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
 
   const clickFila = (id: string) => {
     if (filaClickeada === id) setFilaClickeada('')
@@ -82,6 +73,7 @@ export default function TablaHistorialDescarte(props: propsType) {
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable}
         </Typography>
+      
       </Toolbar>
       <TableContainer>
         <Table sx={{ maxWidth: 1900 }}>
@@ -137,7 +129,7 @@ export default function TablaHistorialDescarte(props: propsType) {
                   </TableCell>
                   <TableCell key={ids + 'kilos'} padding="checkbox">
                     {Object.keys(tabla[ids]).reduce((total: any, enf: any) => {
-                      if (enf !== 'fecha' && enf !== 'tipoFruta' && enf !== 'accion') {
+                      if (enf !== 'fecha' && enf !== 'tipoFruta' && enf !== 'accion' && enf !== 'accion') {
                         total += Object.keys(tabla[ids][enf]).reduce(
                           (tipoDescarte: any, descarte: any) => {
                             if (descarte !== 'cliente') {

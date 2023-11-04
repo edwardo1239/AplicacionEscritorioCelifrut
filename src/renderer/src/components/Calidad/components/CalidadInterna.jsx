@@ -10,10 +10,10 @@ const CalidadInterna = () => {
   useEffect(() => {
     const interval = async () => {
       try {
-        await window.api.obtenerLotesCalidadInterna()
-        const lotes = await window.api.lotesCalidadInterna()
-
-        setLotesData(lotes)
+        const request = { action: 'obtenerLotesCalidadInterna' }
+        const lotes = await window.api.calidad(request)
+        console.log(lotes.data)
+        setLotesData(lotes.data)
       } catch (e) {
         alert(e)
       }
@@ -21,18 +21,6 @@ const CalidadInterna = () => {
     interval()
   }, [])
 
-  //useEffect donde se obtiene la informacion de el Main
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const lotes = await window.api.lotesCalidadInterna()
-        setLotesData(lotes)
-      } catch (e) {
-        alert(e)
-      }
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
   ///header
   const handleLoteChange = (event) => {
     console.log(event.target.value)
@@ -122,11 +110,10 @@ const CalidadInterna = () => {
       promedios: promedios
     }))
 
-    console.log('Datos guardados:', datos)
-    console.log('Promedios calculados:', promedios)
-    window.api.guardarCalidadInterna(promedios).then((response) => console.log(response))
-    console.log(lotesData)
-    window.api.lotesCalidadInterna().then((response) => setLotesData(response))
+   
+    const requestLotes = { action: 'obtenerLotesCalidadInterna'}
+    window.api.calidad({ action: 'guardarCalidadInterna', data:promedios }).then((response) => console.log(response))
+    window.api.calidad(requestLotes).then((response) => setLotesData(response))
     setMensajeGuardado('Los datos se han guardado correctamente')
 
     setTimeout(() => {
@@ -148,7 +135,7 @@ const CalidadInterna = () => {
             <option value="">Lotes</option>
             {lotesData.length > 0 && lotesData.map((lote) => (
               <option key={lote.id} value={lote.id}>
-                {lote.nombre}
+                {lote.id + " " + " " + lote.nombre}
               </option>
             ))}
           </select>
@@ -157,7 +144,7 @@ const CalidadInterna = () => {
 
       <div className="container">
         <div className="section">
-          <h2 className="label">Contenido Zum</h2>
+          <h2 className="label">Contenido Zumo</h2>
           <input
             className="input"
             type="number"

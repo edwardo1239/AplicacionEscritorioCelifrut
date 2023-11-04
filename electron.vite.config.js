@@ -13,8 +13,7 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve(__dirname, 'src/main/index.js'),
-          menuMaker: resolve(__dirname, 'src/main/menuMaker.js'),
-          functions: resolve(__dirname, 'src/main/functions.js'),
+          menuMaker: resolve(__dirname, 'src/main/menuMaker.js')
         },
 
       }

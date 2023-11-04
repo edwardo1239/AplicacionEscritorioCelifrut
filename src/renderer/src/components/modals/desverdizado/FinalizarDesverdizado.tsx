@@ -3,28 +3,31 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpenSuccess }) {
-  const [openError, setOpenError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [loading, setLoading] = useState(false)
+type propsType = {
+  closeModal: () => void
+  propsModal: {nombre:string, canastillas:number, enf:string}
+  funcOpenSuccess: (data:string) => void
+}
+
+export default function FinalizarDesverdizado(props:propsType) {
+  const [openError, setOpenError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   const finalizar = async () => {
     setLoading(true)
 
-    let obj = {
-      enf: propsModal.enf
-    }
+    const request = {action:'finalizarDesverdizado', enf:props.propsModal.enf}
+    const response = await window.api.inventario(request)
    
-    const response = await window.api.finalizarDesverdizado(obj)
-    //console.log(obj)
-    console.log(response)
-    if (response == "Lote" + propsModal.enf+ "desverdizado finalizado") {
-      funcOpenSuccess("Lote " + propsModal.enf+ " desverdizado finalizado")
-      closeModal()
+   
+    if (response.status == 200) {
+      props.funcOpenSuccess("Lote desverdizado finalizado")
+      props.closeModal()
     } else {
       setErrorMessage(response)
       setOpenError(true)
-      closeModal()
+      props.closeModal()
     }
   }
 
@@ -54,7 +57,7 @@ export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpen
         <AppBar position="static">
           <Toolbar sx={{ backgroundColor: 'orange', justifyContent: 'space-between' }}>
             <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-              {propsModal.nombre}
+              {props.propsModal.nombre}
             </Typography>
           </Toolbar>
         </AppBar>
@@ -84,7 +87,7 @@ export default function FinalizarDesverdizado({ closeModal, propsModal, funcOpen
           >
             <span>Aceptar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={closeModal}>
+          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={props.closeModal}>
             Cancelar
           </Button>
         </div>

@@ -13,9 +13,9 @@ export default function ClasificacionCalidad() {
   useEffect(() => {
     const interval = async () => {
       try {
-     
-        const lotes = await window.api.obtenerLotesClasificacionCalidad()
-        setLotesData(lotes)
+        const request = { action: 'obtenerLotesClasificacionCalidad' }
+        const lotes = await window.api.calidad(request)
+        setLotesData(lotes.data)
       } catch (e) {
         alert(e)
       }
@@ -24,20 +24,6 @@ export default function ClasificacionCalidad() {
   }, [])
 
 
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-      
-        const lotes = await window.api.lotesClasificacionCalidad()
-
-       // console.log(lotes)
-        setLotesData(lotes)
-      } catch (e) {
-        alert(e)
-      }
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
 
   const handleLoteChange = (event) => {
     setTIpoFruta(event.target.value)
@@ -63,7 +49,7 @@ export default function ClasificacionCalidad() {
             </option>
             {lotesData.length > 0 && lotesData.map((lote) => (
               <option key={lote.id} value={lote.tipoFruta} data-key={lote.id}>
-                {lote.nombre}
+              {lote.id + " " + " " + lote.nombre}
               </option>
             ))}
           </select>

@@ -3,23 +3,35 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useState } from 'react'
 import CheckIcon from '@mui/icons-material/Check'
 
-export default function EnvioDescarte({ closeModalEnviar, propsModal, funcOpenSuccess, messageModal }) {
-  const [openError, setOpenError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [cliente, setCliente] = useState('')
+type propsType = {
+  closeModalEnviar: () => void
+  propsModal: propsModalType
+  funcOpenSuccess: () => void
+  messageModal: string
+}
+
+type propsModalType = {
+  [key: string] : string
+}
+
+export default function EnvioDescarte(props:propsType) {
+  const [openError, setOpenError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [cliente, setCliente] = useState<string>('')
 
   const clickEliminarFrutaDescarte = async () => {
     try {
    
-      let datos = [propsModal, cliente]
-      const response = await window.api.eliminarFrutaDescarte(datos)
+      let datos = [props.propsModal, cliente]
+      const request = {action:'eliminarFrutaDescarte', data:datos}
+      const response = await window.api.inventario(request)
      
       if (response === 200) {
-        closeModalEnviar()
+        props.closeModalEnviar()
       } else {
         
-        closeModalEnviar()
+        props.closeModalEnviar()
       }
     } catch (e) {
       console.log(e)
@@ -83,7 +95,7 @@ export default function EnvioDescarte({ closeModalEnviar, propsModal, funcOpenSu
           >
             <span>Aceptar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={closeModalEnviar}>
+          <Button variant="outlined" sx={{ width: 110, height: 38 }} onClick={props.closeModalEnviar}>
             Cancelar
           </Button>
         </div>

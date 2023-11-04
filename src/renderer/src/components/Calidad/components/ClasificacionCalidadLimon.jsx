@@ -115,8 +115,9 @@ export default function ClasificacionCalidadLimon({  loteSeleccionado }) {
       wood: promedios.wood
     };
   
-    console.log('Resultado:', resultado);
-    window.api.guardarClasificacionCalidad(resultado)
+    const requestLotes = { action: 'obtenerLotesClasificacionCalidad'}
+    window.api.calidad({ action: 'guardarClasificacionCalidad', data:resultado }).then((response) => console.log(response))
+    window.api.calidad(requestLotes).then((response) => setLotesData(response))
   
     setGuardadoExitoso(true);
     setActualizacionExitosa(true);

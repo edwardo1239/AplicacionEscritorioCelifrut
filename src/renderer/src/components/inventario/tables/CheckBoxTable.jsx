@@ -4,7 +4,6 @@ import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import ColorLensIcon from '@mui/icons-material/ColorLens'
 import {
-  Box,
   Table,
   TableBody,
   TableCell,
@@ -34,7 +33,7 @@ export default function CheckBoxTable({ filtro }) {
   //states de los modales
   const [showVaciarModal, setShowVaciarModal] = useState(false)
   const [showDirectoModal, setShowDirectoModal] = useState(false)
-  const [showDesverdizadoModal, setShowDesverdizadoModal] = useState(false);
+  const [showDesverdizadoModal, setShowDesverdizadoModal] = useState(false)
   //props para los modales y de los modales
   const [propsModal, setPropsModal] = useState({ nombre: '', canastillas: 0 })
   const [openSucces, setOpenSuccess] = useState(false)
@@ -48,8 +47,7 @@ export default function CheckBoxTable({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['nombre'].toLowerCase().indexOf(busqueda.toLowerCase()) !==
-            -1 ||
+          action.datos[lote]['nombre'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
           String(action.datos[lote]['ICA'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
@@ -67,43 +65,60 @@ export default function CheckBoxTable({ filtro }) {
     }
   }
   const [tabla, dispatch] = useReducer(reducer, {})
-//useEffect que obtiene la cadena que se desea filtrar
+  //useEffect que obtiene la cadena que se desea filtrar
   useEffect(() => {
     setBusqueda(filtro)
   }, [filtro])
 
-    //useEffect donde se obtiene la informacion de el Main
-    useEffect(() => {
-      const asyncFunction = async () => {
-      const frutaActual = await window.api.reqObtenerFrutaActual()
-        dispatch({ datos: frutaActual })
-      }
-      asyncFunction()
-    }, [])
-
-
-        //useEffect donde se obtiene la informacion de el Main
+  //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const asyncFunction = async () => {
       try {
-        const frutaActual = await window.api.obtenerFrutaActual()
-        dispatch({ datos: frutaActual })
+        const request = {action:'obtenerFrutaActual'}
+        const frutaActual = await window.api.inventario(request)
+        dispatch({ datos: frutaActual.data })
       } catch (e) {
-        alert(e)
+        alert(`Fruta actual ${e.name}: ${e.message}`)
       }
-    }, 500)
-    return () => clearInterval(interval)
+    }
+    asyncFunction()
   }, [])
-  
 
-  // funcion donde se selecciona el lote 
+  useEffect(() => {
+    const asyncFunction = async () => {
+      try {
+        const request = {action:'obtenerFrutaActual'}
+        const frutaActual = await window.api.inventario(request)
+        dispatch({ datos: frutaActual.data })
+      } catch (e) {
+        alert(`Fruta actual ${e.name}: ${e.message}`)
+      }
+    }
+    asyncFunction()
+  }, [showVaciarModal, showDirectoModal, showDesverdizadoModal])
+  //useEffect donde se obtiene la informacion de el Main
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     try {
+
+  //       const frutaActual = await window.api.leerMem()
+  //       console.log(frutaActual)
+  //       dispatch({ datos: frutaActual })
+  //     } catch (e) {
+  //       alert(e)
+  //     }
+  //   }, 500)
+  //   return () => clearInterval(interval)
+  // }, [])
+
+  // funcion donde se selecciona el lote
   //se obtiene el nombre del radio button
   //el nombre es la ENF que a su vez es la key de el objeto tabla
   const clickLote = (e) => {
     let lote = e.target.value
     setPropsModal(() => ({
       nombre: tabla[lote]['nombre'],
-      canastillas: tabla[lote]["inventario"],
+      canastillas: tabla[lote]['inventario'],
       enf: lote
     }))
     if (e.target.checked) {
@@ -137,7 +152,7 @@ export default function CheckBoxTable({ filtro }) {
     setOpenSuccess(true)
     setMessage(message)
     document.getElementById(propsModal.enf).checked = false
-    setPropsModal(({ nombre: '', canastillas: 0 }))
+    setPropsModal({ nombre: '', canastillas: 0 })
   }
 
   return (
@@ -145,6 +160,13 @@ export default function CheckBoxTable({ filtro }) {
       <Toolbar>
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable}
+        </Typography>
+        <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
+          Kilos Total
+          {tabla &&
+            ' ' +
+              Object.keys(tabla).reduce((acu, enf) => (acu += tabla[enf]['KilosActual']), 0)}{' '}
+          Kg
         </Typography>
         <div style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
           {showVaciar && (
@@ -158,12 +180,22 @@ export default function CheckBoxTable({ filtro }) {
             </Button>
           )}
           {showDirecto && (
-            <Button variant="contained" endIcon={<SwapHorizIcon />} theme={directoNacionalTheme} onClick={closeDirecto}>
+            <Button
+              variant="contained"
+              endIcon={<SwapHorizIcon />}
+              theme={directoNacionalTheme}
+              onClick={closeDirecto}
+            >
               Nacional
             </Button>
           )}
           {showDesverdizar && (
-            <Button variant="contained" endIcon={<ColorLensIcon />} theme={desverdizadoTheme} onClick={closeDesverdizado}>
+            <Button
+              variant="contained"
+              endIcon={<ColorLensIcon />}
+              theme={desverdizadoTheme}
+              onClick={closeDesverdizado}
+            >
               Desverdizado
             </Button>
           )}
@@ -199,16 +231,20 @@ export default function CheckBoxTable({ filtro }) {
                       onClick={clickLote}
                       value={item}
                       name="lote"
-                      key={item+'input'}
+                      key={item + 'input'}
                     />
                   </TableCell>
                   <TableCell key={item}>{item}</TableCell>
                   <TableCell key={item + 'nombre'}>{tabla[item]['nombre']}</TableCell>
                   <TableCell key={item + 'ica'}>{tabla[item]['ICA']}</TableCell>
                   <TableCell key={item + 'fecha'}>
-                    {format(new Date(tabla[item]['fecha']), 'dd/MM/yyyy')}
+                    {format(new Date(tabla[item]['fecha']), 'dd-MM-yyyy')}
                   </TableCell>
-                  <TableCell key={item + 'KilosActual'}>{tabla[item]['KilosActual'].toFixed(2)}</TableCell>
+                  <TableCell key={item + 'KilosActual'}>
+                    {tabla[item]['KilosActual'] !== undefined
+                      ? tabla[item]['KilosActual'].toFixed(2)
+                      : 0}
+                  </TableCell>
                   <TableCell key={item + 'inventario'}>{tabla[item]['inventario']}</TableCell>
                   <TableCell key={item + 'tipoFruta'}>{tabla[item]['tipoFruta']}</TableCell>
                   <TableCell key={item + 'observaciones'}>{tabla[item]['observaciones']}</TableCell>
@@ -228,8 +264,8 @@ export default function CheckBoxTable({ filtro }) {
         )}
       {showDirectoModal &&
         createPortal(
-          <Directo 
-          closeDirecto={closeDirecto}
+          <Directo
+            closeDirecto={closeDirecto}
             propsModal={propsModal}
             funcOpenSuccess={funcOpenSuccess}
           />,
@@ -237,8 +273,8 @@ export default function CheckBoxTable({ filtro }) {
         )}
       {showDesverdizadoModal &&
         createPortal(
-          <Desverdizado 
-          closeDesverdizado={closeDesverdizado}
+          <Desverdizado
+            closeDesverdizado={closeDesverdizado}
             propsModal={propsModal}
             funcOpenSuccess={funcOpenSuccess}
           />,

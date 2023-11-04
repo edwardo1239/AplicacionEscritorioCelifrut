@@ -2,19 +2,21 @@ import { AppBar, FormControl, InputLabel, MenuItem, Select, Toolbar } from '@mui
 import { SelectChangeEvent } from '@mui/material/Select';
 import React, { useEffect, useState } from 'react'
 import Api from '../../../../../preload/types'
-import { contenedoresObj } from '../types';
+import { ContenedoresObj } from '../types';
+import TableListaEmpaque from '../tables/TableListaEmpaque';
+
 
 
 export default function VerListasEmpaque() {
-    const [contenedores, setContenedores] = useState<contenedoresObj>();
+    const [contenedores, setContenedores] = useState<ContenedoresObj>({});
     const [contenedorSelect, setContenedorSelect] = useState<string>('')
 
     useEffect(() => {
       const obtenerDatos = async () =>{
         try{
-          const response = await window.api.obtenerContenedoresListaEmpaque();
-          setContenedores(response);
-          console.log(response)
+          const request = { action: 'obtenerListaEmpaque' }
+          const response = await window.api.contenedores(request);
+          setContenedores(response.data);
         }catch(e){
           console.log(e)
         }
@@ -41,13 +43,15 @@ export default function VerListasEmpaque() {
             >
               {contenedores &&
               Object.keys(contenedores).map((contenedor => (
-                  <MenuItem value={10}>{contenedor + "-" + contenedores[contenedor].infoContenedor.nombreCliente}</MenuItem>
+                  <MenuItem value={contenedor}>{contenedor + "-" + contenedores[contenedor].infoContenedor.nombreCliente}</MenuItem>
               )
               ))}
             </Select>
           </FormControl>
+          
         </Toolbar>
       </AppBar>
+      <TableListaEmpaque contenedor={contenedores[contenedorSelect]}/>
     </div>
   )
 }

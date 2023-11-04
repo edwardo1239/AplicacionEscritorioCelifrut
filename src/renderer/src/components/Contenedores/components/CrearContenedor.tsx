@@ -23,77 +23,74 @@ import React, { useEffect, useState } from 'react'
 import Api from '../../../../../preload/types'
 
 export default function CrearContenedor() {
-  const [numeroContenedor, setNumeroContenedor] = useState<string>('');
-  const [cliente, setCliente] = useState<string>('');
-  const [tipoFruta, setTipoFruta] = useState<string>('');
-  const [pallets, setPallets] = useState<string>('');
+  const [numeroContenedor, setNumeroContenedor] = useState<string>('')
+  const [cliente, setCliente] = useState<string>('')
+  const [tipoFruta, setTipoFruta] = useState<string>('')
+  const [pallets, setPallets] = useState<string>('')
   const [desverdizado, setDesverdizado] = useState<boolean>(false)
-  const [observaciones, setObservaciones] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [observaciones, setObservaciones] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
   const [clientesDatos, setClientesDatos] = useState<string[]>([])
 
-  //mensajes 
-  const [openError, setOpenError] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [openSuccess, setOpenSuccess] = useState<boolean>(false);
-  const [successMessage, setSuccessMessage] = useState<string>('');
+  //mensajes
+  const [openError, setOpenError] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string>('')
+  const [openSuccess, setOpenSuccess] = useState<boolean>(false)
+  const [successMessage, setSuccessMessage] = useState<string>('')
 
   useEffect(() => {
-    const obtenerDatos = async () =>{
-      try{
-        const response = await window.api.obtenerClientes();
-        const nombreClientes:string[] = Object.keys(response);
-        setClientesDatos(nombreClientes);
+    const obtenerDatos = async () => {
+      try {
+        const request = { action: 'obtenerClientes' }
+        const response = await window.api.contenedores(request)
+        const nombreClientes: string[] = Object.keys(response.data)
+        setClientesDatos(nombreClientes)
         console.log(response)
-      }catch(e){
-        console.log(e)
+      } catch (e) {
+        alert(`Crear contenedor ${e.name}: ${e.message}`)
       }
     }
-    obtenerDatos();
-  },[]);
+    obtenerDatos()
+  }, [])
 
   const handleChange = () => {
     setDesverdizado(!desverdizado)
   }
-  const guardarDatos: React.FormEventHandler<HTMLFormElement> = async (event)  => {
-    try{
-        event.preventDefault()
-        setLoading(true)
-        let datos = {
-            cliente:cliente,
-            numeroContenedor:numeroContenedor,
-            pallets:pallets,
-            tipoFruta:tipoFruta,
-            desverdizado:desverdizado,
-            observaciones:observaciones
-        }
+  const guardarDatos: React.FormEventHandler<HTMLFormElement> = async (event) => {
+    try {
+      event.preventDefault()
+      setLoading(true)
+      let datos = {
+        cliente: cliente,
+        numeroContenedor: numeroContenedor,
+        pallets: pallets,
+        tipoFruta: tipoFruta,
+        desverdizado: desverdizado,
+        observaciones: observaciones
+      }
 
-        const response = await window.api.crearContenedor(datos)
-
-        if(response == 200){
-
-            setSuccessMessage("Guardado con exito");
-            setOpenSuccess(true);
-          }
-          else{
-            //console.log(response)
-            setErrorMessage(response)
-            setOpenError(true)
-          }
-        
-          
-        reiniciarCampos()
-        setLoading(false)
-
-    } catch(e){
-        console.log(`${e.name}:{${e.message}}`)
-        setLoading(false)
-        setErrorMessage(e)
+      const request = { action: 'crearContenedor', data:datos }
+      const response = await window.api.contenedores(request)
+      if (response.status == 200) {
+        setSuccessMessage('Guardado con exito')
+        setOpenSuccess(true)
+      } else {
+        //console.log(response)
+        setErrorMessage(response)
         setOpenError(true)
+      }
+
+      reiniciarCampos()
+      setLoading(false)
+    } catch (e) {
+      console.log(`${e.name}:{${e.message}}`)
+      setLoading(false)
+      setErrorMessage(e)
+      setOpenError(true)
     }
   }
 
-  const reiniciarCampos = () =>{
+  const reiniciarCampos = () => {
     setCliente('')
     setNumeroContenedor('')
     setPallets('')
@@ -110,23 +107,24 @@ export default function CrearContenedor() {
         </Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={8} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <Autocomplete
+          <Autocomplete
             disablePortal
             inputValue={cliente}
             id="nombre-predio"
             options={clientesDatos}
             sx={{ width: '100%' }}
-            renderInput={(params) => <TextField {...params} label="Cliente" value={clientesDatos} required/>}
+            renderInput={(params) => (
+              <TextField {...params} label="Cliente" value={clientesDatos} required />
+            )}
             onInputChange={(event, newValue) => {
               setCliente(newValue)
             }}
           />
-         
         </Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <TextField
+          <TextField
             required
             type="number"
             inputProps={{ min: 0, step: 1 }}
@@ -145,7 +143,7 @@ export default function CrearContenedor() {
           />
         </Grid>
         <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <TextField
+          <TextField
             required
             label="Numero de Pallets"
             id="pallets"
@@ -160,12 +158,11 @@ export default function CrearContenedor() {
               )
             }}
           />
-         
         </Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-        <FormControl>
+          <FormControl>
             <FormLabel id="tipo_de_fruta_form">Tipo de Fruta</FormLabel>
             <RadioGroup
               row
@@ -179,22 +176,23 @@ export default function CrearContenedor() {
             </RadioGroup>
           </FormControl>
         </Grid>
-       
+
         <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'center' }}>
-            <ToggleButton
-            color='warning'
-            value='check'
+          <ToggleButton
+            color="warning"
+            value="check"
             selected={desverdizado}
             onChange={handleChange}
-            sx={{height:40}}>
-                Desverdizado
-            </ToggleButton>
+            sx={{ height: 40 }}
+          >
+            Desverdizado
+          </ToggleButton>
         </Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={2}></Grid>
         <Grid item xs={8} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
-          required
+            required
             id="observaciones"
             label="Observaciones"
             value={observaciones}
@@ -212,15 +210,15 @@ export default function CrearContenedor() {
             loadingPosition="start"
             startIcon={<SaveIcon />}
             variant="contained"
-            sx={{ width: '20%', marginBottom:'5rem' }}
+            sx={{ width: '20%', marginBottom: '5rem' }}
           >
             <span>Save</span>
           </LoadingButton>
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-        <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#7D9F3A' }}>
-          <Toolbar></Toolbar>
-        </AppBar>
+          <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#7D9F3A' }}>
+            <Toolbar></Toolbar>
+          </AppBar>
         </Grid>
       </Grid>
 

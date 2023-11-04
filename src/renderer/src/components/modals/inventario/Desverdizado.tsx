@@ -25,23 +25,20 @@ export default function Desverdizado(props: propsType) {
         setOpenError(true)
         setLoading(false)
       } else {
-        let obj = {
+        const obj = {
           canastillas: canastillas,
           enf: props.propsModal.enf,
+          action: 'desverdizado',
           cuartoDesverdizado: cuartoDesverdizado
         }
-        const response = await window.api.desverdizado(obj)
-        await window.api.reqObtenerFrutaActual()
-        //console.log(obj)
-        //console.log(response)
-        if (response === 200) {
+        const response = await window.api.inventario(obj)
+        if (response.status === 200) {
           props.funcOpenSuccess('Lote se ha puesto a desverdizar')
           props.closeDesverdizado()
         } else {
           setErrorMessage('API error:' + response)
           setOpenError(true)
         }
-        
       }
     } catch (error) {
       setErrorMessage('Ha ocurrido un error inesperado')
@@ -123,7 +120,11 @@ export default function Desverdizado(props: propsType) {
           >
             <span>Enviar</span>
           </LoadingButton>
-          <Button variant="outlined" sx={{ width: 100, height: 38 }} onClick={props.closeDesverdizado}>
+          <Button
+            variant="outlined"
+            sx={{ width: 100, height: 38 }}
+            onClick={props.closeDesverdizado}
+          >
             Cancelar
           </Button>
         </div>

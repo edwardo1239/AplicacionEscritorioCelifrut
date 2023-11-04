@@ -132,7 +132,7 @@ h2 {
 
 .floating-percentage {
   position: fixed;
-  top: 125px;
+  top: 100px;
   left: 80%;
   width: 10rem;
   height: 5rem;

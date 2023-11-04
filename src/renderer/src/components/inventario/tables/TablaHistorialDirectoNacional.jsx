@@ -63,21 +63,30 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
    //useEffect donde se obtiene la informacion de el servidor
    useEffect(() => {
     const makeReq = async () => {
-      const frutaActual = await window.api.reqObtenerHistorialDirectoNacional()
-      //console.log(frutaActual)
-      dispatch({ datos: frutaActual })
+      try {
+        const request = { action: 'obtenerHistorialDirectoNacional' }
+        const descarte = await window.api.inventario(request)
+        dispatch({ datos: descarte.data })
+      } catch (e) {
+        alert(`Historial vaciado ${e.name}:${e.message}`)
+      }
     }
     makeReq()
   }, [])
 
-  //useEffect donde se obtiene la informacion de el Main
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const frutaActual = await window.api.obtenerHistorialDirectoNacional()
-      dispatch({ datos: frutaActual })
-    }, 500)
-    return () => clearInterval(interval)
-  }, [])
+   //useEffect donde se obtiene la informacion de el servidor
+   useEffect(() => {
+    const makeReq = async () => {
+      try {
+        const request = { action: 'obtenerHistorialDirectoNacional' }
+        const descarte = await window.api.inventario(request)
+        dispatch({ datos: descarte.data })
+      } catch (e) {
+        alert(`Historial vaciado ${e.name}:${e.message}`)
+      }
+    }
+    makeReq()
+  }, [modalModificar])
 
   const clickLote = (e) => {
     let lote = e.target.value
@@ -115,6 +124,12 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
       <Toolbar>
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
           {titleTable}
+        </Typography>
+        <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
+          Kilos Total
+          {tabla &&
+            " " + Object.keys(tabla).reduce((acu, enf) => (acu += tabla[enf]['kilos']), 0)}{' '}
+          Kg
         </Typography>
 
         {showBtnModificar && (

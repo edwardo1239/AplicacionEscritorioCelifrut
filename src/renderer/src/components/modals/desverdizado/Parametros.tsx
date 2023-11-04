@@ -3,37 +3,52 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import SaveIcon from '@mui/icons-material/Save';
 import React, { useState } from 'react'
 
+type propsType = {
+  closeModal: () => void
+  propsModal: {nombre:string, canastillas:number, enf:string}
+  funcOpenSuccess: (data:string) => void
+}
+type objType = {
+  temperatura:number
+  etileno:number
+  carbono:number
+  humedad:number
+  enf:string
+  action:string
+}
 
-export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) {
+export default function Parametros(props:propsType) {
    
-    const [openError, setOpenError] = useState(false)
-    const [errorMessage, setErrorMessage] = useState('')
-    const [loading, setLoading] = useState(false)
-    const [temperatura, setTemperatura] = useState(0)
-    const [etileno, setEtileno] = useState(0)
-    const [carbono, setCarbono] = useState(0)
-    const [humedad, setHumedad] = useState(0)
+    const [openError, setOpenError] = useState<boolean>(false)
+    const [errorMessage, setErrorMessage] = useState<string>('')
+    const [loading, setLoading] = useState<boolean>(false)
+    const [temperatura, setTemperatura] = useState<number>(0)
+    const [etileno, setEtileno] = useState<number>(0)
+    const [carbono, setCarbono] = useState<number>(0)
+    const [humedad, setHumedad] = useState<number>(0)
   
     const guardar = async () => {
      try{
         setLoading(true)
-        let obj = {}
-        obj.temperatura = temperatura
-        obj.etileno = etileno
-        obj.carbono = carbono
-        obj.humedad = humedad
-        obj.enf = propsModal.enf
+        let request:objType = {
+          temperatura: temperatura,
+          etileno: etileno,
+          carbono: carbono,
+          humedad: humedad,
+          enf: props.propsModal.enf,
+          action:'setParametrosDesverdizado'
+        }
 
-        const response = await window.api.setParametrosDesverdizado(obj);
+        const response = await window.api.inventario(request);
         
-        if(response === 200){
+        if(response.status === 200){
             setLoading(false)
-            closeModal()
-            funcOpenSuccess('Parametros guardados con exito')
+            props.closeModal()
+            props.funcOpenSuccess('Parametros guardados con exito')
         }
         else{
             setLoading(false)
-            closeModal()
+            props.closeModal()
             setErrorMessage(response)
         }
      } catch(e){
@@ -69,7 +84,7 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
           <AppBar position="static">
             <Toolbar sx={{ backgroundColor: '#7D9F3A', justifyContent: 'space-between' }}>
               <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-                {propsModal.nombre}
+                {props.propsModal.nombre}
               </Typography>
             </Toolbar>
           </AppBar>
@@ -84,7 +99,7 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
               variant="outlined"
               type="number"
               inputProps={{ min: 0, step: 0.1 }}
-              onChange={(e) => setTemperatura(e.target.value)}
+              onChange={(e) => setTemperatura(Number(e.target.value))}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
@@ -94,7 +109,7 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
               variant="outlined"
               type="number"
               inputProps={{ min: 0, step: 0.1 }}
-              onChange={(e) => setEtileno(e.target.value)}
+              onChange={(e) => setEtileno(Number(e.target.value))}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
@@ -104,7 +119,7 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
               variant="outlined"
               type="number"
               inputProps={{ min: 0, step: 0.1 }}
-              onChange={(e) => setCarbono(e.target.value)}
+              onChange={(e) => setCarbono(Number(e.target.value))}
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
@@ -114,7 +129,7 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
               variant="outlined"
               type="number"
               inputProps={{ min: 0, step: 0.01 }}
-              onChange={(e) => setHumedad(e.target.value)}
+              onChange={(e) => setHumedad(Number(e.target.value))}
             />
           </div>
           <div
@@ -137,7 +152,7 @@ export default function Parametros({ closeModal, propsModal, funcOpenSuccess }) 
             >
               <span>Guardar</span>
             </LoadingButton>
-            <Button variant="outlined" sx={{ width: 120, height: 38 }} onClick={closeModal}>
+            <Button variant="outlined" sx={{ width: 120, height: 38 }} onClick={props.closeModal}>
               Cancelar
             </Button>
           </div>

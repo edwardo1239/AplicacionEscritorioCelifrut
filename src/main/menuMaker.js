@@ -1,5 +1,4 @@
 import { Menu, app, Notification } from 'electron'
-import { actualizarClientes, actualizarProveedores, obtenerENF } from './functions'
 const isMac = process.platform === 'darwin'
 const template = [
   // { role: 'appMenu' }
