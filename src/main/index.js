@@ -56,6 +56,12 @@ function createWindow() {
     if (data.status === 200) mainWindow.webContents.send('descartes', data.data)
     else console.log('error')
   })
+  socket.on('listaEmpaqueInfo', (data) => {
+    console.log("no entiendo ")
+    console.log(data)
+    if (data.status === 200) mainWindow.webContents.send('listaEmpaqueInfo', data)
+    else console.log('error')
+  })
 }
 
 // This method will be called when Electron has finished
@@ -128,7 +134,7 @@ autoUpdater.on('update-downloaded', (info) => {
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-const socket = io('ws://192.168.0.162:3000/', {
+const socket = io('ws://192.168.0.172:3000/', {
   rejectUnauthorized: false
 })
 //la funcion que loguea la cuenta
@@ -247,21 +253,3 @@ socket.on('serverResponse', async (data) => {
   }
 })
 
-//guarda la clasificacion calidad
-ipcMain.handle('guardarClasificacionCalidad', (event, datos) => {
-  try {
-    socket.emit('guardarClasificacionCalidad', datos)
-    return 200
-  } catch (e) {
-    console.log(e.message)
-  }
-})
-//funcion que obtiene el rendimiento del lote o lotes que se requiera
-ipcMain.handle('obtenerRendimientoLote', async (event, datos) => {
-  try {
-    const request = { action: 'obtenerRendimientoLote', data: datos }
-    socket.emit('celifrutListen', request)
-  } catch (e) {
-    return `${e.name}:${e.message}`
-  }
-})

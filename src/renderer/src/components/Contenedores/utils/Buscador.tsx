@@ -37,7 +37,7 @@ export default function Buscador(props: propsType) {
           value={value1}
           label="Filtro"
         >
-          <MenuItem value={'pallet'}>Pallets</MenuItem>
+          <MenuItem value={'pallet'}>{props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Pallets' : 'Estibas'}</MenuItem>
           <MenuItem value={'predio'}>Predios</MenuItem>
           <MenuItem value={''}>None</MenuItem>
 

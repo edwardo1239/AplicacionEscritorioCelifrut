@@ -85,6 +85,8 @@ export default function TablaDescarte({ filtro }) {
   })
   }, [])
 
+
+
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const asyncFunction = async () => {

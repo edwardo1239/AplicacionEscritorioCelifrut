@@ -7,14 +7,6 @@ const api = {
     const response = await ipcRenderer.invoke('logIn', datos)
     return response
   },
-  guardarClasificacionCalidad: async (datos) => {
-    const response = await ipcRenderer.invoke('guardarClasificacionCalidad', datos)
-    return response
-  },
-  obtenerRendimientoLote: async (datos) => {
-    const response = await ipcRenderer.invoke('obtenerRendimientoLote', datos)
-    return response
-  },
   ingresoFruta: async (datos) => {
     const response = await ipcRenderer.invoke('ingresoFruta', datos)
     return response
@@ -32,9 +24,12 @@ const api = {
     return response
   },
   descartes: (channel, callback) => {
-    ipcRenderer.on(channel, (event, ...args) => callback(...args));
+    ipcRenderer.on(channel, (event, ...args) => callback(...args))
+  },
+  listaEmpaqueInfo: (channel, callback) => {
+    ipcRenderer.on(channel, (event, ...args) => callback(...args))
   }
-};
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

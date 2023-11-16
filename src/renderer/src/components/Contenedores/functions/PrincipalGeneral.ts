@@ -3,6 +3,7 @@ import { ContenedoresObj } from "../types";
 type calidadType = {
     1.5: number
     1: number
+    2: number
   }
   type calibreType = {
       [key:string]: number
@@ -14,7 +15,7 @@ export default function (contenedor:ContenedoresObj|''): PrincipalGeneralType|0 
     try{
         if(contenedor === '') return 0
         let total = 0;
-        let calidad = { 1: 0, 1.5: 0 };
+        let calidad = { 1: 0, 1.5: 0, 2:0 };
         let calibre = {};
         let tipoCaja = {}
     
@@ -47,6 +48,6 @@ export default function (contenedor:ContenedoresObj|''): PrincipalGeneralType|0 
     
        return [total, calidad, calibre, tipoCaja]
     } catch(e){
-        return [0, {1.5:0,1:0}, {}, {}]
+        return [0, {1.5:0,1:0,2:0}, {}, {}]
     }
 }

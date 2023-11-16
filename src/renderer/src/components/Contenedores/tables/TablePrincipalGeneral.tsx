@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { ContenedoresObj } from '../types'
 import PrincipalGeneral from '../functions/PrincipalGeneral'
-import * as echarts from 'echarts'
 
 type propsType = {
   contenedor: ContenedoresObj
@@ -9,6 +8,7 @@ type propsType = {
 type calidadType = {
   1.5: number
   1: number
+  2: number
 }
 type calibreType = {
   [key: string]: number
@@ -18,7 +18,7 @@ type PrincipalGeneralType = [number, calidadType, calibreType, calibreType]
 
 export default function TablePrincipalGeneral(props: propsType) {
   const [total, setTotal] = useState<number>(0)
-  const [calidad, setCalidad] = useState<calidadType>({ 1: 0, 1.5: 0 })
+  const [calidad, setCalidad] = useState<calidadType>({ 1: 0, 1.5: 0, 2:0 })
   const [calibre, setCalibre] = useState<calibreType>({})
   const [tipoCaja, setTipoCaja] = useState<calibreType>({})
 
@@ -63,7 +63,7 @@ export default function TablePrincipalGeneral(props: propsType) {
           marginBottom: '10px'
         }}
       >
-        <span style={{ fontWeight: 'bold' }}>Cajas :</span>
+        <span style={{ fontWeight: 'bold' }}>{props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}</span>
         {total}
       </div>
       <hr />
@@ -89,10 +89,13 @@ export default function TablePrincipalGeneral(props: propsType) {
           {' '}
           <div style={{ display: 'flex', flexDirection: 'row', gap: 50 }}>
             <div>
-              <span style={{ fontWeight: 'bold' }}>Calidad 1:</span> {calidad[1]} Cajas
+              <span style={{ fontWeight: 'bold' }}>Calidad 1:</span> {calidad[1]} {props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}
             </div>
             <div>
-              <span style={{ fontWeight: 'bold' }}>Calidad 1.5:</span> {calidad['1.5']} Cajas
+              <span style={{ fontWeight: 'bold' }}>Calidad 1.5:</span> {calidad['1.5']} {props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}
+            </div>
+            <div>
+              <span style={{ fontWeight: 'bold' }}>Calidad 2:</span> {calidad['2']} {props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}
             </div>
           </div>
         
@@ -115,11 +118,11 @@ export default function TablePrincipalGeneral(props: propsType) {
             }}
           >
             <div style={{ fontWeight: 'bold' }}>Calibre {item}:</div>
-            <div>{calibre[item]} cajas</div>
+            <div>{calibre[item]} {props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}</div>
           </div>
         ))}
       <hr />
-      <h3 style={{ color: '#007BFF' }}>Tipo Caja</h3>
+      <h3 style={{ color: '#007BFF' }}>Tipo {props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}</h3>
       {tipoCaja !== null &&
         Object.keys(tipoCaja).map((item) => (
           <div
@@ -133,8 +136,8 @@ export default function TablePrincipalGeneral(props: propsType) {
               marginBottom: '10px'
             }}
           >
-            <div style={{ fontWeight: 'bold' }}>Tipo de Caja {item}</div>
-            <div>Cajas:{tipoCaja[item]}</div>
+            <div style={{ fontWeight: 'bold' }}>Tipo de {props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas ' : 'Sacos '} {item}</div>
+            <div>{props.contenedor && props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}{tipoCaja[item]}</div>
           </div>
         ))}
     </div>

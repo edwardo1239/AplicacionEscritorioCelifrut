@@ -23,7 +23,7 @@ const [tabla, setTabla] = useState({})
             <ul key={pallet + 'div'} style={{listStyleType: 'none',marginLeft:15, marginRight:15, marginBottom: '20px', border: '1px solid #ccc', borderRadius: '5px', boxShadow: '0 0 10px rgba(0,0,0,0.1)', padding: '10px'}}>
                 <li>
                     <div style={{fontWeight: 'bold', fontSize: '20px', marginBottom: '10px', color: '#333'}}>
-                        Pallet: {pallet}
+                    {props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Pallet: ' : 'Estiba: '}{pallet}
                     </div>
                     <ul style={{marginLeft: '5px'}}>
                         {Object.keys(tabla[pallet]).map(enf => (
@@ -34,8 +34,8 @@ const [tabla, setTabla] = useState({})
                                 </div>
                                 {Object.keys(tabla[pallet][enf]).map(item => (
                                     <div style={{display:'flex', flexDirection:'row', gap:'15px', alignItems: 'center'}}>
-                                        <p>Cajas: {tabla[pallet][enf][item][1]}</p>
-                                        <p>Tipo Caja: {tabla[pallet][enf][item][2]}</p>
+                                        <p>{props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '}{tabla[pallet][enf][item][1]}</p>
+                                        <p>Tipo {props.contenedor.infoContenedor?.tipoEmpaque === 'Caja' ? 'Cajas: ' : 'Sacos: '} {tabla[pallet][enf][item][2]}</p>
                                         <p>Calibre: {tabla[pallet][enf][item][3]}</p>
                                         <p>Calidad: {tabla[pallet][enf][item][4]}</p>
                                         <p>Fecha: {format(new Date(tabla[pallet][enf][item][5]), 'dd-MM-yyyy')}</p>

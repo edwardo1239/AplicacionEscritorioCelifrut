@@ -28,13 +28,17 @@ export default function TablePrediosListaEmpaque(props: propsType) {
   useEffect(() => {
    const funcionAuxiliar = async () =>{
     const response: outObjtype = ObtenerInfoPrediosListaEmpaque(props.contenedor, props.filtro)
-    const predios = ObtenerPrediosContenedor(props.contenedor)
-    await window.api.obtenerRendimientoLote(predios)
-    const rendimientoReq = await window.api.leerMem()
-    setRendimiento(rendimientoReq)
+    //const predios = ObtenerPrediosContenedor(props.contenedor)
+    const request = {action:'obtenerRendimiento'}
+     const rendimientoReq =  await window.api.ingresoFruta(request)
+     console.log(rendimientoReq)
+    setRendimiento(rendimientoReq.data)
     setTabla(response)
    }
    funcionAuxiliar()
+   window.api.listaEmpaqueInfo('listaEmpaqueInfo', (response:any) =>{
+    setRendimiento(response.rendimiento)
+    })
   }, [props.contenedor])
 
   return (
@@ -45,7 +49,10 @@ export default function TablePrediosListaEmpaque(props: propsType) {
             <div style={{display:'flex', flexDirection:'row', gap:'15px', alignItems: 'center', marginLeft:10}}>
             <p style={{fontWeight: 'bold', color:'#007BFF'}}>{enf}</p>
             <p style={{fontWeight: 'bold', color:'#007BFF'}}>{tabla[enf][Object.keys(tabla[enf])[0]][0][0]}</p>
-            <p style={{fontWeight: 'bold', color:'#007BFF'}}>{rendimiento[enf].toFixed(2) + '%'}</p>
+            {rendimiento &&
+               <p style={{fontWeight: 'bold', color:'#007BFF'}}>{rendimiento[enf].toFixed(2) + '%'}</p> 
+            }
+         
             </div>
             <ul>
               {Object.keys(tabla[enf]).map((pallet) => (

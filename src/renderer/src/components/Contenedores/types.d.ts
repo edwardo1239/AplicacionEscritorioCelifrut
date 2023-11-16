@@ -27,4 +27,11 @@ export interface ContenedoresObj {
   [key: number]: {
     [key: number]: pallet
   }
+  infoContenedor?:infoContenedorType
+}
+
+interface infoContenedorType{
+  tipoFruta:string
+  tipoEmpaque:string
+  nombreCliente:string
 }

@@ -22,6 +22,9 @@ export default function VerListasEmpaque() {
         }
       }
       obtenerDatos();
+
+      window.api.listaEmpaqueInfo('listaEmpaqueInfo', (response:any) =>{
+        setContenedores(response.listaEmpaque)} )
     },[]);
 
     const handleChange = (event: SelectChangeEvent) => {

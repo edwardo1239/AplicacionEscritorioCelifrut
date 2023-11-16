@@ -25,6 +25,7 @@ import BotonesCalidad from './Calidad/BotonesCalidad'
 import CalidadInterna from './Calidad/components/CalidadInterna'
 import VerListasEmpaque from './Contenedores/components/VerListasEmpaque'
 import ClasificacionCalidad from './Calidad/components/ClasificacionCalidad'
+import Formularios from './Calidad/Formatos/components/Formularios'
 
 
 const drawerWidth = 240
@@ -94,6 +95,7 @@ export default function Nav() {
         {state === 'Listas de Empaque' && <VerListasEmpaque />}
         {state === 'Calidad interna' && <CalidadInterna />}
         {state === 'Clasificacion calidad' && <ClasificacionCalidad />}
+        {state === 'Formatos' && <Formularios />}
       </Box>
     </Box>
   )

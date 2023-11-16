@@ -26,6 +26,7 @@ export default function CrearContenedor() {
   const [numeroContenedor, setNumeroContenedor] = useState<string>('')
   const [cliente, setCliente] = useState<string>('')
   const [tipoFruta, setTipoFruta] = useState<string>('')
+  const [tipoEmpaque, setTipoEmpaque] = useState<string>('')
   const [pallets, setPallets] = useState<string>('')
   const [desverdizado, setDesverdizado] = useState<boolean>(false)
   const [observaciones, setObservaciones] = useState<string>('')
@@ -66,7 +67,8 @@ export default function CrearContenedor() {
         pallets: pallets,
         tipoFruta: tipoFruta,
         desverdizado: desverdizado,
-        observaciones: observaciones
+        observaciones: observaciones,
+        tipoEmpaque: tipoEmpaque
       }
 
       const request = { action: 'crearContenedor', data:datos }
@@ -173,11 +175,31 @@ export default function CrearContenedor() {
             >
               <FormControlLabel value="Naranja" control={<Radio />} label="Naranja" />
               <FormControlLabel value="Limon" control={<Radio />} label="Limon" />
+              <FormControlLabel value="Mixto" control={<Radio />} label="Mixto" />
             </RadioGroup>
           </FormControl>
         </Grid>
 
         <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'center' }}>
+          <FormControl>
+            <FormLabel id="tipo_de_empaque_form">Tipo empaque</FormLabel>
+            <RadioGroup
+              row
+              aria-labelledby="demo-row-radio-buttons-group-label"
+              name="row-radio-buttons-group"
+              value={tipoEmpaque}
+              onChange={(e) => setTipoEmpaque(e.target.value)}
+            >
+              <FormControlLabel value="Caja" control={<Radio />} label="Caja" />
+              <FormControlLabel value="Saco" control={<Radio />} label="Saco" />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+
+
+        
+
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <ToggleButton
             color="warning"
             value="check"
@@ -189,7 +211,7 @@ export default function CrearContenedor() {
           </ToggleButton>
         </Grid>
         <Grid item xs={2}></Grid>
-        <Grid item xs={2}></Grid>
+
         <Grid item xs={8} sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
             required

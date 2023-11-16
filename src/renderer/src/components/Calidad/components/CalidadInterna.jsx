@@ -133,7 +133,7 @@ const CalidadInterna = () => {
             onChange={handleLoteChange}
           >
             <option value="">Lotes</option>
-            {lotesData.length > 0 && lotesData.map((lote) => (
+            {typeof(lotesData) === 'object' && lotesData.length > 0 && lotesData.map((lote) => (
               <option key={lote.id} value={lote.id}>
                 {lote.id + " " + " " + lote.nombre}
               </option>
