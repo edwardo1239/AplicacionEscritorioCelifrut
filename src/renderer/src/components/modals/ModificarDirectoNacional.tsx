@@ -84,7 +84,7 @@ export default function ModificarDirectoNacional(props:propsType) {
           </div>
      
           <div style={{ display: 'flex', flexDirection:'column', justifyContent: 'center', marginTop: '2rem', marginLeft:'1rem', marginRight:'1rem' }}>
-            <InputLabel htmlFor="component-helper"> Ingrese las canastilals que desea devolver a la fruta no procesada</InputLabel>
+            <InputLabel htmlFor="component-helper"> Ingrese las canastillas que desea devolver a la fruta no procesada</InputLabel>
             <TextField
               id="outlined-basic"
               label="Canastillas"

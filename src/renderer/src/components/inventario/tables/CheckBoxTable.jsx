@@ -1,8 +1,7 @@
+/// <reference types="vite-plugin-svgr/client" />
+
 import { CheckBox } from '@mui/icons-material'
 import { createTheme } from '@mui/material/styles'
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
-import ColorLensIcon from '@mui/icons-material/ColorLens'
 import {
   Table,
   TableBody,
@@ -10,9 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Toolbar,
-  Typography,
-  Button,
   Snackbar,
   Alert
 } from '@mui/material'
@@ -22,10 +18,13 @@ import { createPortal } from 'react-dom'
 import Vaciado from '../../modals/inventario/Vaciado'
 import Directo from '../../modals/inventario/Directo'
 import Desverdizado from '../../modals/inventario/Desverdizado'
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
+
 
 export default function CheckBoxTable({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
   const [titleTable, setTitleTable] = useState('Lotes')
+  const [datosOriginales, setDatosOriginales] = useState({})
   //states de los botones
   const [showVaciar, setShowVaciar] = useState(false)
   const [showDirecto, setShowDirecto] = useState(false)
@@ -51,7 +50,8 @@ export default function CheckBoxTable({ filtro }) {
           String(action.datos[lote]['ICA'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
-          action.datos[lote]['fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+            format(new Date(action.datos[lote]['fecha']), 'dd-MM-yyyy').toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          lote.toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
           action.datos[lote]['tipoFruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
       )
 
@@ -67,15 +67,24 @@ export default function CheckBoxTable({ filtro }) {
   const [tabla, dispatch] = useReducer(reducer, {})
   //useEffect que obtiene la cadena que se desea filtrar
   useEffect(() => {
+   
     setBusqueda(filtro)
+    dispatch({ datos: datosOriginales})
   }, [filtro])
+
+  useEffect(() => {
+    // Aquí puedes realizar acciones que dependan del nuevo valor de busqueda
+
+  }, [busqueda]); // Escucha los cambios en busqueda
+  
 
   //useEffect donde se obtiene la informacion de el Main
   useEffect(() => {
     const asyncFunction = async () => {
       try {
-        const request = {action:'obtenerFrutaActual'}
+        const request = { action: 'obtenerFrutaActual' }
         const frutaActual = await window.api.inventario(request)
+        setDatosOriginales(frutaActual.data)
         dispatch({ datos: frutaActual.data })
       } catch (e) {
         alert(`Fruta actual ${e.name}: ${e.message}`)
@@ -87,7 +96,7 @@ export default function CheckBoxTable({ filtro }) {
   useEffect(() => {
     const asyncFunction = async () => {
       try {
-        const request = {action:'obtenerFrutaActual'}
+        const request = { action: 'obtenerFrutaActual' }
         const frutaActual = await window.api.inventario(request)
         dispatch({ datos: frutaActual.data })
       } catch (e) {
@@ -157,50 +166,87 @@ export default function CheckBoxTable({ filtro }) {
 
   return (
     <div>
-      <Toolbar>
-        <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
-          {titleTable}
-        </Typography>
-        <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
+      <div className="grid grid-cols-5 gap-4 w-full justify-center items-center m-5">
+        <h4 className="flex justify-center p-2">{titleTable}</h4>
+        <h4 className="p-2">
           Kilos Total
           {tabla &&
             ' ' +
               Object.keys(tabla).reduce((acu, enf) => (acu += tabla[enf]['KilosActual']), 0)}{' '}
           Kg
-        </Typography>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-          {showVaciar && (
-            <Button
-              variant="contained"
-              endIcon={<MoveToInboxIcon />}
-              color="success"
-              onClick={closeVaciado}
+        </h4>
+        {/*boton desverdizado */}
+        <button
+          onClick={closeDesverdizado}
+          className={
+            showDesverdizar
+              ? 'group relative inline-flex w-10/12 h-10 items-center overflow-hidden rounded bg-amber-500 px-8 py-3 text-white focus:outline-none active:bg-amber-700 active:border-amber-800'
+              : 'invisible'
+          }
+        >
+          <span className="absolute -end-full transition-all group-hover:end-4">
+            <svg
+              className="h-5 w-5 rtl:rotate-180"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              Vaciar
-            </Button>
-          )}
-          {showDirecto && (
-            <Button
-              variant="contained"
-              endIcon={<SwapHorizIcon />}
-              theme={directoNacionalTheme}
-              onClick={closeDirecto}
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </span>
+
+          <span class="text-sm font-medium transition-all group-hover:me-4">Desverdizar</span>
+        </button>
+          {/* boton vaciar lote  */}
+        <button
+          onClick={closeVaciado}
+          className={
+            showVaciar
+              ? 'group relative inline-flex w-10/12 h-10 items-center overflow-hidden rounded bg-Celifrut-green px-8 py-3 text-white focus:outline-none active:bg-Celifrut-green-dark active:border-Celifrut-green-dark'
+              : 'invisible'
+          }
+        >
+          <span className="absolute -end-full transition-all group-hover:end-4">
+            <svg
+              className="h-5 w-5 rtl:rotate-180"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              Nacional
-            </Button>
-          )}
-          {showDesverdizar && (
-            <Button
-              variant="contained"
-              endIcon={<ColorLensIcon />}
-              theme={desverdizadoTheme}
-              onClick={closeDesverdizado}
-            >
-              Desverdizado
-            </Button>
-          )}
-        </div>
-      </Toolbar>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
+            </svg>
+          </span>
+
+          <span class="text-sm font-medium transition-all group-hover:me-4">Vaciar</span>
+        </button>
+          {/* boton directo nacional */}
+        <button
+          onClick={closeDirecto}
+          className={
+            showDirecto
+              ? 'group relative inline-flex w-10/12 h-10 items-center overflow-hidden rounded bg-red-700 px-8 py-3 text-white focus:outline-none active:bg-red-900 active:border-red-700'
+              : 'invisible'
+          }
+        >
+          <span className="absolute  -end-full transition-all group-hover:end-4">
+          <SwapHorizIcon />
+          </span>
+
+          <span class="text-sm font-medium transition-all group-hover:me-4">Directo Nacional</span> 
+        </button>
+      </div>
       <TableContainer>
         <Table>
           <TableHead>

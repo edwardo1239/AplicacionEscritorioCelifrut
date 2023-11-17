@@ -71,7 +71,7 @@ export default function CrearContenedor() {
         tipoEmpaque: tipoEmpaque
       }
 
-      const request = { action: 'crearContenedor', data:datos }
+      const request = { action: 'crearContenedor', data: datos }
       const response = await window.api.contenedores(request)
       if (response.status == 200) {
         setSuccessMessage('Guardado con exito')
@@ -196,9 +196,6 @@ export default function CrearContenedor() {
           </FormControl>
         </Grid>
 
-
-        
-
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <ToggleButton
             color="warning"
@@ -225,17 +222,10 @@ export default function CrearContenedor() {
           />
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-          <LoadingButton
-            color="primary"
-            loading={loading}
-            type="submit"
-            loadingPosition="start"
-            startIcon={<SaveIcon />}
-            variant="contained"
-            sx={{ width: '20%', marginBottom: '5rem' }}
-          >
-            <span>Save</span>
-          </LoadingButton>
+          <button type='submit' className="flex mb-8 items-center px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50">
+            <SaveIcon className="w-5 h-5 mr-2" />
+            Guardar
+          </button>
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
           <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#7D9F3A' }}>

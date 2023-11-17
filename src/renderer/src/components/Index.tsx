@@ -107,9 +107,9 @@ export default function Index(props: indexType) {
                 paddingTop: 100
               }}
             >
-              <Typography variant="h2" component="h2">
+              <h2 className='4xl'>
                 Bienvenido
-              </Typography>
+              </h2>
             </div>
           </>
         ) : (

@@ -19,6 +19,9 @@ import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded'
 import SaveIcon from '@mui/icons-material/Save'
 import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useEffect, useState } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSave, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import '../../index.css'
 
 export default function Recepcion() {
   const fecha = new Date()
@@ -40,7 +43,7 @@ export default function Recepcion() {
 
   useEffect(() => {
     const obtenerPredios = async () => {
-      const request = {action:'obtenerProveedores'}
+      const request = { action: 'obtenerProveedores' }
       const response = await window.api.ingresoFruta(request)
       const predios = response.data
       console.log(predios)
@@ -81,10 +84,10 @@ export default function Recepcion() {
         setError('Seleccione el tipo de fruta del lote')
         return
       }
-      const request = {action:'guardarLote', data:datos}
+      const request = { action: 'guardarLote', data: datos }
       const response = await window.api.ingresoFruta(request)
       console.log(response)
- 
+
       if (response.status === 200) {
         setSaveRender(!saveRender)
         setSuccessMessage('Guardado con exito')
@@ -231,17 +234,15 @@ export default function Recepcion() {
           />
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-          <LoadingButton
-            color="primary"
-            loading={loading}
-            type="submit"
-            loadingPosition="start"
-            startIcon={<SaveIcon />}
-            variant="contained"
-            sx={{ width: '20%', marginBottom: '5rem' }}
-          >
-            <span>Save</span>
-          </LoadingButton>
+          <button type="submit"  className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600" >
+            {loading ? <div className='gap-1'>
+            <span  className="animate-spin inline-block w-4 h-4 border-[3px] border-current border-t-transparent text-white rounded-full" role="status" aria-label="loading"></span>
+              Loading
+            </div> : <>
+              <FontAwesomeIcon icon={faSave} className="mr-2" />
+              Guardar
+            </>}
+          </button>
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
           <AppBar position="fixed" sx={{ top: 'auto', bottom: 0, backgroundColor: '#7D9F3A' }}>

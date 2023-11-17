@@ -1,4 +1,4 @@
-import { CheckBox, TableBar } from '@mui/icons-material'
+import { CheckBox } from '@mui/icons-material'
 import {
   Box,
   Table,
@@ -9,7 +9,6 @@ import {
   Typography,
   TableCell,
   TableBody,
-  Button,
   Snackbar,
   Alert
 } from '@mui/material'
@@ -23,6 +22,7 @@ export default function TablaHistorialVaciado({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
   const [titleTable, setTitleTable] = useState('Lotes')
   const [showBtnModificar, setShowBtnModificar] = useState(false)
+  const [datosOriginales, setDatosOriginales] = useState({})
   //states de los modales
   const [modalModificar, setModalModificar] = useState(false)
   //props para los modales y de los modales
@@ -58,6 +58,7 @@ export default function TablaHistorialVaciado({ filtro }) {
 
   //useEffect que obtiene la cadena que se desea filtrar
   useEffect(() => {
+    dispatch({ datos: datosOriginales})
     setBusqueda(filtro)
   }, [filtro])
 
@@ -67,6 +68,7 @@ export default function TablaHistorialVaciado({ filtro }) {
       try {
         const request = { action: 'obtenerHistorialProceso' }
         const descarte = await window.api.inventario(request)
+        setDatosOriginales(descarte.data)
         dispatch({ datos: descarte.data })
       } catch (e) {
         alert(`Historial vaciado ${e.name}:${e.message}`)
@@ -133,9 +135,17 @@ export default function TablaHistorialVaciado({ filtro }) {
         </Typography>
 
         {showBtnModificar && (
-          <Button variant="contained" endIcon={<RestoreIcon />} onClick={closeModal}>
-            Modificar
-          </Button>
+          <button
+            onClick={closeModal}
+            class="group relative inline-flex items-center overflow-hidden w-[20rem] mr-10 rounded bg-indigo-600 px-8 py-3 text-white focus:outline-none focus:ring active:bg-indigo-500"
+            href="/download"
+          >
+            <span class="absolute -end-full transition-all group-hover:end-4">
+              <RestoreIcon />
+            </span>
+
+            <span class="text-sm font-medium transition-all group-hover:me-4">Modificar</span>
+          </button>
         )}
       </Toolbar>
       <TableContainer>

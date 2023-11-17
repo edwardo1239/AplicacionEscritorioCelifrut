@@ -24,6 +24,7 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
   const [busqueda, setBusqueda] = useState('')
   const [titleTable, setTitleTable] = useState('Lotes')
   const [showBtnModificar, setShowBtnModificar] = useState(false)
+  const [datosOriginales, setDatosOriginales] = useState({})
   //states de los modales
   const [modalModificar, setModalModificar] = useState(false)
   //props para los modales y de los modales
@@ -39,11 +40,11 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
       let obj = {}
       const tablaFiltrada = Object.keys(action.datos).filter(
         (lote) =>
-          action.datos[lote]['ENF'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
-          String(action.datos[lote]['nombrePredio'])
+          action.datos[lote]['enf'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+          String(action.datos[lote]['nombre'])
             .toLowerCase()
             .indexOf(String(busqueda).toLowerCase()) !== -1 ||
-          action.datos[lote]['fecha'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
+            format(new Date(action.datos[lote]['fecha']), 'dd/MM/yyyy').toLowerCase().indexOf(busqueda.toLowerCase()) !== -1 ||
           action.datos[lote]['tipoFruta'].toLowerCase().indexOf(busqueda.toLowerCase()) !== -1
       )
       tablaFiltrada.map((item) => {
@@ -57,6 +58,7 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
 
   //useEffect que obtiene la cadena que se desea filtrar
   useEffect(() => {
+    dispatch({ datos: datosOriginales})
     setBusqueda(filtro)
   }, [filtro])
 
@@ -66,6 +68,8 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
       try {
         const request = { action: 'obtenerHistorialDirectoNacional' }
         const descarte = await window.api.inventario(request)
+        console.log(descarte.data)
+        setDatosOriginales(descarte.data)
         dispatch({ datos: descarte.data })
       } catch (e) {
         alert(`Historial vaciado ${e.name}:${e.message}`)
@@ -133,9 +137,17 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
         </Typography>
 
         {showBtnModificar && (
-          <Button variant="contained" endIcon={<RestoreIcon />} onClick={closeModal}>
-            Modificar
-          </Button>
+          <button
+            onClick={closeModal}
+            class="group relative inline-flex items-center overflow-hidden w-[20rem] mr-10 rounded bg-indigo-600 px-8 py-3 text-white focus:outline-none focus:ring active:bg-indigo-500"
+            href="/download"
+          >
+            <span class="absolute -end-full transition-all group-hover:end-4">
+              <RestoreIcon />
+            </span>
+
+            <span class="text-sm font-medium transition-all group-hover:me-4">Modificar</span>
+          </button>
         )}
       </Toolbar>
       <TableContainer>
