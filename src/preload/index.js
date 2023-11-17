@@ -23,6 +23,10 @@ const api = {
     const response = await ipcRenderer.invoke('calidad', datos)
     return response
   },
+  proveedores: async (datos) => {
+    const response = await ipcRenderer.invoke('proveedores', datos)
+    return response
+  },
   descartes: (channel, callback) => {
     ipcRenderer.on(channel, (event, ...args) => callback(...args))
   },

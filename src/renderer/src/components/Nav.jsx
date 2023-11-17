@@ -27,6 +27,8 @@ import VerListasEmpaque from './Contenedores/components/VerListasEmpaque'
 import ClasificacionCalidad from './Calidad/components/ClasificacionCalidad'
 import Formularios from './Calidad/Formatos/components/Formularios'
 import BotonProveedores from './Proveedores/BotonProveedores'
+import VolanteCalidadC from './Calidad/VolanteCalidad/components/VolanteCalidadC'
+import Proveedores from './Proveedores/components/Proveedores'
 
 
 const drawerWidth = 240
@@ -70,10 +72,10 @@ export default function Nav() {
               <ListItem key={text + index} disablePadding>
                   <ListItemIcon>
                     {text === 'Ingreso de fruta' && <BotonIngresoFruta seleccion={seleccion} />}
-                    {text === 'Proveedores' && <BotonProveedores seleccion={seleccion}/>}
                     {text === 'Inventario' && <ListaBotonesInventario seleccion={seleccion}/>}
                     {text === 'Contenedores' && <BotonContenedores seleccion={seleccion}/>}
                     {text === 'Calidad' && <BotonesCalidad seleccion={seleccion}/>}
+                    {text === 'Proveedores' && <BotonProveedores seleccion={seleccion}/>}
                   </ListItemIcon>
               </ListItem>
             ))}
@@ -97,6 +99,8 @@ export default function Nav() {
         {state === 'Calidad interna' && <CalidadInterna />}
         {state === 'Clasificacion calidad' && <ClasificacionCalidad />}
         {state === 'Formatos' && <Formularios />}
+        {state === 'Volante Calidad' && <VolanteCalidadC />}
+        {state === 'Proveedores' && <Proveedores />}
       </Box>
     </Box>
   )

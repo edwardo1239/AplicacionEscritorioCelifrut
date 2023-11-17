@@ -82,6 +82,7 @@ class TablaControlPlagas extends Component {
 
   handleFechaFilter = event => {
     const fechaFiltrada = event.target.value;
+    console.log(this.state)
     const { originalData } = this.state;
 
     const filteredData = originalData.filter(item => {
@@ -94,9 +95,10 @@ class TablaControlPlagas extends Component {
 
   handleAreaFilter = (event) => {
     const areaFiltrada = event.target.value;
-    const { originalData } = this.state;
+    const  originalData  = this.state.data;
 
     const filteredData = originalData.filter(item => {
+  
       return Object.keys(item).some(key => key.startsWith(areaFiltrada));
     });
 
@@ -207,7 +209,7 @@ class TablaControlPlagas extends Component {
         <label htmlFor="areaFilter" style={labelStyle}>
           Filtrar por Área:
         </label>
-        <select id="areaFilter" onChange={this.handleAreaFilter} style={selectStyle}>
+        <select id="areaFilter" onChange={(e) => this.handleAreaFilter(e)} style={selectStyle}>
           <option value="">Todas</option>
           <option value="area_control">Área de Control</option>
           <option value="area_cebo">Área de Cebo</option>

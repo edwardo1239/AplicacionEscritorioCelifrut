@@ -239,6 +239,27 @@ ipcMain.handle('calidad', async (event, data) => {
   }
 })
 
+// funcion encargada para proveedores
+ipcMain.handle('proveedores', async (event, data) => {
+  try {
+    const request = { data: data, id: socket.id }
+    console.log(request)
+    const response = await new Promise((resolve, reject) => {
+      socket.emit('proveedores', request, (serverResponse) => {
+        if (serverResponse.status === 200) {
+          resolve(serverResponse)
+        } else {
+          resolve({ status: 400, data:{}})
+        }
+      })
+    })
+    console.log(response)
+    return response
+  } catch (e) {
+    return { status: 400, data:{} }
+  }
+})
+
 // const socket = io('ws://localhost:3000/',{
 //   rejectUnauthorized: false,
 // });

@@ -8,6 +8,7 @@ export interface Api {
   contenedores: (data:any) => Promise<any>
   calidad: (data:any) => Promise<any>
   listaEmpaqueInfo: (data:any, callback:any) => any
+  proveedores: (data:any) => Promise<any>
 }
 
 declare global {
