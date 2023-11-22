@@ -28,7 +28,7 @@ import ClasificacionCalidad from './Calidad/components/ClasificacionCalidad'
 import Formularios from './Calidad/Formatos/components/Formularios'
 import BotonProveedores from './Proveedores/BotonProveedores'
 import VolanteCalidadC from './Calidad/VolanteCalidad/components/VolanteCalidadC'
-import Proveedores from './Proveedores/components/Proveedores'
+import Proveedor from './Proveedores/components/Proveedor'
 
 
 const drawerWidth = 240
@@ -100,7 +100,7 @@ export default function Nav() {
         {state === 'Clasificacion calidad' && <ClasificacionCalidad />}
         {state === 'Formatos' && <Formularios />}
         {state === 'Volante Calidad' && <VolanteCalidadC />}
-        {state === 'Proveedores' && <Proveedores />}
+        {state === 'Proveedor' && <Proveedor />}
       </Box>
     </Box>
   )
