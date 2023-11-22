@@ -168,7 +168,6 @@ export default function TablaHistorialVaciado({ filtro }) {
           <TableBody>
             {tabla &&
               Object.keys(tabla)
-                .reverse()
                 .map((item) => (
                   <TableRow key={item + 'tableRow'}>
                     <TableCell padding="checkbox" key={item + 'tablecellInput'}>

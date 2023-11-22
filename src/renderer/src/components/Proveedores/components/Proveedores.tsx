@@ -9,10 +9,10 @@ import Api from '../../../../../preload/types'
 export default function Proveedores() {
 
 useEffect(() => {
-    const asyncFunction = async () =>{
+    const asyncFunction = async () => {
         try{
         
-            const request = { action: 'obtenerProveedores' }
+            const request = { action: 'selimina' , data:{} }
             const proveedores = await  window.api.proveedores(request)
             console.log(proveedores)
         }catch(e){

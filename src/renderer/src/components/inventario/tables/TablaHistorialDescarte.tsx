@@ -128,13 +128,15 @@ export default function TablaHistorialDescarte(props: propsType) {
                     {format(new Date(tabla[ids]['fecha']), 'dd/MM/yyyy')}
                   </TableCell>
                   <TableCell key={ids + 'kilos'} padding="checkbox">
-                    {Object.keys(tabla[ids]).reduce((total: any, enf: any) => {
-                      if (enf !== 'fecha' && enf !== 'tipoFruta' && enf !== 'accion' && enf !== 'accion') {
-                        total += Object.keys(tabla[ids][enf]).reduce(
+                    {Object.keys(tabla[ids].predios).reduce((total: any, enf: any) => {
+                      if (enf !== 'fecha' && enf !== '_id' && enf !== '__v' ) {
+                        console.log(enf)
+                        total += Object.keys(tabla[ids].predios[enf]).reduce(
                           (tipoDescarte: any, descarte: any) => {
-                            if (descarte !== 'cliente') {
-                              tipoDescarte += Object.keys(tabla[ids][enf][descarte]).reduce(
-                                (acu: any, item) => (acu += tabla[ids][enf][descarte][item]),
+                            //console.log(descarte)
+                            if (descarte !== 'cliente' && descarte !== 'fecha' && typeof(descarte) !== 'object') {
+                              tipoDescarte += Object.keys(tabla[ids].predios[enf][descarte]).reduce(
+                                (acu: any, item) => (acu += tabla[ids].predios[enf][descarte][item]),
                                 0
                               )
                             } else tipoDescarte += 0
@@ -176,8 +178,8 @@ export default function TablaHistorialDescarte(props: propsType) {
                       <div style={{ width: 50, fontSize: 10 }}>Balin Encerado(Kg)</div>
                     </TableCell>
 
-                    {Object.keys(tabla[ids]).map((enf) =>
-                      enf !== 'fecha' && enf !== 'tipoFruta' && enf !== 'accion' ? (
+                    {Object.keys(tabla[ids].predios).map((enf) =>
+                      enf !== 'fecha' && enf !== '_id' && enf !== '__v' && enf != 'tipoFruta' ? (
                         <TableCell
                           colSpan={6}
                           sx={{
@@ -192,26 +194,34 @@ export default function TablaHistorialDescarte(props: propsType) {
                         >
                           <div style={{ width: 50, fontSize: 10 }}> {enf}</div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteLavado']['descarteGeneral']}
+                            {tabla[ids].predios[enf]['descarteLavado']?.['descarteGeneral'] ?
+                              tabla[ids].predios[enf]['descarteLavado']['descarteGeneral'] : 0}
                           </div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteLavado']['pareja']}
+                            {tabla[ids].predios[enf]['descarteLavado']?.['pareja'] ?
+                              tabla[ids].predios[enf]['descarteLavado']['pareja'] : 0}
                           </div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteLavado']['balin']}
+                            {tabla[ids].predios[enf]['descarteLavado']?.['balin'] ?
+                              tabla[ids].predios[enf]['descarteLavado']['balin'] : 0}
                           </div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteEncerado']['descarteGeneral']}
+                            {tabla[ids].predios[enf]['descarteEncerado']?.['descarteGeneral'] ?
+                              tabla[ids].predios[enf]['descarteEncerado']['descarteGeneral'] : 0}
                           </div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteEncerado']['extra']}
+                            {tabla[ids].predios[enf]['descarteEncerado']?.['extra'] ?
+                              tabla[ids].predios[enf]['descarteEncerado']['extra'] : 0}
                           </div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteEncerado']['pareja']}
+                            {tabla[ids].predios[enf]['descarteEncerado']?.['pareja'] ?
+                              tabla[ids].predios[enf]['descarteEncerado']['pareja'] : 0}
                           </div>
                           <div style={{ width: 50, fontSize: 10 }}>
-                            {tabla[ids][enf]['descarteEncerado']['balin']}
+                            {tabla[ids].predios[enf]['descarteEncerado']?.['balin'] ?
+                              tabla[ids].predios[enf]['descarteEncerado']['balin'] : 0}
                           </div>
+                        
                           <hr></hr>
                         </TableCell>
                       ) : null

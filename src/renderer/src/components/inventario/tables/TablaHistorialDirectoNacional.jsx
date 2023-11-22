@@ -69,8 +69,13 @@ export default function TablaHistorialDirectoNacional({ filtro }) {
         const request = { action: 'obtenerHistorialDirectoNacional' }
         const descarte = await window.api.inventario(request)
         console.log(descarte.data)
-        setDatosOriginales(descarte.data)
-        dispatch({ datos: descarte.data })
+        if(descarte.status === 400) {
+          setDatosOriginales({})
+          dispatch({ datos: {}})
+        } else{
+          setDatosOriginales(descarte.data)
+          dispatch({ datos: descarte.data })
+        }
       } catch (e) {
         alert(`Historial vaciado ${e.name}:${e.message}`)
       }

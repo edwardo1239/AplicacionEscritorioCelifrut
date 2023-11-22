@@ -48,8 +48,8 @@ export default function Index(props: indexType) {
           setErrorUser(true)
           setIsLogged(false)
         } else if (response.status === 402) {
-          setErrorUser(false)
-          setIsLogged(true)
+          setErrorClave(true)
+          setIsLogged(false)
         } else {
           setErrorUser(false)
           setErrorClave(false)

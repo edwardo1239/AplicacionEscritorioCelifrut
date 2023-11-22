@@ -16,11 +16,9 @@ import {
 } from '@mui/material'
 import NumbersRoundedIcon from '@mui/icons-material/NumbersRounded'
 import LocalShippingRoundedIcon from '@mui/icons-material/LocalShippingRounded'
-import SaveIcon from '@mui/icons-material/Save'
-import LoadingButton from '@mui/lab/LoadingButton'
 import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSave, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faSave } from '@fortawesome/free-solid-svg-icons'
 import '../../index.css'
 
 export default function Recepcion() {
@@ -46,8 +44,9 @@ export default function Recepcion() {
       const request = { action: 'obtenerProveedores' }
       const response = await window.api.ingresoFruta(request)
       const predios = response.data
-      console.log(predios)
-      setPrediosData(predios)
+      const nombrePredio = predios.map(item => item.PREDIO)
+      console.log(nombrePredio)
+      setPrediosData(nombrePredio)
     }
     obtenerPredios()
   }, [saveRender])
@@ -250,7 +249,7 @@ export default function Recepcion() {
           </AppBar>
         </Grid>
       </Grid>
-      //alertas
+ 
       <Snackbar open={openError} autoHideDuration={6000} onClose={() => setOpenError(false)}>
         <Alert severity="error">{errorMessage}</Alert>
       </Snackbar>
