@@ -20,6 +20,7 @@ type loginResponseType = {
   permisos: string[]
 }
 
+let prueba = "esta es una prueba de git"
 export default function Index(props: indexType) {
   const [usuario, setUsuario] = useState<string>('')
   const [password, setPassword] = useState<string>('')
