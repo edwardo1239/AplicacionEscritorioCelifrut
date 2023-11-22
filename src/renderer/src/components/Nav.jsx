@@ -29,6 +29,8 @@ import Formularios from './Calidad/Formatos/components/Formularios'
 import BotonProveedores from './Proveedores/BotonProveedores'
 import VolanteCalidadC from './Calidad/VolanteCalidad/components/VolanteCalidadC'
 import Proveedor from './Proveedores/components/Proveedor'
+import BotonLotes from './Lotes/BotonLotes'
+import Lotes from './Lotes/components/Lotes'
 
 
 const drawerWidth = 240
@@ -76,6 +78,7 @@ export default function Nav() {
                     {text === 'Contenedores' && <BotonContenedores seleccion={seleccion}/>}
                     {text === 'Calidad' && <BotonesCalidad seleccion={seleccion}/>}
                     {text === 'Proveedores' && <BotonProveedores seleccion={seleccion}/>}
+                    {text === 'Lotes' && <BotonLotes seleccion={seleccion}/>}
                   </ListItemIcon>
               </ListItem>
             ))}
@@ -101,6 +104,7 @@ export default function Nav() {
         {state === 'Formatos' && <Formularios />}
         {state === 'Volante Calidad' && <VolanteCalidadC />}
         {state === 'Proveedor' && <Proveedor />}
+        {state === 'Lotes' && <Lotes />}
       </Box>
     </Box>
   )
