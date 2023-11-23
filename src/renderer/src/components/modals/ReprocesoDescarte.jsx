@@ -21,21 +21,20 @@ export default function ReprocesoDescarte({
       if (messageModal === '¿Desea reprocesar el descarte del predio seleccionado?') {
         const request = { action: 'reprocesarDescarteUnPredio', data: propsModal }
         response = await window.api.inventario(request)
+   
       } else if (
         messageModal === '¿Desea reprocesar los descartes unificados en forma de Celifrut?'
       ) {
         const request = { action: 'ReprocesarDescarteCelifrut', data: propsModal }
         response = await window.api.inventario(request)
+        
       }
-      await window.api.obtenerDescarte()
-
+      console.log(response)
       if (response.status === 200) {
-        funcOpenSuccess('Reproceso con exito')
+        funcOpenError(true, 'Reproceso con exito')
         closeModal()
-      } else {
-        setErrorMessage(response)
-        setOpenError(true)
-        closeModal()
+      } else if(response.status === 400){
+        funcOpenError(true, response.action);
       }
     } catch (e) {
       console.log(`${e.name}:${e.message}`)
@@ -43,6 +42,11 @@ export default function ReprocesoDescarte({
       closeModal()
     }
   }
+
+  const funcOpenError = (open, message) => {
+    setErrorMessage(message)
+    setOpenError(open)
+  };
 
   return (
     <div

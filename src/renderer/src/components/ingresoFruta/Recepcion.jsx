@@ -92,7 +92,7 @@ export default function Recepcion() {
         setSuccessMessage('Guardado con exito')
         setOpenSuccess(true)
       } else {
-        setError(response.action)
+        setError(response.data)
       }
 
       reiniciarCampos()

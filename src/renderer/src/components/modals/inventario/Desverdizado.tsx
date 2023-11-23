@@ -19,12 +19,13 @@ export default function Desverdizado(props: propsType) {
 
   const desverdizado = async () => {
     try {
+      console.log('response')
       setLoading(true)
       if (canastillas > props.propsModal.canastillas) {
-        setErrorMessage('Error en el numero de canastillas')
-        setOpenError(true)
+        funcOpenError(true, 'Error en el numero de canastillas')
         setLoading(false)
       } else {
+        
         const obj = {
           canastillas: canastillas,
           enf: props.propsModal.enf,
@@ -32,18 +33,22 @@ export default function Desverdizado(props: propsType) {
           cuartoDesverdizado: cuartoDesverdizado
         }
         const response = await window.api.inventario(obj)
+        console.log(response)
         if (response.status === 200) {
           props.funcOpenSuccess('Lote se ha puesto a desverdizar')
           props.closeDesverdizado()
-        } else {
-          setErrorMessage('API error:' + response)
-          setOpenError(true)
+        } else if (response.status === 400) {
+          funcOpenError(true, response.data)
         }
       }
     } catch (error) {
-      setErrorMessage('Ha ocurrido un error inesperado')
-      setOpenError(true)
+      alert('error')
     }
+  }
+
+  const funcOpenError = (open: boolean, message: string): void => {
+    setErrorMessage(message)
+    setOpenError(open)
   }
 
   return (
@@ -110,6 +115,7 @@ export default function Desverdizado(props: propsType) {
           }}
         >
           <LoadingButton
+            key={'desverdizarButtonAceptar'}
             color="primary"
             loading={loading}
             loadingPosition="start"
@@ -130,6 +136,7 @@ export default function Desverdizado(props: propsType) {
         </div>
       </div>
       <Snackbar
+        key={'desverdizado error'}
         open={openError}
         autoHideDuration={6000}
         onClose={() => setOpenError(false)}

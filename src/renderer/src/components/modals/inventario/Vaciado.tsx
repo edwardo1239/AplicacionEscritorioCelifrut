@@ -3,6 +3,7 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox'
 import React, {  useState } from 'react'
 import Api from '../../../../../preload/types'
+import { data } from 'autoprefixer'
 
 type vaciadoType = {
   closeVaciado: () => void
@@ -30,7 +31,10 @@ export default function Vaciado(props:vaciadoType) {
         if (response.status === 200) {
           props.funcOpenSuccess('Vaciado con exito');
           props.closeVaciado();
-        } else {
+        }else if(response.status === 400){
+
+          funcOpenError(true, response.data);
+        }else {
           funcOpenError(true, response);
         }
       }
