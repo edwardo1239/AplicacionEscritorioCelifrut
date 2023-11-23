@@ -1,4 +1,3 @@
-// Importa las librerías necesarias
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
@@ -64,6 +63,10 @@ const Table = styled.table`
   &:hover {
     max-height: 1000px; /* Ajusta según sea necesario */
   }
+
+  &:hover th {
+    background-color: #ddd; /* Cambia el color de fondo al pasar el mouse sobre los títulos */
+  }
 `;
 
 const Th = styled.th`
@@ -71,6 +74,15 @@ const Th = styled.th`
   padding: 12px;
   text-align: left;
   background-color: #f2f2f2;
+  transition: background-color 0.3s ease-in-out; /* Agrega la transición al color de fondo */
+  position: relative;
+
+  &:hover {
+    background-color: #ddd; /* Cambia el color de fondo al pasar el mouse sobre el título */
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  // Resto del estilo...
 `;
 
 const Td = styled.td`
@@ -83,6 +95,41 @@ const Td = styled.td`
 const Loading = styled.p`
   text-align: center;
   margin-top: 20px;
+`;
+
+const FilterContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+
+  & > * {
+    margin-right: 20px;
+  }
+`;
+
+const FilterSelect = styled.select`
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+`;
+
+const FilterInput = styled.input`
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+`;
+
+const FilterDate = styled.input`
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+`;
+
+const FilterDateLabel = styled.label`
+  margin-right: 10px;
 `;
 
 const Title = styled.h2`
@@ -111,22 +158,34 @@ const Title = styled.h2`
     visibility: visible;
     transform: scaleX(1);
   }
-`;
+}`;
 
 const LoteTable: React.FC = () => {
-  // Estado para almacenar los datos del lote
-  const [loteData, setLoteData] = useState<LoteData[] | null>(null);
+  // Estado para almacenar los datos originales del lote
+  const [originalLoteData, setOriginalLoteData] = useState<LoteData[] | null>(null);
+  // Estado para almacenar los datos filtrados del lote
+  const [filteredLoteData, setFilteredLoteData] = useState<LoteData[] | null>(null);
+  const [filtros, setFiltros] = useState<{ tipoFruta: string | ''; nombrePredio: string | ''; fechaInicio: string; fechaFin: string }>({
+    tipoFruta: '',
+    nombrePredio: '',
+    fechaInicio: '',
+    fechaFin: '',
+  }); // Estado para los filtros
 
-  // Efecto para realizar la solicitud al servidor
+  // Efecto para realizar la solicitud al servidor y almacenar los datos originales
   useEffect(() => {
     const obtenerDatosDelServidor = async () => {
       try {
-        // Realizar la solicitud al servidor
-        const request = { action: 'obtenerDatosLotes' }; // ajusta 'obtenerDatosLote' según tu API
+        // Realizar la solicitud al servidor sin filtros
+        const request = {
+          action: 'obtenerDatosLotes',
+          data: { filtros: {} },
+        };
+
         const datosLotes = await window.api.inventario(request);
 
-        // Almacenar los datos en el estado
-        setLoteData(datosLotes.data);
+        // Almacenar los datos originales en el estado
+        setOriginalLoteData(datosLotes.data);
       } catch (error) {
         console.error('Error al obtener datos del lote:', error);
       }
@@ -134,11 +193,30 @@ const LoteTable: React.FC = () => {
 
     // Llamar a la función de solicitud
     obtenerDatosDelServidor();
-  }, []); // El segundo argumento del useEffect indica que solo se debe ejecutar una vez al montar el componente
+  }, []); // Se ejecuta solo una vez al montar el componente
+
+  // Efecto para filtrar los datos cuando cambian los filtros
+  useEffect(() => {
+    // Filtrar los datos originales en base a los filtros
+    const filteredData =
+      originalLoteData &&
+      originalLoteData.filter(
+        (lote) =>
+          (filtros.tipoFruta === '' || lote.tipoFruta === filtros.tipoFruta) &&
+          (filtros.nombrePredio === '' || lote.nombrePredio.includes(filtros.nombrePredio)) &&
+          (!filtros.fechaInicio || lote.fechaIngreso >= filtros.fechaInicio) &&
+          (!filtros.fechaFin || lote.fechaIngreso <= filtros.fechaFin)
+      );
+
+    // Almacenar los datos filtrados en el estado
+    setFilteredLoteData(filteredData);
+  }, [originalLoteData, filtros]);
 
   // Función para renderizar la tabla
   const renderTable = () => {
-    if (!loteData) {
+    const dataToRender = filteredLoteData || originalLoteData;
+
+    if (!dataToRender) {
       return <Loading>Cargando...</Loading>;
     }
 
@@ -168,7 +246,7 @@ const LoteTable: React.FC = () => {
         </thead>
         <tbody>
           {/* Map sobre el array de datos para renderizar múltiples filas */}
-          {loteData.map((lote) => (
+          {dataToRender.map((lote) => (
             <tr key={lote._id}>
               <Td>{lote._id}</Td>
               <Td>{lote.nombrePredio}</Td>
@@ -191,13 +269,13 @@ const LoteTable: React.FC = () => {
               <Td>{lote.frutaNacional}</Td>
               <Td>{lote.desverdizado}</Td>
               <Td>
-  {lote.exportacion &&
-    Object.keys(lote.exportacion).map((calidad, index) => (
-      <div key={index}>
-        {`${calidad}: ${lote.exportacion[calidad].calidad1}, ${lote.exportacion[calidad].calidad1_5}, ${lote.exportacion[calidad].calidad2}`}
-      </div>
-    ))}
-</Td>
+                {lote.exportacion &&
+                  Object.keys(lote.exportacion).map((calidad, index) => (
+                    <div key={index}>
+                      {`${calidad}: ${lote.exportacion[calidad].calidad1}, ${lote.exportacion[calidad].calidad1_5}, ${lote.exportacion[calidad].calidad2}`}
+                    </div>
+                  ))}
+              </Td>
             </tr>
           ))}
         </tbody>
@@ -208,6 +286,40 @@ const LoteTable: React.FC = () => {
   return (
     <Container>
       <Title>Lotes</Title>
+      <FilterContainer>
+        <FilterSelect
+          value={filtros.tipoFruta}
+          onChange={(e) => setFiltros({ ...filtros, tipoFruta: e.target.value })}
+        >
+          <option value="">Seleccionar Todos</option>
+          <option value="Naranja">Naranja</option>
+          <option value="Limon">Limón</option>
+        </FilterSelect>
+        <FilterInput
+          type="text"
+          placeholder="Nombre del Predio"
+          value={filtros.nombrePredio}
+          onChange={(e) => setFiltros({ ...filtros, nombrePredio: e.target.value })}
+        />
+        <div>
+          <FilterDateLabel>Fecha de Inicio:</FilterDateLabel>
+          <FilterDate
+            type="date"
+            placeholder="Fecha de Inicio"
+            value={filtros.fechaInicio}
+            onChange={(e) => setFiltros({ ...filtros, fechaInicio: e.target.value })}
+          />
+        </div>
+        <div>
+          <FilterDateLabel>Fecha de Fin:</FilterDateLabel>
+          <FilterDate
+            type="date"
+            placeholder="Fecha de Fin"
+            value={filtros.fechaFin}
+            onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
+          />
+        </div>
+      </FilterContainer>
       {renderTable()}
     </Container>
   );
