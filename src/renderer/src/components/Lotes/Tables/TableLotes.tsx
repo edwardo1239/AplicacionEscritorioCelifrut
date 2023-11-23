@@ -44,7 +44,7 @@ interface LoteData {
 
 // Estilos con styled-components
 const Container = styled.div`
-  max-width: 2000px;
+  max-width: 3000px;
   margin: auto;
   padding: 20px;
   border-radius: 8px;
@@ -215,11 +215,11 @@ const LoteTable: React.FC = () => {
   // Función para renderizar la tabla
   const renderTable = () => {
     const dataToRender = filteredLoteData || originalLoteData;
-
+  
     if (!dataToRender) {
       return <Loading>Cargando...</Loading>;
     }
-
+  
     return (
       <Table>
         <thead>
@@ -245,7 +245,6 @@ const LoteTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {/* Map sobre el array de datos para renderizar múltiples filas */}
           {dataToRender.map((lote) => (
             <tr key={lote._id}>
               <Td>{lote._id}</Td>
@@ -269,13 +268,33 @@ const LoteTable: React.FC = () => {
               <Td>{lote.frutaNacional}</Td>
               <Td>{lote.desverdizado}</Td>
               <Td>
-                {lote.exportacion &&
-                  Object.keys(lote.exportacion).map((calidad, index) => (
-                    <div key={index}>
-                      {`${calidad}: ${lote.exportacion[calidad].calidad1}, ${lote.exportacion[calidad].calidad1_5}, ${lote.exportacion[calidad].calidad2}`}
-                    </div>
-                  ))}
-              </Td>
+  {lote.exportacion &&
+    Object.keys(lote.exportacion).map((calidad, index) => (
+      <div key={index} style={{ marginBottom: '10px' }}>
+        <div>
+          <strong style={{ color: 'white' }}>
+            {calidad.replace(/12:/, '')}:
+          </strong>
+          <table>
+            <thead>
+              <tr>
+                <Th>Calidad 1</Th>
+                <Th>Calidad 1.5</Th>
+                <Th>Calidad 2</Th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <Td>{lote.exportacion[calidad].calidad1}</Td>
+                <Td>{lote.exportacion[calidad].calidad1_5}</Td>
+                <Td>{lote.exportacion[calidad].calidad2}</Td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ))}
+</Td>
             </tr>
           ))}
         </tbody>
