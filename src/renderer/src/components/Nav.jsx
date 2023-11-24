@@ -38,7 +38,14 @@ const drawerWidth = 240
 export default function Nav() {
 
   const [state, setState] = useState("")
-  const [encabezados, setEncabezados] = useState([''])
+  const [encabezados, setEncabezados] = useState([
+    "Ingreso de fruta",
+    "Inventario",
+    "Contenedores",
+    "Calidad",
+    "Proveedores",
+    "Lotes"
+])
 
   const seleccion = (nombre) =>{
     setState(nombre)

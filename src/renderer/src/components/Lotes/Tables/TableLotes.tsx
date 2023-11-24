@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { format } from 'date-fns';
 
 interface LoteData {
   _id: string;
@@ -49,6 +50,13 @@ const Container = styled.div`
   border: 1px solid #ddd;
 `;
 
+const TotalKilosExportacion = styled.p`
+  font-size: 19px;
+  color: #00000; /* o el color que prefieras */
+  margin-top: 10px;
+`;
+
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -95,8 +103,8 @@ const Loading = styled.p`
 const FilterContainer = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
-
+  margin-bottom: 30px;
+  margin-top: 35px;
   & > * {
     margin-right: 20px;
   }
@@ -107,6 +115,18 @@ const FilterSelect = styled.select`
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  margin-top: 26px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #4caf50; /* Color de fondo en hover */
+    color: #000; /* Color del texto en hover */
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50; /* Color del borde al enfocar */
+  }
 `;
 
 const FilterInput = styled.input`
@@ -114,6 +134,18 @@ const FilterInput = styled.input`
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  margin-top: 26px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #4caf50; /* Color de fondo en hover */
+    color: #000; /* Color del texto en hover */
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50; /* Color del borde al enfocar */
+  }
 `;
 
 const FilterDate = styled.input`
@@ -121,12 +153,41 @@ const FilterDate = styled.input`
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  margin-top: 1px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #4caf50; /* Color de fondo en hover */
+    color: #000; /* Color del texto en hover */
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50; /* Color del borde al enfocar */
+  }
 `;
 
 const FilterDateLabel = styled.label`
-  margin-right: 10px;
+  margin-right: 8px;
 `;
 
+
+const CardContainer = styled.div`
+  max-width: 3000px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 12px; /* Ajusta según sea necesario para hacer la tarjeta redonda */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f2f2f2; /* Ajusta el color de fondo según sea necesario */
+`;
+const CardContainerS = styled.div`
+  max-width: 3000px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 12px; /* Ajusta según sea necesario para hacer la tarjeta redonda */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff; /* Ajusta el color de fondo según sea necesario */
+`;
 const Title = styled.h2`
   margin-bottom: 10px;
   position: relative;
@@ -155,17 +216,6 @@ const Title = styled.h2`
   }
 `;
 
-// const ColumnVisibilityToggle = styled.label`
-//   display: flex;
-//   align-items: center;
-//   margin-right: 10px; /* Ajusta según sea necesario para el espacio entre las columnas */
-//   cursor: pointer;
-
-//   input {
-//     margin-right: 5px;
-//   }
-// `;
-
 const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) => (
   <label className={className}>
     <input type="checkbox" checked={checked} onChange={onChange} />
@@ -174,37 +224,41 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
 ))`
   display: flex;
   align-items: center;
-  margin-right: 10px; /* Ajusta según sea necesario para el espacio entre las columnas */
+  margin-right: 10px;
   cursor: pointer;
-  font-size: 17px; /* Tamaño de fuente ajustado */
-  margin-bottom: 5px; /* Ajusta según sea necesario */
-  input {
+  font-size: 17px;
+  margin-bottom: 10px;
 
+  input {
     margin-right: 5px;
+
+    &:checked {
+      &::before {
+        background-color: #4caf50 !important;
+      }
+    }
   }
 
   span {
-    margin-bottom: 2px; /* Ajusta el espacio entre el texto y el borde inferior */
+    margin-bottom: 2px;
   }
 `;
 
 
 const LoteTable: React.FC = () => {
-  // Estado para almacenar los datos originales del lote
   const [originalLoteData, setOriginalLoteData] = useState<LoteData[] | null>(null);
-  // Estado para almacenar los datos filtrados del lote
   const [filteredLoteData, setFilteredLoteData] = useState<LoteData[] | null>(null);
   const [filtros, setFiltros] = useState<{ tipoFruta: string | ''; nombrePredio: string | ''; fechaInicio: string; fechaFin: string }>({
     tipoFruta: '',
     nombrePredio: '',
     fechaInicio: '',
     fechaFin: '',
-  }); // Estado para los filtros
-  // Estado para la visibilidad de las columnas
+  });
   const [columnVisibility, setColumnVisibility] = useState({
     canastillas: false,
     kilos: false,
     placa: false,
+    kilosVaciados: false,
     promedio: false,
     rendimiento: false,
     descarteLavado: false,
@@ -214,6 +268,7 @@ const LoteTable: React.FC = () => {
     desverdizado: false,
     exportacion: false,
   });
+  const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
 
   useEffect(() => {
     const obtenerDatosDelServidor = async () => {
@@ -247,6 +302,50 @@ const LoteTable: React.FC = () => {
     setFilteredLoteData(filteredData);
   }, [originalLoteData, filtros]);
 
+  useEffect(() => {
+    const calcularTotalExportacionKilos = () => {
+      if (filteredLoteData) {
+        const totalKilos = filteredLoteData.reduce((total, lote) => {
+          if (lote.exportacion) {
+            Object.values(lote.exportacion).forEach((calidad) => {
+              total += calidad.calidad1 + calidad.calidad1_5 + calidad.calidad2;
+            });
+          }
+          return total;
+        }, 0);
+
+        setTotalExportacionKilos(totalKilos);
+      } else {
+        setTotalExportacionKilos(0);
+      }
+    };
+
+    calcularTotalExportacionKilos();
+  }, [filteredLoteData]);
+
+  const calculateTotalExportacion = (lotes: LoteData[]) => {
+    const total = { calidad1: 0, calidad1_5: 0, calidad2: 0 };
+
+    lotes.forEach((lote) => {
+      if (lote.exportacion) {
+        Object.values(lote.exportacion).forEach((calidad) => {
+          total.calidad1 += calidad.calidad1;
+          total.calidad1_5 += calidad.calidad1_5;
+          total.calidad2 += calidad.calidad2;
+        });
+      }
+    });
+
+  
+    return (
+      <>
+        <div>Calidad 1: {total.calidad1}</div>
+        <div>Calidad 1.5: {total.calidad1_5}</div>
+        <div>Calidad 2: {total.calidad2}</div>
+      </>
+    );
+  };
+  
   const renderTable = () => {
     const dataToRender = filteredLoteData || originalLoteData;
 
@@ -268,13 +367,14 @@ const LoteTable: React.FC = () => {
             {columnVisibility.placa && <Th>Placa</Th>}
             {columnVisibility.kilosVaciados && <Th>Kilos Vaciados</Th>}
             {columnVisibility.promedio && <Th>Promedio</Th>}
-            {columnVisibility.rendimiento && <Th>Rendimiento</Th>}
+            {columnVisibility.rendimiento && <Th>Rendimiento (%)</Th>}
             {columnVisibility.descarteLavado && <Th>Descarte Lavado</Th>}
             {columnVisibility.descarteEncerado && <Th>Descarte Encerado</Th>}
             {columnVisibility.directoNacional && <Th>Directo Nacional</Th>}
             {columnVisibility.frutaNacional && <Th>Fruta Nacional</Th>}
             {columnVisibility.desverdizado && <Th>Desverdizado</Th>}
             {columnVisibility.exportacion && <Th>Exportación</Th>}
+            <br></br>
           </tr>
         </thead>
         <tbody>
@@ -282,7 +382,7 @@ const LoteTable: React.FC = () => {
             <tr key={lote._id}>
               <Td>{lote._id}</Td>
               <Td>{lote.nombrePredio}</Td>
-              <Td>{lote.fechaIngreso}</Td>
+              <Td>{format(new Date(lote.fechaIngreso),  'dd/MM/yyyy HH:mm:ss')}</Td>
               {columnVisibility.canastillas && <Td>{lote.canastillas}</Td>}
               <Td>{lote.tipoFruta}</Td>
               <Td>{lote.observaciones}</Td>
@@ -290,7 +390,7 @@ const LoteTable: React.FC = () => {
               {columnVisibility.placa && <Td>{lote.placa}</Td>}
               {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
               {columnVisibility.promedio && <Td>{lote.promedio}</Td>}
-              {columnVisibility.rendimiento && <Td>{lote.rendimiento}</Td>}
+              {columnVisibility.rendimiento && <Td>{`${(lote.rendimiento).toFixed(2)}%`}</Td>}
               {columnVisibility.descarteLavado && (
                 <Td>
                   {lote.descarteLavado &&
@@ -307,46 +407,54 @@ const LoteTable: React.FC = () => {
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
               {columnVisibility.exportacion && (
-                <Td>
-                  {lote.exportacion &&
-                    Object.keys(lote.exportacion).map((calidad, index) => (
-                      <div key={index} style={{ marginBottom: '10px' }}>
-                        <div>
-                          <strong style={{ color: 'white' }}>
-                            {calidad.replace(/12:/, '')}:
-                          </strong>
-                          <table>
-                            <thead>
-                              <tr>
-                                <Th>Calidad 1</Th>
-                                <Th>Calidad 1.5</Th>
-                                <Th>Calidad 2</Th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <Td>{lote.exportacion[calidad].calidad1}</Td>
-                                <Td>{lote.exportacion[calidad].calidad1_5}</Td>
-                                <Td>{lote.exportacion[calidad].calidad2}</Td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
+              <Td>
+                {lote.exportacion &&
+                  Object.keys(lote.exportacion).map((calidad, index) => (
+                    <div key={index} style={{ marginBottom: '10px' }}>
+                      <div>
+                        <strong style={{ color: 'white' }}>
+                          {calidad.replace(/12:/, '')}:
+                        </strong>
+                        <table>
+                          <thead>
+                            <tr>
+                              <Th>Calidad 1</Th>
+                              <Th>Calidad 1.5</Th>
+                              <Th>Calidad 2</Th>
+                              <Th>Total</Th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <Td>{lote.exportacion[calidad].calidad1}</Td>
+                              <Td>{lote.exportacion[calidad].calidad1_5}</Td>
+                              <Td>{lote.exportacion[calidad].calidad2}</Td>
+                              <Td>
+                                {lote.exportacion[calidad].calidad1 +
+                                  lote.exportacion[calidad].calidad1_5 +
+                                  lote.exportacion[calidad].calidad2}
+                              </Td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </div>
-                    ))}
-                </Td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    );
-  };
+                    </div>
+                  ))}
+              </Td>
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+};
 
   return (
     <Container>
+       <CardContainer>
       <Title>Lotes</Title>
       <div>
+      <CardContainerS>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       <ColumnVisibilityToggle
   label="Canastillas"
@@ -355,8 +463,6 @@ const LoteTable: React.FC = () => {
     setColumnVisibility((prev) => ({ ...prev, canastillas: !prev.canastillas }))
   }
 >
-  <input type="checkbox" checked={columnVisibility.canastillas} onChange={() => null} />
-  <span>Canastillas</span>
 </ColumnVisibilityToggle>
         <ColumnVisibilityToggle
           label="Kilos"
@@ -404,16 +510,17 @@ const LoteTable: React.FC = () => {
         onChange={() => setColumnVisibility((prev) => ({ ...prev, frutaNacional: !prev.frutaNacional }))}
       />
       <ColumnVisibilityToggle
-        label="Desverdizado"
+        label="Fruta Desverdizado"
         checked={columnVisibility.desverdizado}
         onChange={() => setColumnVisibility((prev) => ({ ...prev, desverdizado: !prev.desverdizado }))}
       />
       <ColumnVisibilityToggle
-        label="Exportación"
+        label="Fruta Exportación"
         checked={columnVisibility.exportacion}
         onChange={() => setColumnVisibility((prev) => ({ ...prev, exportacion: !prev.exportacion }))}
       />
        </div>
+      </CardContainerS>
       </div>
       <FilterContainer>
         <FilterSelect
@@ -442,16 +549,20 @@ const LoteTable: React.FC = () => {
         <div>
           <FilterDateLabel>Fecha de Fin:</FilterDateLabel>
           <FilterDate
-            type="date"
+            type="date" 
             placeholder="Fecha de Fin"
             value={filtros.fechaFin}
             onChange={(e) => setFiltros({ ...filtros, fechaFin: e.target.value })}
           />
         </div>
+        <TotalKilosExportacion>
+          Total kilos exportación Filtrados: {totalExportacionKilos}
+        </TotalKilosExportacion>
+          <br></br>
       </FilterContainer>
+      </CardContainer>
       {renderTable()}
     </Container>
   );
 };
-
 export default LoteTable;
