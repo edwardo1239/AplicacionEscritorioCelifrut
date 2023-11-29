@@ -31,20 +31,20 @@ export default function Index(props: indexType) {
   const [isLogged, setIsLogged] = useState<boolean>(false)
 
   const login: React.FormEventHandler<HTMLFormElement> = (event) => {
-    event.preventDefault()
+    event.preventDefault();
     try {
-      setLoading(true)
+      setLoading(true);
       let datosLogIn: datosLogInType = {
         user: usuario,
-        password: password
-      }
-      window.api.logIn(datosLogIn).then( (response) =>{
-        console.log(response)
+        password: password,
+      };
+      window.api.logIn(datosLogIn).then((response) => {
+        console.log(response);
         if (response.status === 200) {
-          props.permisosSesion(response.permisos)
-          setIsLogged(true)
-          setErrorUser(false)
-          setErrorClave(false)
+          props.permisosSesion(response.data.permisos); // Ajuste aquí
+          setIsLogged(true);
+          setErrorUser(false);
+          setErrorClave(false);
         } else if (response.status === 401) {
           setErrorUser(true)
           setIsLogged(false)

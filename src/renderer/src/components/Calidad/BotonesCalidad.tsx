@@ -39,6 +39,12 @@ export default function BotonesCalidad(props: propsType) {
             <ListItemText primary={'Volante Calidad'} />
           </ListItemButton>
         </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton sx={{ gap: 2 }} onClick={() => clickInventario('Informes')}>
+            <ListAltIcon />
+            <ListItemText primary={'Informes'} />
+          </ListItemButton>
+        </ListItem>
       </List>
     </div>
   )

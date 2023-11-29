@@ -134,7 +134,7 @@ autoUpdater.on('update-downloaded', (info) => {
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-const socket = io('ws://192.168.0.172:3001/', {
+const socket = io('ws://192.168.0.172:3000/', {
   rejectUnauthorized: false
 })
 //la funcion que loguea la cuenta

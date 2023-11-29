@@ -31,6 +31,7 @@ import VolanteCalidadC from './Calidad/VolanteCalidad/components/VolanteCalidadC
 import Proveedor from './Proveedores/components/Proveedor'
 import BotonLotes from './Lotes/BotonLotes'
 import Lotes from './Lotes/components/Lotes'
+import InformesCalidad from './Calidad/Informes/components/InformesCalidad'
 
 
 const drawerWidth = 240
@@ -38,14 +39,7 @@ const drawerWidth = 240
 export default function Nav() {
 
   const [state, setState] = useState("")
-  const [encabezados, setEncabezados] = useState([
-    "Ingreso de fruta",
-    "Inventario",
-    "Contenedores",
-    "Calidad",
-    "Proveedores",
-    "Lotes"
-])
+  const [encabezados, setEncabezados] = useState([''])
 
   const seleccion = (nombre) =>{
     setState(nombre)
@@ -110,6 +104,7 @@ export default function Nav() {
         {state === 'Clasificacion calidad' && <ClasificacionCalidad />}
         {state === 'Formatos' && <Formularios />}
         {state === 'Volante Calidad' && <VolanteCalidadC />}
+        {state === 'Informes' && <InformesCalidad />}
         {state === 'Proveedor' && <Proveedor />}
         {state === 'Lotes' && <Lotes />}
       </Box>
