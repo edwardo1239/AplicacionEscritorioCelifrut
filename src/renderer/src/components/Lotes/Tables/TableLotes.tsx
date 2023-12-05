@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { format } from 'date-fns';
+import GraficasLotes from './GraficasLotes'; // Reemplaza './ruta/del/componente/GraficasLotes' con la ruta correcta
+
 
 interface LoteData {
   _id: string;
@@ -43,7 +45,7 @@ interface LoteData {
 }
 
 const Container = styled.div`
-  max-width: 3000px;
+  max-width: 4000px;
   margin: auto;
   padding: 20px;
   border-radius: 8px;
@@ -173,7 +175,7 @@ const FilterDateLabel = styled.label`
 
 
 const CardContainer = styled.div`
-  max-width: 3000px;
+  max-width: 6000px;
   margin: auto;
   padding: 20px;
   border-radius: 12px; /* Ajusta según sea necesario para hacer la tarjeta redonda */
@@ -181,7 +183,7 @@ const CardContainer = styled.div`
   background-color: #f2f2f2; /* Ajusta el color de fondo según sea necesario */
 `;
 const CardContainerS = styled.div`
-  max-width: 3000px;
+  max-width: 6000px;
   margin: auto;
   padding: 20px;
   border-radius: 12px; /* Ajusta según sea necesario para hacer la tarjeta redonda */
@@ -248,6 +250,8 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
 const LoteTable: React.FC = () => {
   const [originalLoteData, setOriginalLoteData] = useState<LoteData[] | null>(null);
   const [filteredLoteData, setFilteredLoteData] = useState<LoteData[] | null>(null);
+  const [filtroRendimiento, setFiltroRendimiento] = useState<number | null>(null);
+  const [tipoGrafico, setTipoGrafico] = useState<string>('bar');
   const [filtros, setFiltros] = useState<{ tipoFruta: string | ''; nombrePredio: string | ''; fechaInicio: string; fechaFin: string }>({
     tipoFruta: '',
     nombrePredio: '',
@@ -269,6 +273,13 @@ const LoteTable: React.FC = () => {
     exportacion: false,
   });
   const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
+  const [selectedLote, setSelectedLote] = useState<string>('');
+  
+  // Nuevo estado para los datos de las gráficas
+  const [graficasData, setGraficasData] = useState<{
+    data: number[];
+    labels: string[];
+  } | null>(null);
 
   useEffect(() => {
     const obtenerDatosDelServidor = async () => {
@@ -296,11 +307,25 @@ const LoteTable: React.FC = () => {
           (filtros.tipoFruta === '' || lote.tipoFruta === filtros.tipoFruta) &&
           (filtros.nombrePredio === '' || lote.nombrePredio.includes(filtros.nombrePredio)) &&
           (!filtros.fechaInicio || lote.fechaIngreso >= filtros.fechaInicio) &&
-          (!filtros.fechaFin || lote.fechaIngreso <= filtros.fechaFin)
+          (!filtros.fechaFin || lote.fechaIngreso <= filtros.fechaFin) &&
+          (filtroRendimiento === null || lote.rendimiento >= filtroRendimiento)
       );
-
+  
     setFilteredLoteData(filteredData);
-  }, [originalLoteData, filtros]);
+  
+    // Actualizar datos de las gráficas cuando cambian los filtros
+    if (filteredData) {
+      const dataCuantitativa = filteredData.map((lote) => lote.exportacion?.calidad1 || 0);
+      const dataCualitativa = filteredData.map((lote) => lote.tipoFruta || '');
+  
+      setGraficasData({
+        data: dataCuantitativa,
+        labels: dataCualitativa,
+      });
+    } else {
+      setGraficasData(null);
+    }
+  }, [originalLoteData, filtros, filtroRendimiento]);
 
   useEffect(() => {
     const calcularTotalExportacionKilos = () => {
@@ -323,29 +348,6 @@ const LoteTable: React.FC = () => {
     calcularTotalExportacionKilos();
   }, [filteredLoteData]);
 
-  const calculateTotalExportacion = (lotes: LoteData[]) => {
-    const total = { calidad1: 0, calidad1_5: 0, calidad2: 0 };
-
-    lotes.forEach((lote) => {
-      if (lote.exportacion) {
-        Object.values(lote.exportacion).forEach((calidad) => {
-          total.calidad1 += calidad.calidad1;
-          total.calidad1_5 += calidad.calidad1_5;
-          total.calidad2 += calidad.calidad2;
-        });
-      }
-    });
-
-  
-    return (
-      <>
-        <div>Calidad 1: {total.calidad1}</div>
-        <div>Calidad 1.5: {total.calidad1_5}</div>
-        <div>Calidad 2: {total.calidad2}</div>
-      </>
-    );
-  };
-  
   const renderTable = () => {
     const dataToRender = filteredLoteData || originalLoteData;
 
@@ -407,47 +409,48 @@ const LoteTable: React.FC = () => {
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
               {columnVisibility.exportacion && (
-              <Td>
-                {lote.exportacion &&
-                  Object.keys(lote.exportacion).map((calidad, index) => (
-                    <div key={index} style={{ marginBottom: '10px' }}>
-                      <div>
-                        <strong style={{ color: 'white' }}>
-                          {calidad.replace(/12:/, '')}:
-                        </strong>
-                        <table>
-                          <thead>
-                            <tr>
-                              <Th>Calidad 1</Th>
-                              <Th>Calidad 1.5</Th>
-                              <Th>Calidad 2</Th>
-                              <Th>Total</Th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <Td>{lote.exportacion[calidad].calidad1}</Td>
-                              <Td>{lote.exportacion[calidad].calidad1_5}</Td>
-                              <Td>{lote.exportacion[calidad].calidad2}</Td>
-                              <Td>
-                                {lote.exportacion[calidad].calidad1 +
-                                  lote.exportacion[calidad].calidad1_5 +
-                                  lote.exportacion[calidad].calidad2}
-                              </Td>
-                            </tr>
-                          </tbody>
-                        </table>
+                <Td>
+                  {lote.exportacion &&
+                    Object.keys(lote.exportacion).map((calidad, index) => (
+                      <div key={index} style={{ marginBottom: '10px' }}>
+                        <div>
+                          <strong style={{ color: 'white' }}>
+                            {calidad.replace(/12:/, '')}:
+                          </strong>
+                          <table>
+                            <thead>
+                              <tr>
+                                <Th>Calidad 1</Th>
+                                <Th>Calidad 1.5</Th>
+                                <Th>Calidad 2</Th>
+                                <Th>Total</Th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr>
+                                <Td>{lote.exportacion[calidad].calidad1}</Td>
+                                <Td>{lote.exportacion[calidad].calidad1_5}</Td>
+                                <Td>{lote.exportacion[calidad].calidad2}</Td>
+                                <Td>
+                                  {lote.exportacion[calidad].calidad1 +
+                                    lote.exportacion[calidad].calidad1_5 +
+                                    lote.exportacion[calidad].calidad2}
+                                </Td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-              </Td>
-            )}
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  );
-};
+                    ))}
+                </Td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    );
+  };
+
 
   return (
     <Container>
@@ -531,12 +534,22 @@ const LoteTable: React.FC = () => {
           <option value="Naranja">Naranja</option>
           <option value="Limon">Limón</option>
         </FilterSelect>
+
         <FilterInput
           type="text"
           placeholder="Nombre del Predio"
           value={filtros.nombrePredio}
           onChange={(e) => setFiltros({ ...filtros, nombrePredio: e.target.value })}
         />
+        <FilterInput
+  type="number"
+  placeholder="Filtrar por rendimiento"
+  value={filtroRendimiento !== null ? filtroRendimiento : ''}
+  onChange={(e) => {
+    const valor = e.target.value === '' ? null : parseFloat(e.target.value.replace('.', '.')); // Reemplaza la coma por punto
+    setFiltroRendimiento(valor);
+  }}
+/>
         <div>
           <FilterDateLabel>Fecha de Inicio:</FilterDateLabel>
           <FilterDate
@@ -560,6 +573,20 @@ const LoteTable: React.FC = () => {
         </TotalKilosExportacion>
           <br></br>
       </FilterContainer>
+      <CardContainer>
+          <Title>Gráficas</Title>
+          <div>
+            <FilterSelect value={selectedLote} onChange={(e) => setSelectedLote(e.target.value)}>
+              <option value="">Seleccionar Lote</option>
+              {originalLoteData?.map((lote) => (
+                <option key={lote.nombrePredio} value={lote.nombrePredio}>
+                  {lote.nombrePredio}
+                </option>
+              ))}
+            </FilterSelect>
+          </div>
+          <GraficasLotes lotes={originalLoteData} selectedLote={selectedLote} />
+        </CardContainer>
       </CardContainer>
       {renderTable()}
     </Container>

@@ -134,7 +134,7 @@ autoUpdater.on('update-downloaded', (info) => {
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
 
-const socket = io('ws://192.168.0.172:3000/', {
+const socket = io('ws://192.168.0.172:3001/', {
   rejectUnauthorized: false
 })
 //la funcion que loguea la cuenta
@@ -174,6 +174,26 @@ ipcMain.handle('ingresoFruta', async (event, data) => {
     return response
   } catch (e) {
     console.log(`${e.name}:${e.message}`)
+  }
+})
+// Sección Cuentas
+ipcMain.handle('cuenta', async (event, data) => {
+  try {
+    const request = { data: data, id: socket.id }
+    console.log(request)
+    const response = await new Promise((resolve, reject) => {
+      socket.emit('celifrutListen', request, (serverResponse) => {
+        if (typeof serverResponse === 'object') {
+          resolve(serverResponse)
+        } else {
+          resolve({ status: 400 })
+        }
+      })
+    })
+    console.log(response)
+    return response
+  } catch (e) {
+    return { status: 400 }
   }
 })
 //seccion inventario

@@ -32,6 +32,8 @@ import Proveedor from './Proveedores/components/Proveedor'
 import BotonLotes from './Lotes/BotonLotes'
 import Lotes from './Lotes/components/Lotes'
 import InformesCalidad from './Calidad/Informes/components/InformesCalidad'
+import BotonCrear from './Cuentas/BotonCrear'
+import CrearCuentas from './Cuentas/CrearCuentas'
 
 
 const drawerWidth = 240
@@ -80,6 +82,7 @@ export default function Nav() {
                     {text === 'Calidad' && <BotonesCalidad seleccion={seleccion}/>}
                     {text === 'Proveedores' && <BotonProveedores seleccion={seleccion}/>}
                     {text === 'Lotes' && <BotonLotes seleccion={seleccion}/>}
+                    {text === 'Crear cuenta' && <BotonCrear seleccion={seleccion} />}
                   </ListItemIcon>
               </ListItem>
             ))}
@@ -107,6 +110,7 @@ export default function Nav() {
         {state === 'Informes' && <InformesCalidad />}
         {state === 'Proveedor' && <Proveedor />}
         {state === 'Lotes' && <Lotes />}
+        {state === 'Crear cuenta' && <CrearCuentas />}
       </Box>
     </Box>
   )
