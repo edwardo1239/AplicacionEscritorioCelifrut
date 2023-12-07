@@ -34,6 +34,7 @@ import Lotes from './Lotes/components/Lotes'
 import InformesCalidad from './Calidad/Informes/components/InformesCalidad'
 import BotonCrear from './Cuentas/BotonCrear'
 import CrearCuentas from './Cuentas/CrearCuentas'
+import VerListasDeEmpaqueCerrada from './Contenedores/components/VerListaDeEmpaqueCerrada'
 
 
 const drawerWidth = 240
@@ -111,6 +112,7 @@ export default function Nav() {
         {state === 'Proveedor' && <Proveedor />}
         {state === 'Lotes' && <Lotes />}
         {state === 'Crear cuenta' && <CrearCuentas />}
+        {state === 'Contenedores cerrados' && <VerListasDeEmpaqueCerrada />}
       </Box>
     </Box>
   )
