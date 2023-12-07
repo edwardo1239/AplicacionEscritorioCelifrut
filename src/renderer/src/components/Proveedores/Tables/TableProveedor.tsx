@@ -20,6 +20,7 @@ interface DatosTabla {
 export default function Proveedores() {
   const [datos, setDatos] = useState<DatosTabla[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [filtroBusqueda, setFiltroBusqueda] = useState<string>('');
   const [editedIndex, setEditedIndex] = useState<number | null>(null);
   const [editedData, setEditedData] = useState<Partial<DatosTabla>>({
     PREDIO: '',

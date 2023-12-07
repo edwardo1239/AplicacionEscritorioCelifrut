@@ -251,6 +251,8 @@ const LoteTable: React.FC = () => {
   const [originalLoteData, setOriginalLoteData] = useState<LoteData[] | null>(null);
   const [filteredLoteData, setFilteredLoteData] = useState<LoteData[] | null>(null);
   const [filtroRendimiento, setFiltroRendimiento] = useState<number | null>(null);
+  const [porcentajesDeshidratacion, setPorcentajesDeshidratacion] = useState([]);
+  const [totalDeshidratacion, setTotalDeshidratacion] = useState<number | null>(null);
   const [tipoGrafico, setTipoGrafico] = useState<string>('bar');
   const [filtros, setFiltros] = useState<{ tipoFruta: string | ''; nombrePredio: string | ''; fechaInicio: string; fechaFin: string }>({
     tipoFruta: '',
@@ -271,6 +273,7 @@ const LoteTable: React.FC = () => {
     frutaNacional: false,
     desverdizado: false,
     exportacion: false,
+    observaciones: false
   });
   const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
   const [selectedLote, setSelectedLote] = useState<string>('');
@@ -329,25 +332,78 @@ const LoteTable: React.FC = () => {
   }, [originalLoteData, filtros, filtroRendimiento]);
 
   useEffect(() => {
-    const calcularTotalExportacionKilos = () => {
+    const calcularTotalDescarte = (descarte) => {
+      return Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
+    };
+  
+    const obtenerTotalExportacion = (exportacion) => {
+      if (!exportacion) return 0;
+  
+      return Object.values(exportacion).reduce(
+        (totalCalidad, calidad) =>
+          totalCalidad +
+          calidad.calidad1 +
+          calidad.calidad1_5 +
+          calidad.calidad2,
+        0
+      );
+    };
+  
+    const calcularTotales = () => {
+      // Calcular el total de exportación
+      let totalExportacionKilos = 0;
+  
       if (filteredLoteData) {
-        const totalKilos = filteredLoteData.reduce((total, lote) => {
+        filteredLoteData.forEach((lote) => {
           if (lote.exportacion) {
             Object.values(lote.exportacion).forEach((calidad) => {
-              total += calidad.calidad1 + calidad.calidad1_5 + calidad.calidad2;
+              totalExportacionKilos +=
+                calidad.calidad1 + calidad.calidad1_5 + calidad.calidad2;
             });
           }
-          return total;
-        }, 0);
-
-        setTotalExportacionKilos(totalKilos);
-      } else {
-        setTotalExportacionKilos(0);
+        });
       }
+  
+      setTotalExportacionKilos(totalExportacionKilos);
+  
+      // Calcular el total de deshidratación
+      let totalDeshidratacion = 0;
+      let totalKilos = 0;
+  
+      if (filteredLoteData && Array.isArray(filteredLoteData)) { 
+        filteredLoteData.forEach((lote) => {
+          totalDeshidratacion +=
+            calcularTotalDescarte(lote.descarteLavado) +
+            calcularTotalDescarte(lote.descarteEncerado) +
+            lote.directoNacional +
+            obtenerTotalExportacion(lote.exportacion);
+          
+          totalKilos += lote.kilos || 0; 
+        });
+      }
+  
+      setTotalDeshidratacion(totalDeshidratacion);
+  
+      const porcentajesDeshidratacion = (filteredLoteData || []).map((lote) => {
+        const deshidratacionPredio =
+          calcularTotalDescarte(lote.descarteLavado) +
+          calcularTotalDescarte(lote.descarteEncerado) +
+          lote.directoNacional +
+          obtenerTotalExportacion(lote.exportacion);
+    
+        const porcentaje = lote.kilos !== 0 ? (deshidratacionPredio / lote.kilos) * 100 : 0;
+    
+        return porcentaje.toLocaleString(undefined, { maximumFractionDigits: 2 }) + '%';
+      });
+    
+      setPorcentajesDeshidratacion(porcentajesDeshidratacion);
     };
-
-    calcularTotalExportacionKilos();
+    
+  
+    // Llamada a calcularTotales dentro del bloque de useEffect
+    calcularTotales();
   }, [filteredLoteData]);
+  
   
   const calcularTotalDescarte = (descarte) => {
     return Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
@@ -369,7 +425,8 @@ const LoteTable: React.FC = () => {
             <Th>Fecha de Ingreso</Th>
             {columnVisibility.canastillas && <Th>Canastillas</Th>}
             <Th>Tipo de Fruta</Th>
-            <Th>Observaciones</Th>
+            <Th>Deshidratación</Th>
+            {columnVisibility.observaciones && <Th>Observaciones</Th>}
             {columnVisibility.kilos && <Th>Kilos</Th>}
             {columnVisibility.placa && <Th>Placa</Th>}
             {columnVisibility.kilosVaciados && <Th>Kilos Vaciados</Th>}
@@ -392,7 +449,8 @@ const LoteTable: React.FC = () => {
               <Td>{format(new Date(lote.fechaIngreso),  'dd/MM/yyyy HH:mm:ss')}</Td>
               {columnVisibility.canastillas && <Td>{lote.canastillas}</Td>}
               <Td>{lote.tipoFruta}</Td>
-              <Td>{lote.observaciones}</Td>
+              <Td>{porcentajesDeshidratacion[0]}</Td>
+              {columnVisibility.observaciones && <Td>{lote.observaciones}</Td>}
               {columnVisibility.kilos && <Td>{lote.kilos}</Td>}
               {columnVisibility.placa && <Td>{lote.placa}</Td>}
               {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
@@ -414,41 +472,39 @@ const LoteTable: React.FC = () => {
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
               {columnVisibility.exportacion && (
-                <Td>
-                  {lote.exportacion &&
-                    Object.keys(lote.exportacion).map((calidad, index) => (
-                      <div key={index} style={{ marginBottom: '10px' }}>
-                        <div>
-                          <strong style={{ color: 'white' }}>
-                            {calidad.replace(/12:/, '')}:
-                          </strong>
-                          <table>
-                            <thead>
-                              <tr>
-                                <Th>Calidad 1</Th>
-                                <Th>Calidad 1.5</Th>
-                                <Th>Calidad 2</Th>
-                                <Th>Total</Th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr>
-                                <Td>{lote.exportacion[calidad].calidad1}</Td>
-                                <Td>{lote.exportacion[calidad].calidad1_5}</Td>
-                                <Td>{lote.exportacion[calidad].calidad2}</Td>
-                                <Td>
-                                  {lote.exportacion[calidad].calidad1 +
-                                    lote.exportacion[calidad].calidad1_5 +
-                                    lote.exportacion[calidad].calidad2}
-                                </Td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    ))}
-                </Td>
-              )}
+  <Td>
+    {lote.exportacion &&
+      Object.keys(lote.exportacion).map((calidad, index) => (
+        <div key={index} style={{ marginBottom: '10px' }}>
+          <div>
+          <strong style={{ color: '#000' }}> Contenedor {calidad.replace(/12:/, '')}:</strong>
+            <table>
+              <thead>
+                <tr>
+                  <Th>Calidad 1</Th>
+                  <Th>Calidad 1.5</Th>
+                  <Th>Calidad 2</Th>
+                  <Th>Total</Th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <Td>{lote.exportacion[calidad].calidad1}</Td>
+                  <Td>{lote.exportacion[calidad].calidad1_5}</Td>
+                  <Td>{lote.exportacion[calidad].calidad2}</Td>
+                  <Td>
+                    {lote.exportacion[calidad].calidad1 +
+                      lote.exportacion[calidad].calidad1_5 +
+                      lote.exportacion[calidad].calidad2}
+                  </Td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
+  </Td>
+)}
             </tr>
           ))}
         </tbody>
@@ -521,6 +577,11 @@ const LoteTable: React.FC = () => {
         label="Fruta Desverdizado"
         checked={columnVisibility.desverdizado}
         onChange={() => setColumnVisibility((prev) => ({ ...prev, desverdizado: !prev.desverdizado }))}
+      />
+      <ColumnVisibilityToggle
+        label="Observaciones"
+        checked={columnVisibility.observaciones}
+        onChange={() => setColumnVisibility((prev) => ({ ...prev, observaciones: !prev.observaciones }))}
       />
       <ColumnVisibilityToggle
         label="Fruta Exportación"
