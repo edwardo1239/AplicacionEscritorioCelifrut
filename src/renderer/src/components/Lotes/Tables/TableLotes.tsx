@@ -95,11 +95,6 @@ const Td = styled.td`
   border: 1px solid #ddd;
   padding: 12px;
   text-align: left;
-
-  .total-descartes {
-    font-weight: bold;
-    /* Otros estilos que desees aplicar al total */
-  }
 `;
 
 const Loading = styled.p`
@@ -473,26 +468,18 @@ const LoteTable: React.FC = () => {
               {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
               {columnVisibility.promedio && <Td>{lote.promedio}</Td>}
               {columnVisibility.rendimiento && <Td>{`${Math.round(lote.rendimiento)}%`}</Td>}
-              <Td>
-  {lote.descarteLavado &&
-    <>
-      <span>General: {lote.descarteLavado.descarteGeneral}, Pareja: {lote.descarteLavado.pareja}, Balin: {lote.descarteLavado.balin}, Descompuesta: {lote.descarteLavado.descompuesta}, Piel: {lote.descarteLavado.piel} , Hojas: {lote.descarteLavado.hojas}, <strong>Total:</strong> </span>
-      <span className="total-descartes">{calcularTotalDescarte(lote.descarteLavado)}</span>
-    </>
-  }
-</Td>
-<Td className="total-descartes">
-  {columnVisibility.descarteEncerado && (
-    <>
-      {lote.descarteEncerado &&
-        <>
-          <span>General: {lote.descarteEncerado.descarteGeneral}, Pareja: {lote.descarteEncerado.pareja}, Balin: {lote.descarteEncerado.balin}, Extra: {lote.descarteEncerado.extra}, Descompuesta: {lote.descarteEncerado.descompuesta}, Suelo: {lote.descarteEncerado.suelo}, <strong>Total:</strong> </span>
-          <span className="total-descartes">{calcularTotalDescarte(lote.descarteEncerado)}</span>
-        </>
-      }
-    </>
-  )}
-</Td>
+              {columnVisibility.descarteLavado && (
+  <Td className="total-descartes">
+    {lote.descarteLavado &&
+      `General: ${lote.descarteLavado.descarteGeneral}, Pareja: ${lote.descarteLavado.pareja}, Balin: ${lote.descarteLavado.balin}, Descompuesta: ${lote.descarteLavado.descompuesta}, Piel: ${lote.descarteLavado.piel} , Hojas: ${lote.descarteLavado.hojas}, Total: ${calcularTotalDescarte(lote.descarteLavado)}`}
+  </Td>
+)}
+{columnVisibility.descarteEncerado && (
+  <Td className="total-descartes">
+    {lote.descarteEncerado &&
+      `General: ${lote.descarteEncerado.descarteGeneral}, Pareja: ${lote.descarteEncerado.pareja}, Balin: ${lote.descarteEncerado.balin}, Extra: ${lote.descarteEncerado.extra}, Descompuesta: ${lote.descarteEncerado.descompuesta}, Suelo: ${lote.descarteEncerado.suelo}, Total: ${calcularTotalDescarte(lote.descarteEncerado)}`}
+  </Td>
+)}
               {columnVisibility.directoNacional && <Td>{lote.directoNacional}</Td>}
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
