@@ -95,6 +95,11 @@ const Td = styled.td`
   border: 1px solid #ddd;
   padding: 12px;
   text-align: left;
+
+  .total-descartes {
+    font-weight: bold;
+    /* Otros estilos que desees aplicar al total */
+  }
 `;
 
 const Loading = styled.p`
@@ -190,6 +195,8 @@ const CardContainerS = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   background-color: #fff; /* Ajusta el color de fondo según sea necesario */
 `;
+
+
 const Title = styled.h2`
   margin-bottom: 10px;
   position: relative;
@@ -273,7 +280,8 @@ const LoteTable: React.FC = () => {
     frutaNacional: false,
     desverdizado: false,
     exportacion: false,
-    observaciones: false
+    observaciones: false,
+    deshidratacion: true,
   });
   const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
   const [selectedLote, setSelectedLote] = useState<string>('');
@@ -352,7 +360,7 @@ const LoteTable: React.FC = () => {
     const calcularTotales = () => {
       // Calcular el total de exportación
       let totalExportacionKilos = 0;
-  
+    
       if (filteredLoteData) {
         filteredLoteData.forEach((lote) => {
           if (lote.exportacion) {
@@ -363,37 +371,44 @@ const LoteTable: React.FC = () => {
           }
         });
       }
-  
+    
       setTotalExportacionKilos(totalExportacionKilos);
-  
+    
       // Calcular el total de deshidratación
       let totalDeshidratacion = 0;
       let totalKilos = 0;
-  
-      if (filteredLoteData && Array.isArray(filteredLoteData)) { 
+    
+      if (filteredLoteData && Array.isArray(filteredLoteData)) {
         filteredLoteData.forEach((lote) => {
           totalDeshidratacion +=
-            calcularTotalDescarte(lote.descarteLavado) +
-            calcularTotalDescarte(lote.descarteEncerado) +
+            parseFloat(calcularTotalDescarte(lote.descarteLavado)) +
+            parseFloat(calcularTotalDescarte(lote.descarteEncerado)) +
             lote.directoNacional +
             obtenerTotalExportacion(lote.exportacion);
-          
-          totalKilos += lote.kilos || 0; 
+    
+          totalKilos += lote.kilos || 0;
         });
       }
-  
+    
       setTotalDeshidratacion(totalDeshidratacion);
-  
+    
       const porcentajesDeshidratacion = (filteredLoteData || []).map((lote) => {
-        const deshidratacionPredio =
-          calcularTotalDescarte(lote.descarteLavado) +
-          calcularTotalDescarte(lote.descarteEncerado) +
-          lote.directoNacional +
-          obtenerTotalExportacion(lote.exportacion);
+        if (columnVisibility.deshidratacion) {
+          const deshidratacionPredio =
+            parseFloat(calcularTotalDescarte(lote.descarteLavado)) +
+            parseFloat(calcularTotalDescarte(lote.descarteEncerado)) +
+            lote.directoNacional +
+            obtenerTotalExportacion(lote.exportacion);
     
-        const porcentaje = lote.kilos !== 0 ? (deshidratacionPredio / lote.kilos) * 100 : 0;
+          const porcentaje =
+            lote.kilos !== 0 ? (deshidratacionPredio / lote.kilos) * 100 : 0;
     
-        return porcentaje.toLocaleString(undefined, { maximumFractionDigits: 2 }) + '%';
+          const porcentajeAproximado = porcentaje.toFixed(2);
+    
+          return porcentajeAproximado + '%';
+        } else {
+          return ''; // o cualquier otro valor que desees mostrar cuando la columna no está visible
+        }
       });
     
       setPorcentajesDeshidratacion(porcentajesDeshidratacion);
@@ -406,8 +421,10 @@ const LoteTable: React.FC = () => {
   
   
   const calcularTotalDescarte = (descarte) => {
-    return Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
+    const total = Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
+    return total.toFixed(2);
   };
+  
 
   const renderTable = () => {
     const dataToRender = filteredLoteData || originalLoteData;
@@ -425,7 +442,7 @@ const LoteTable: React.FC = () => {
             <Th>Fecha de Ingreso</Th>
             {columnVisibility.canastillas && <Th>Canastillas</Th>}
             <Th>Tipo de Fruta</Th>
-            <Th>Deshidratación</Th>
+            {columnVisibility.deshidratacion && <Th>Deshidratación</Th>}
             {columnVisibility.observaciones && <Th>Observaciones</Th>}
             {columnVisibility.kilos && <Th>Kilos</Th>}
             {columnVisibility.placa && <Th>Placa</Th>}
@@ -449,25 +466,33 @@ const LoteTable: React.FC = () => {
               <Td>{format(new Date(lote.fechaIngreso),  'dd/MM/yyyy HH:mm:ss')}</Td>
               {columnVisibility.canastillas && <Td>{lote.canastillas}</Td>}
               <Td>{lote.tipoFruta}</Td>
-              <Td>{porcentajesDeshidratacion[0]}</Td>
+              {columnVisibility.deshidratacion && <Td>{porcentajesDeshidratacion[0]}</Td>}
               {columnVisibility.observaciones && <Td>{lote.observaciones}</Td>}
               {columnVisibility.kilos && <Td>{lote.kilos}</Td>}
               {columnVisibility.placa && <Td>{lote.placa}</Td>}
               {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
               {columnVisibility.promedio && <Td>{lote.promedio}</Td>}
               {columnVisibility.rendimiento && <Td>{`${Math.round(lote.rendimiento)}%`}</Td>}
-              {columnVisibility.descarteLavado && (
-  <Td>
-    {lote.descarteLavado &&
-      `General: ${lote.descarteLavado.descarteGeneral}, Pareja: ${lote.descarteLavado.pareja}, Balin: ${lote.descarteLavado.balin}, Descompuesta: ${lote.descarteLavado.descompuesta}, Piel: ${lote.descarteLavado.piel} , Hojas: ${lote.descarteLavado.hojas}, Total: ${calcularTotalDescarte(lote.descarteLavado)}`}
-  </Td>
-)}
-{columnVisibility.descarteEncerado && (
-  <Td>
-    {lote.descarteEncerado &&
-      `General: ${lote.descarteEncerado.descarteGeneral}, Pareja: ${lote.descarteEncerado.pareja}, Balin: ${lote.descarteEncerado.balin}, Extra: ${lote.descarteEncerado.extra}, Descompuesta: ${lote.descarteEncerado.descompuesta}, Suelo: ${lote.descarteEncerado.suelo}, Total: ${calcularTotalDescarte(lote.descarteEncerado)}`}
-  </Td>
-)}
+              <Td>
+  {lote.descarteLavado &&
+    <>
+      <span>General: {lote.descarteLavado.descarteGeneral}, Pareja: {lote.descarteLavado.pareja}, Balin: {lote.descarteLavado.balin}, Descompuesta: {lote.descarteLavado.descompuesta}, Piel: {lote.descarteLavado.piel} , Hojas: {lote.descarteLavado.hojas}, <strong>Total:</strong> </span>
+      <span className="total-descartes">{calcularTotalDescarte(lote.descarteLavado)}</span>
+    </>
+  }
+</Td>
+<Td className="total-descartes">
+  {columnVisibility.descarteEncerado && (
+    <>
+      {lote.descarteEncerado &&
+        <>
+          <span>General: {lote.descarteEncerado.descarteGeneral}, Pareja: {lote.descarteEncerado.pareja}, Balin: {lote.descarteEncerado.balin}, Extra: {lote.descarteEncerado.extra}, Descompuesta: {lote.descarteEncerado.descompuesta}, Suelo: {lote.descarteEncerado.suelo}, <strong>Total:</strong> </span>
+          <span className="total-descartes">{calcularTotalDescarte(lote.descarteEncerado)}</span>
+        </>
+      }
+    </>
+  )}
+</Td>
               {columnVisibility.directoNacional && <Td>{lote.directoNacional}</Td>}
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
@@ -588,6 +613,13 @@ const LoteTable: React.FC = () => {
         checked={columnVisibility.exportacion}
         onChange={() => setColumnVisibility((prev) => ({ ...prev, exportacion: !prev.exportacion }))}
       />
+      <ColumnVisibilityToggle
+  label="Deshidratación"
+  checked={columnVisibility.deshidratacion}
+  onChange={() =>
+    setColumnVisibility((prev) => ({ ...prev, deshidratacion: !prev.deshidratacion }))
+  }
+/>
        </div>
       </CardContainerS>
       </div>
