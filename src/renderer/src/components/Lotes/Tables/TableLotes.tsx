@@ -117,7 +117,7 @@ const FilterSelect = styled.select`
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  margin-top: 10px;
+  margin-top: 26px;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 
   &:hover {
@@ -682,7 +682,6 @@ const LoteTable: React.FC = () => {
         <TotalKilosExportacion>
           Total kilos exportación Filtrados: {totalExportacionKilos}
         </TotalKilosExportacion>
-          <br></br>
       </FilterContainer>
       <CardContainer>
           <Title>Gráficas</Title>
