@@ -305,7 +305,8 @@ const LoteTable: React.FC = () => {
       originalLoteData.filter(
         (lote) =>
           (filtros.tipoFruta === '' || lote.tipoFruta === filtros.tipoFruta) &&
-          (filtros.nombrePredio === '' || lote.nombrePredio.includes(filtros.nombrePredio)) &&
+          // Convertir a minúsculas antes de comparar
+          (filtros.nombrePredio === '' || lote.nombrePredio.toLowerCase().includes(filtros.nombrePredio.toLowerCase())) &&
           (!filtros.fechaInicio || lote.fechaIngreso >= filtros.fechaInicio) &&
           (!filtros.fechaFin || lote.fechaIngreso <= filtros.fechaFin) &&
           (filtroRendimiento === null || lote.rendimiento >= filtroRendimiento)
@@ -347,6 +348,10 @@ const LoteTable: React.FC = () => {
 
     calcularTotalExportacionKilos();
   }, [filteredLoteData]);
+  
+  const calcularTotalDescarte = (descarte) => {
+    return Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
+  };
 
   const renderTable = () => {
     const dataToRender = filteredLoteData || originalLoteData;
@@ -392,19 +397,19 @@ const LoteTable: React.FC = () => {
               {columnVisibility.placa && <Td>{lote.placa}</Td>}
               {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
               {columnVisibility.promedio && <Td>{lote.promedio}</Td>}
-              {columnVisibility.rendimiento && <Td>{`${(lote.rendimiento).toFixed(2)}%`}</Td>}
+              {columnVisibility.rendimiento && <Td>{`${Math.round(lote.rendimiento)}%`}</Td>}
               {columnVisibility.descarteLavado && (
-                <Td>
-                  {lote.descarteLavado &&
-                    `General: ${lote.descarteLavado.descarteGeneral}, Pareja: ${lote.descarteLavado.pareja}, Balin: ${lote.descarteLavado.balin}, Descompuesta: ${lote.descarteLavado.descompuesta}, Piel: ${lote.descarteLavado.piel} , Hojas: ${lote.descarteLavado.hojas}`}
-                </Td>
-              )}
-              {columnVisibility.descarteEncerado && (
-                <Td>
-                  {lote.descarteEncerado &&
-                    `General: ${lote.descarteEncerado.descarteGeneral}, Pareja: ${lote.descarteEncerado.pareja}, Balin: ${lote.descarteEncerado.balin}, Extra: ${lote.descarteEncerado.extra}, Descompuesta: ${lote.descarteEncerado.descompuesta}, Suelo: ${lote.descarteEncerado.suelo}`}
-                </Td>
-              )}
+  <Td>
+    {lote.descarteLavado &&
+      `General: ${lote.descarteLavado.descarteGeneral}, Pareja: ${lote.descarteLavado.pareja}, Balin: ${lote.descarteLavado.balin}, Descompuesta: ${lote.descarteLavado.descompuesta}, Piel: ${lote.descarteLavado.piel} , Hojas: ${lote.descarteLavado.hojas}, Total: ${calcularTotalDescarte(lote.descarteLavado)}`}
+  </Td>
+)}
+{columnVisibility.descarteEncerado && (
+  <Td>
+    {lote.descarteEncerado &&
+      `General: ${lote.descarteEncerado.descarteGeneral}, Pareja: ${lote.descarteEncerado.pareja}, Balin: ${lote.descarteEncerado.balin}, Extra: ${lote.descarteEncerado.extra}, Descompuesta: ${lote.descarteEncerado.descompuesta}, Suelo: ${lote.descarteEncerado.suelo}, Total: ${calcularTotalDescarte(lote.descarteEncerado)}`}
+  </Td>
+)}
               {columnVisibility.directoNacional && <Td>{lote.directoNacional}</Td>}
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
@@ -548,7 +553,7 @@ const LoteTable: React.FC = () => {
   onChange={(e) => {
     const valor = e.target.value === '' ? null : parseFloat(e.target.value.replace('.', '.')); // Reemplaza la coma por punto
     setFiltroRendimiento(valor);
-  }}
+  }}  
 />
         <div>
           <FilterDateLabel>Fecha de Inicio:</FilterDateLabel>

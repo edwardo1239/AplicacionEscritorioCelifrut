@@ -23,18 +23,21 @@ const getRandomColor = () => colorPalette[Math.floor(Math.random() * colorPalett
 const GraficasLotes = ({ lotes, selectedLote }) => {
   const [tipoGrafico, setTipoGrafico] = useState("barras");
   const [descarteData, setDescarteData] = useState(null);
+  const [barChartMaximized, setBarChartMaximized] = useState(true);
+  const [lineChartMaximized, setLineChartMaximized] = useState(true);
+
 
   if (!lotes) {
     return <p>No hay datos de lotes disponibles.</p>;
   }
 
-  const data = lotes.filter((lote) => lote.nombrePredio === selectedLote);
+  const data = lotes.find((lote) => lote.nombrePredio === selectedLote);
 
-  if (!selectedLote || data.length === 0) {
+  if (!selectedLote || !data) {
     return <p>Seleccione un lote válido para ver las gráficas.</p>;
   }
 
-  const totalKilos = data[0].kilos;
+  const totalKilos = data.kilos;
 
   let grafico;
 
@@ -60,6 +63,29 @@ const GraficasLotes = ({ lotes, selectedLote }) => {
       setDescarteData(descarteData);
     }
     // Otras acciones al hacer clic en una barra de Descarte Encerado
+  };
+
+  const handleExportacionClick = () => {
+    if (data.exportacion && typeof data.exportacion === 'object') {
+      console.log(data.exportacion); // Agrega esta línea para imprimir en la consola
+      const exportacionData = Object.entries(data.exportacion).map(([key, value]) => ({
+        name: key,
+        calidad1: Number(value.calidad1),
+        calidad1_5: Number(value.calidad1_5),
+        calidad2: Number(value.calidad2),
+        total: Number(value.calidad1) + Number(value.calidad1_5) + Number(value.calidad2),
+      }));
+  
+      setDescarteData(exportacionData);
+    }
+  };
+
+  const toggleBarChartSize = () => {
+    setBarChartMaximized(!barChartMaximized);
+  };
+
+  const toggleLineChartSize = () => {
+    setLineChartMaximized(!lineChartMaximized);
   };
 
   // Nueva función para manejar clic en la barra
@@ -89,54 +115,61 @@ const GraficasLotes = ({ lotes, selectedLote }) => {
 
   if (tipoGrafico === "barras") {
     const barChartData = [
-      { name: "Canastillas", value: data[0].canastillas, percentage: (data[0].canastillas / totalKilos) * 100 },
-      { name: "Kilos", value: data[0].kilos, percentage: (data[0].kilos / totalKilos) * 100 },
-      { name: "Kilos Vaciados", value: data[0].kilosVaciados, percentage: (data[0].kilosVaciados / totalKilos) * 100 },
-      { name: "Promedio", value: data[0].promedio, percentage: (data[0].promedio / totalKilos) * 100 },
-      { name: "Rendimiento", value: data[0].rendimiento, percentage: data[0].rendimiento },
-      { name: "Descarte Lavado", value: data[0].descarteLavado?.descarteGeneral, percentage: (data[0].descarteLavado?.descarteGeneral / totalKilos) * 100, descarteLavado: data[0].descarteLavado },
-      { name: "Descarte Encerado", value: data[0].descarteEncerado?.descarteGeneral, percentage: (data[0].descarteEncerado?.descarteGeneral / totalKilos) * 100, descarteEncerado: data[0].descarteEncerado },
-      { name: "Directo Nacional", value: data[0].directoNacional, percentage: (data[0].directoNacional / totalKilos) * 100 },
-      { name: "Fruta Nacional", value: data[0].frutaNacional, percentage: (data[0].frutaNacional / totalKilos) * 100 },
-      { name: "Fruta Desverdizado", value: data[0].frutaDesverdizado, percentage: (data[0].frutaDesverdizado / totalKilos) * 100 },
-      { name: "Fruta Exportación", value: data[0].frutaExportacion, percentage: (data[0].frutaExportacion / totalKilos) * 100 },
+      { name: "Canastillas", value: data.canastillas, percentage: (data.canastillas / totalKilos) * 100 },
+      { name: "Kilos", value: data.kilos, percentage: (data.kilos / totalKilos) * 100 },
+      { name: "Kilos Vaciados", value: data.kilosVaciados, percentage: (data.kilosVaciados / totalKilos) * 100 },
+      { name: "Promedio", value: data.promedio, percentage: (data.promedio / totalKilos) * 100 },
+      { name: "Rendimiento", value: data.rendimiento, percentage: data.rendimiento },
+      { name: "Descarte Lavado", value: data.descarteLavado?.descarteGeneral, percentage: (data.descarteLavado?.descarteGeneral / totalKilos) * 100, descarteLavado: data.descarteLavado },
+      { name: "Descarte Encerado", value: data.descarteEncerado?.descarteGeneral, percentage: (data.descarteEncerado?.descarteGeneral / totalKilos) * 100, descarteEncerado: data.descarteEncerado },
+      { name: "Directo Nacional", value: data.directoNacional, percentage: (data.directoNacional / totalKilos) * 100 },
+      { name: "Fruta Nacional", value: data.frutaNacional, percentage: (data.frutaNacional / totalKilos) * 100 },
+      { name: "Fruta Desverdizado", value: data.desverdizado, percentage: (data.desverdizado / totalKilos) * 100 },
+      { name: "Fruta Exportación", value: data.exportacion, percentage: totalKilos !== 0 ? (data.exportacion / totalKilos) * 100 : 0 },
     ];
 
     grafico = (
-      <ResponsiveContainer width="180%" height={350}>
-        <BarChart
-          data={descarteData || barChartData}
-          margin={{ top: 20, right: 80, left: 30, bottom: 0 }}
-          style={{ filter: "drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1))" }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip formatter={tooltipFormatter} />
-          <Legend verticalAlign="top" height={36} />
-          {Object.keys(descarteData ? descarteData[0] : barChartData[0])
-            .filter((key) => key !== "name") // Excluir "name" del gráfico de barras
-            .map((key, index) => (
-              <Bar
-                key={key}
-                dataKey={key}
-                fill={colorPalette[index % colorPalette.length]}
-                style={{ filter: "drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2))" }}
-                onClick={key === "descarteLavado" ? handleDescarteLavadoClick : (key === "descarteEncerado" ? handleDescarteEnceradoClick : handleBarClick)} // Asignar la función de clic
-              />
-            ))}
-        </BarChart>
-      </ResponsiveContainer>
+      <div>
+        <button onClick={toggleBarChartSize}>
+          {barChartMaximized ? 'Minimizar Gráfico de Barras' : 'Maximizar Gráfico de Barras'}
+        </button>
+        {barChartMaximized ? (
+          <ResponsiveContainer width="180%" height={350}>
+            <BarChart
+              data={descarteData || barChartData}
+              margin={{ top: 20, right: 80, left: 30, bottom: 0 }}
+              style={{ filter: "drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1))" }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip formatter={tooltipFormatter} />
+              <Legend verticalAlign="top" height={36} />
+              {Object.keys(descarteData ? descarteData[0] : barChartData[0])
+                .filter((key) => key !== "name")
+                .map((key, index) => (
+                  <Bar
+                    key={key}
+                    dataKey={key}
+                    fill={colorPalette[index % colorPalette.length]}
+                    style={{ filter: "drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2))" }}
+                    onClick={handleBarClick}
+                  />
+                ))}
+            </BarChart>
+          </ResponsiveContainer>
+        ) : null}
+      </div>
     );
   } else if (tipoGrafico === "circular") {
     const pieChartData = [
-      { name: "Canastillas", value: data[0].canastillas, percentage: (data[0].canastillas / totalKilos) * 100 },
-      { name: "Kilos", value: data[0].kilos, percentage: (data[0].kilos / totalKilos) * 100 },
-      { name: "Kilos Vaciados", value: data[0].kilosVaciados, percentage: (data[0].kilosVaciados / totalKilos) * 100 },
-      { name: "Promedio", value: data[0].promedio, percentage: (data[0].promedio / totalKilos) * 100 },
-      { name: "Rendimiento", value: data[0].rendimiento, percentage: data[0].rendimiento },
-      { name: "Descarte Lavado", value: data[0].descarteLavado?.descarteGeneral, percentage: (data[0].descarteLavado?.descarteGeneral / totalKilos) * 100 },
-      { name: "Descarte Encerado", value: data[0].descarteEncerado?.descarteGeneral, percentage: (data[0].descarteEncerado?.descarteGeneral / totalKilos) * 100 },
+      { name: "Canastillas", value: data.canastillas, percentage: (data.canastillas / totalKilos) * 100 },
+      { name: "Kilos", value: data.kilos, percentage: (data.kilos / totalKilos) * 100 },
+      { name: "Kilos Vaciados", value: data.kilosVaciados, percentage: (data.kilosVaciados / totalKilos) * 100 },
+      { name: "Promedio", value: data.promedio, percentage: (data.promedio / totalKilos) * 100 },
+      { name: "Rendimiento", value: data.rendimiento, percentage: data.rendimiento },
+      { name: "Descarte Lavado", value: data.descarteLavado?.descarteGeneral, percentage: (data.descarteLavado?.descarteGeneral / totalKilos) * 100 },
+      { name: "Descarte Encerado", value: data.descarteEncerado?.descarteGeneral, percentage: (data.descarteEncerado?.descarteGeneral / totalKilos) * 100 },
     ];
 
     grafico = (
@@ -163,17 +196,17 @@ const GraficasLotes = ({ lotes, selectedLote }) => {
     );
   } else if (tipoGrafico === "linea") {
     const lineChartData = [
-      { name: "Canastillas", value: data[0].canastillas },
-      { name: "Kilos", value: data[0].kilos },
-      { name: "Kilos Vaciados", value: data[0].kilosVaciados },
-      { name: "Promedio", value: data[0].promedio },
-      { name: "Rendimiento", value: data[0].rendimiento },
-      { name: "Descarte Lavado", value: data[0].descarteLavado?.descarteGeneral },
-      { name: "Descarte Encerado", value: data[0].descarteEncerado?.descarteGeneral },
-      { name: "Directo Nacional", value: data[0].directoNacional },
-      { name: "Fruta Nacional", value: data[0].frutaNacional },
-      { name: "Fruta Desverdizado", value: data[0].frutaDesverdizado },
-      { name: "Fruta Exportación", value: data[0].frutaExportacion },
+      { name: "Canastillas", value: data.canastillas },
+      { name: "Kilos", value: data.kilos },
+      { name: "Kilos Vaciados", value: data.kilosVaciados },
+      { name: "Promedio", value: data.promedio },
+      { name: "Rendimiento", value: data.rendimiento },
+      { name: "Descarte Lavado", value: data.descarteLavado?.descarteGeneral },
+      { name: "Descarte Encerado", value: data.descarteEncerado?.descarteGeneral },
+      { name: "Directo Nacional", value: data.directoNacional },
+      { name: "Fruta Nacional", value: data.frutaNacional },
+      { name: "Fruta Desverdizado", value: data.desverdizado },
+      { name: "Fruta Exportación", value: data.exportacion },
     ];
 
     grafico = (

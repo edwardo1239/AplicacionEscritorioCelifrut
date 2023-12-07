@@ -18,18 +18,23 @@ const App = () => {
 
   const handlePermissionChange = (permission) => {
     // Toggle the permission selection
-    const isSelected = selectedPermissions.includes(permission);
+    const isSelected = selectedPermissions.some((p) => p.name === permission.name);
     if (isSelected) {
-      setSelectedPermissions(selectedPermissions.filter((p) => p !== permission));
+      setSelectedPermissions(selectedPermissions.filter((p) => p.name !== permission.name));
     } else {
       setSelectedPermissions([...selectedPermissions, permission]);
     }
   };
 
   const handleSave = async () => {
+    const permissionsWithActions = selectedPermissions.map((permission) => {
+      // Agregar la letra "w" al permiso seleccionado
+      return permission.name === "Ingreso de fruta" ? { ...permission, name: `${permission.name}w` } : permission;
+    });
+  
     const request = {
       action: 'cuenta',
-      data: { username, password, permissions: selectedPermissions },
+      data: { username, password, permissions: permissionsWithActions },
     };
   
     try {
@@ -55,20 +60,42 @@ const App = () => {
   };
 
   const renderPermissionCheckbox = (permission) => {
-    const isSelected = selectedPermissions.includes(permission);
+    const isSelected = selectedPermissions.some((p) => p.name === permission.name);
     return (
-      <div key={permission} style={styles.checkboxContainer}>
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => handlePermissionChange(permission)}
-          style={styles.checkbox}
-        />
-        <label style={{ ...styles.checkboxLabel, ...(isSelected && styles.checkboxChecked) }}>
-          {permission}
-        </label>
+      <div key={permission.name} style={styles.checkboxContainer}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            onChange={() => handlePermissionChange(permission)}
+            style={styles.checkbox}
+          />
+          <label style={styles.checkboxLabel}>
+            {permission.description}
+          </label>
+        </div>
+        <div style={{ marginLeft: '20px' }}>
+          <input
+            type="checkbox"
+            checked={isSelected && permission.editable}
+            onChange={() => handleEditPermissionChange(permission)}
+            style={styles.checkbox}
+          />
+          <label style={styles.checkboxLabel}>
+            Editar
+          </label>
+        </div>
       </div>
     );
+  };
+
+  const handleEditPermissionChange = (permission) => {
+    // Toggle the edit permission selection
+    const updatedPermissions = selectedPermissions.map((p) => {
+      return p.name === permission.name ? { ...p, editable: !p.editable } : p;
+    });
+
+    setSelectedPermissions(updatedPermissions);
   };
 
   const styles = {
@@ -81,19 +108,12 @@ const App = () => {
       marginTop: '100px',
       marginBottom: '100px',
       transition: 'transform 0.3s ease, opacity 0.5s ease',
-      ':hover': {
-        transform: 'scale(1.05)',
-      },
     },
     title: {
       fontSize: '28px',
       color: '#333',
       marginBottom: '20px',
       transition: 'color 0.3s ease, transform 0.3s ease',
-      ':hover': {
-        color: '#4CAF50',
-        transform: 'scale(1.1)',
-      },
     },
     inputContainer: {
       display: 'flex',
@@ -111,13 +131,6 @@ const App = () => {
       borderRadius: '8px',
       border: '1px solid #ccc',
       transition: 'border-color 0.3s ease, transform 0.3s ease',
-      ':hover': {
-        borderColor: '#555',
-      },
-      ':focus': {
-        borderColor: '#4CAF50',
-        transform: 'scale(1.02)',
-      },
     },
     button: {
       padding: '12px',
@@ -127,12 +140,6 @@ const App = () => {
       borderRadius: '8px',
       cursor: 'pointer',
       transition: 'background-color 0.3s ease',
-      ':hover': {
-        backgroundColor: '#45a049',
-      },
-      ':active': {
-        transform: 'translateY(2px)',
-      },
     },
     icon: {
       marginRight: '8px',
@@ -161,27 +168,32 @@ const App = () => {
       alignItems: 'center',
       marginBottom: '12px',
       transition: 'transform 0.2s ease-in-out',
-      ':hover': {
-        transform: 'scale(1.1)',
-      },
     },
     checkbox: {
       marginRight: '8px',
-      opacity: 0,
-      transform: 'scale(0.8)',
+      opacity: 1,  // Ajuste para hacer visible el checkbox
+      transform: 'scale(1)',
       transition: 'opacity 0.3s ease, transform 0.3s ease',
     },
     checkboxLabel: {
       fontSize: '14px',
       color: '#555',
-      marginBottom: '100px'
+      marginBottom: '0px',
     },
     checkboxChecked: {
       color: '#4CAF50',
     },
   };
 
-  const permissions = ["Ingreso de fruta", "Inventario", "Contenedores", "Calidad", "Proveedores", "Lotes", "Cuenta"];
+  const permissions = [
+    { name: "Ingreso de fruta", description: "Ingreso de fruta" },
+    { name: "Inventario", description: "Inventario" },
+    { name: "Contenedores", description: "Contenedores" },
+    { name: "Calidad", description: "Calidad" },
+    { name: "Proveedores", description: "Proveedores" },
+    { name: "Lotes", description: "Lotes" },
+    { name: "Cuenta", description: "Cuenta" },
+  ];
 
   return (
     <div style={styles.card}>
@@ -209,18 +221,7 @@ const App = () => {
 
       <div style={styles.permissionContainer}>
         <label style={styles.label}>Permisos:</label>
-        {permissions.map((permission) => {
-          return (
-            <div key={permission}>
-              <input
-                type="checkbox"
-                checked={selectedPermissions.includes(permission)}
-                onChange={() => handlePermissionChange(permission)}
-              />
-              <label>{permission}</label>
-            </div>
-          );
-        })}
+        {permissions.map(renderPermissionCheckbox)}
       </div>
 
       <button onClick={handleSave} style={styles.button}>
