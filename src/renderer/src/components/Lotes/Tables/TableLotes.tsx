@@ -117,7 +117,7 @@ const FilterSelect = styled.select`
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  margin-top: 26px;
+  margin-top: 10px;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 
   &:hover {
@@ -419,6 +419,10 @@ const LoteTable: React.FC = () => {
     const total = Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
     return total.toFixed(2);
   };
+
+  const formatDescarteItem = (lote, label, value) => {
+    return lote.tipoFruta === 'Naranja' ? `${label}: ${value}` : `${label}: ${value} `;
+  };
   
 
   const renderTable = () => {
@@ -470,16 +474,38 @@ const LoteTable: React.FC = () => {
               {columnVisibility.rendimiento && <Td>{`${Math.round(lote.rendimiento)}%`}</Td>}
               {columnVisibility.descarteLavado && (
   <Td className="total-descartes">
-    {lote.descarteLavado &&
-      `General: ${lote.descarteLavado.descarteGeneral}, Pareja: ${lote.descarteLavado.pareja}, Balin: ${lote.descarteLavado.balin}, Descompuesta: ${lote.descarteLavado.descompuesta}, Piel: ${lote.descarteLavado.piel} , Hojas: ${lote.descarteLavado.hojas}, Total: ${calcularTotalDescarte(lote.descarteLavado)}`}
+    {lote.descarteLavado && (
+      <>
+        {formatDescarteItem(lote, 'General', lote.descarteLavado.descarteGeneral)},{' '}
+        {formatDescarteItem(lote, 'Pareja', lote.descarteLavado.pareja)},{' '}
+        {formatDescarteItem(lote, 'Balin', lote.descarteLavado.balin)},{' '}
+        {formatDescarteItem(lote, 'Descompuesta', lote.descarteLavado.descompuesta)},{' '}
+        {formatDescarteItem(lote, 'Piel', lote.descarteLavado.piel)},{' '}
+        {formatDescarteItem(lote, 'Hojas', lote.descarteLavado.hojas)},{' '}
+        <br></br>
+        <strong>Total: {calcularTotalDescarte(lote.descarteLavado)}</strong>
+      </>
+    )}
   </Td>
 )}
+
 {columnVisibility.descarteEncerado && (
   <Td className="total-descartes">
-    {lote.descarteEncerado &&
-      `General: ${lote.descarteEncerado.descarteGeneral}, Pareja: ${lote.descarteEncerado.pareja}, Balin: ${lote.descarteEncerado.balin}, Extra: ${lote.descarteEncerado.extra}, Descompuesta: ${lote.descarteEncerado.descompuesta}, Suelo: ${lote.descarteEncerado.suelo}, Total: ${calcularTotalDescarte(lote.descarteEncerado)}`}
+    {lote.descarteEncerado && (
+      <>
+        {formatDescarteItem(lote, 'General', lote.descarteEncerado.descarteGeneral)},{' '}
+        {formatDescarteItem(lote, 'Pareja', lote.descarteEncerado.pareja)},{' '}
+        {formatDescarteItem(lote, 'Balin', lote.descarteEncerado.balin)},{' '}
+        {formatDescarteItem(lote, 'Extra', lote.descarteEncerado.extra)},{' '}
+        {formatDescarteItem(lote, 'Descompuesta', lote.descarteEncerado.descompuesta)},{' '}
+        {formatDescarteItem(lote, 'Suelo', lote.descarteEncerado.suelo)},{' '}
+        <br></br>
+        <strong>Total: {calcularTotalDescarte(lote.descarteEncerado)}</strong>
+      </>
+    )}
   </Td>
 )}
+
               {columnVisibility.directoNacional && <Td>{lote.directoNacional}</Td>}
               {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
               {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}

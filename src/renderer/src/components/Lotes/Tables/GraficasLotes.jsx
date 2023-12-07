@@ -34,7 +34,7 @@ const GraficasLotes = ({ lotes, selectedLote }) => {
   const data = lotes.find((lote) => lote.nombrePredio === selectedLote);
 
   if (!selectedLote || !data) {
-    return <p>Seleccione un lote válido para ver las gráficas.</p>;
+    return <p></p>;
   }
 
   const totalKilos = data.kilos;
@@ -130,8 +130,9 @@ const GraficasLotes = ({ lotes, selectedLote }) => {
 
     grafico = (
       <div>
+        <br></br>
         <button onClick={toggleBarChartSize}>
-          {barChartMaximized ? 'Minimizar Gráfico de Barras' : 'Maximizar Gráfico de Barras'}
+          {barChartMaximized ? 'Minimizar' : 'Maximizar'}
         </button>
         {barChartMaximized ? (
           <ResponsiveContainer width="180%" height={350}>
@@ -227,6 +228,7 @@ const GraficasLotes = ({ lotes, selectedLote }) => {
   }
   return (
     <div>
+      <br></br>
       <h3>Seleccionar Tipo de Gráfico</h3>
       <select onChange={(e) => setTipoGrafico(e.target.value)} value={tipoGrafico}>
         <option value="barras">Gráfico de Barras</option>
