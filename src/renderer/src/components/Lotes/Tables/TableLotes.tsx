@@ -423,7 +423,6 @@ const LoteTable: React.FC = () => {
   const formatDescarteItem = (lote, label, value) => {
     return lote.tipoFruta === 'Naranja' ? `${label}: ${value}` : `${label}: ${value} `;
   };
-  
 
   const renderTable = () => {
     const dataToRender = filteredLoteData || originalLoteData;
@@ -691,6 +690,7 @@ const LoteTable: React.FC = () => {
               {originalLoteData?.map((lote) => (
                 <option key={lote.nombrePredio} value={lote.nombrePredio}>
                   {lote.nombrePredio}
+
                 </option>
               ))}
             </FilterSelect>

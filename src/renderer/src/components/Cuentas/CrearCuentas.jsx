@@ -1,66 +1,72 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
+import Confetti from 'react-confetti';
 
 const App = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const initialState = {
+    username: '',
+    password: '',
+    selectedPermissions: [],
+    showSuccessMessage: false,
+  };
+
+  const [state, setState] = useState(initialState);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const { username, password, selectedPermissions, showSuccessMessage } = state;
 
   const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
+    const updatedUsername = event.target.value;
+    // Asegurar que el usuario contenga solo letras y números
+    const sanitizedUsername = updatedUsername.replace(/[^a-zA-Z0-9]/g, '');
+    setState((prevState) => ({ ...prevState, username: sanitizedUsername }));
   };
 
   const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
+    const updatedPassword = event.target.value;
+    setState((prevState) => ({ ...prevState, password: updatedPassword }));
   };
 
   const handlePermissionChange = (permission) => {
-    // Toggle the permission selection
     const isSelected = selectedPermissions.some((p) => p.name === permission.name);
-    if (isSelected) {
-      setSelectedPermissions(selectedPermissions.filter((p) => p.name !== permission.name));
-    } else {
-      setSelectedPermissions([...selectedPermissions, permission]);
-    }
+    const updatedPermissions = isSelected
+      ? selectedPermissions.filter((p) => p.name !== permission.name)
+      : [...selectedPermissions, permission];
+
+    setState((prevState) => ({ ...prevState, selectedPermissions: updatedPermissions }));
   };
 
   const handleSave = async () => {
-    const permissionsWithActions = selectedPermissions.map((permission) => {
-      // Agregar la letra "w" al permiso seleccionado
-      return permission.name === "Ingreso de fruta" ? { ...permission, name: `${permission.name}w` } : permission;
-    });
-  
-    const request = {
-      action: 'cuenta',
-      data: { username, password, permissions: permissionsWithActions },
-    };
-  
     try {
+      setShowConfetti(true);
+
+      // Limpia los campos antes de enviar los datos al servidor.
+      setState(initialState);
+
       // Simulación de la llamada al servidor
-      const response = await window.api.ingresoFruta(request);
-  
-      // Verifica la respuesta del servidor y realiza acciones adicionales si es necesario.
-  
+      const response = await window.api.ingresoFruta({
+        action: 'cuenta',
+        data: { username, password, permissions: selectedPermissions.map((permission) => ({ ...permission })) },
+      });
+
       // Muestra el mensaje de éxito solo si la respuesta es satisfactoria.
-      setShowSuccessMessage(true);
-  
-      // Resetear los campos después de enviar los datos al servidor.
-      setUsername('');
-      setPassword('');
-      setSelectedPermissions([]);
-  
-      // Utilizar la función de setState con un callback para asegurar la actualización síncrona de los estados.
-      setShowSuccessMessage(false);
+      setState((prevState) => ({ ...prevState, showSuccessMessage: true }));
+
+      // Oculta el confeti y el mensaje de éxito después de 2000 milisegundos (2 segundos).
+      setTimeout(() => {
+        setShowConfetti(false);
+        setState(initialState);
+      }, 2000);
     } catch (error) {
-      // Maneja errores de la llamada al servidor aquí.
       console.error('Error al enviar datos al servidor:', error);
     }
   };
 
   const renderPermissionCheckbox = (permission) => {
     const isSelected = selectedPermissions.some((p) => p.name === permission.name);
+    const isEditable = isSelected && permission.editable;
+
     return (
       <div key={permission.name} style={styles.checkboxContainer}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -70,69 +76,75 @@ const App = () => {
             onChange={() => handlePermissionChange(permission)}
             style={styles.checkbox}
           />
-          <label style={styles.checkboxLabel}>
-            {permission.description}
-          </label>
+          <label style={styles.checkboxLabel}>{permission.description}</label>
         </div>
         <div style={{ marginLeft: '20px' }}>
           <input
             type="checkbox"
-            checked={isSelected && permission.editable}
+            checked={isEditable}
             onChange={() => handleEditPermissionChange(permission)}
             style={styles.checkbox}
           />
-          <label style={styles.checkboxLabel}>
-            Editar
-          </label>
+          <label style={styles.checkboxLabel}>Editar</label>
         </div>
       </div>
     );
   };
 
   const handleEditPermissionChange = (permission) => {
-    // Toggle the edit permission selection
-    const updatedPermissions = selectedPermissions.map((p) => {
-      return p.name === permission.name ? { ...p, editable: !p.editable } : p;
-    });
+    const updatedPermissions = selectedPermissions.map((p) =>
+      p.name === permission.name ? { ...p, editable: !p.editable } : p
+    );
 
-    setSelectedPermissions(updatedPermissions);
+    setState({ ...state, selectedPermissions: updatedPermissions });
   };
 
   const styles = {
     card: {
-      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+      boxShadow: '0 20px 20px rgba(0, 0, 0, 0.2)',
       borderRadius: '12px',
       padding: '40px',
       width: '550px',
       margin: 'auto',
-      marginTop: '100px',
-      marginBottom: '100px',
+      marginTop: '50px',
+      marginBottom: '50px',
       transition: 'transform 0.3s ease, opacity 0.5s ease',
+      position: 'relative',
+    },
+    cardHover: {
+      transform: 'scale(1.05)',
     },
     title: {
-      fontSize: '28px',
+      fontSize: '32px',
       color: '#333',
       marginBottom: '20px',
-      transition: 'color 0.3s ease, transform 0.3s ease',
+      fontWeight: 'bold',
+    },
+    subtitle: {
+      fontSize: '18px',
+      color: '#555',
+      marginBottom: '20px',
     },
     inputContainer: {
-      display: 'flex',
-      flexDirection: 'column',
       marginBottom: '20px',
     },
     label: {
+      display: 'block',
       marginBottom: '8px',
       color: '#333',
       fontSize: '16px',
     },
     input: {
+      width: '100%',
       padding: '12px',
       fontSize: '16px',
       borderRadius: '8px',
       border: '1px solid #ccc',
       transition: 'border-color 0.3s ease, transform 0.3s ease',
+      boxSizing: 'border-box',
     },
     button: {
+      width: '100%',
       padding: '12px',
       backgroundColor: '#4CAF50',
       color: 'white',
@@ -148,40 +160,25 @@ const App = () => {
       marginTop: '20px',
       color: '#4CAF50',
       fontWeight: 'bold',
-      animation: 'fade-in 1s ease-in-out',
-    },
-    '@keyframes fade-in': {
-      '0%': {
-        opacity: 0,
-      },
-      '100%': {
-        opacity: 1,
-      },
     },
     permissionContainer: {
-      display: 'flex',
-      flexDirection: 'column',
       marginBottom: '20px',
     },
     checkboxContainer: {
       display: 'flex',
       alignItems: 'center',
-      marginBottom: '12px',
-      transition: 'transform 0.2s ease-in-out',
+      marginBottom: '8px',
     },
     checkbox: {
-      marginRight: '8px',
-      opacity: 1,  // Ajuste para hacer visible el checkbox
-      transform: 'scale(1)',
-      transition: 'opacity 0.3s ease, transform 0.3s ease',
+      marginRight: '10px',
     },
     checkboxLabel: {
       fontSize: '14px',
       color: '#555',
-      marginBottom: '0px',
+      marginBottom: '2px',
     },
-    checkboxChecked: {
-      color: '#4CAF50',
+    checkboxTick: {
+      color: 'green',
     },
   };
 
@@ -196,14 +193,18 @@ const App = () => {
   ];
 
   return (
-    <div style={styles.card}>
-      <h1 style={styles.title}>Crear Cuenta</h1>
+    <div
+      style={{ ...styles.card, ...(showConfetti && styles.cardHover) }}
+      onMouseEnter={() => setShowConfetti(false)}
+    >
+      <h1 style={styles.title}>Formulario de Creación de Cuentas</h1>
+      <p style={styles.subtitle}>Complete la información a continuación para crear una nueva cuenta.</p>
 
       <div style={styles.inputContainer}>
         <label style={styles.label}>Usuario:</label>
         <input
           type="text"
-          value={username}
+          value={state.username}
           onChange={handleUsernameChange}
           style={styles.input}
         />
@@ -213,7 +214,7 @@ const App = () => {
         <label style={styles.label}>Contraseña:</label>
         <input
           type="password"
-          value={password}
+          value={state.password}
           onChange={handlePasswordChange}
           style={styles.input}
         />
@@ -230,9 +231,12 @@ const App = () => {
       </button>
 
       {showSuccessMessage && (
-        <div style={styles.successMessage}>
-          ¡Usuario {username} guardado con éxito!
-        </div>
+        <>
+          <div style={styles.successMessage}>
+            ¡Usuario {state.username} guardado con éxito!
+          </div>
+          {showConfetti && <Confetti />}
+        </>
       )}
     </div>
   );
