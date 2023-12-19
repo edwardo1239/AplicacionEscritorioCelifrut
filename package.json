@@ -10,7 +10,10 @@
         "repo": "recepcionapp",
         "token": "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"
       }
-    ]
+    ],
+    "win": {
+      "icon": "iconoCelifrut.ico"
+    }
   },
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
@@ -25,12 +28,14 @@
     "@mui/lab": "^5.0.0-alpha.138",
     "@mui/material": "^5.14.4",
     "@mui/styled-engine-sc": "^5.12.0",
-    "chart.js": "^4.4.0",
+    "chart.js": "^4.4.1",
     "date-fns": "^2.30.0",
     "echarts": "^5.4.3",
     "electron-updater": "^6.1.4",
+    "lodash": "^4.17.21",
     "react-chartjs-2": "^5.2.0",
     "react-confetti": "^6.1.0",
+    "react-dom-confetti": "^0.2.0",
     "react-icons": "^4.12.0",
     "react-spring": "^9.7.3",
     "react-three-fiber": "^6.0.13",

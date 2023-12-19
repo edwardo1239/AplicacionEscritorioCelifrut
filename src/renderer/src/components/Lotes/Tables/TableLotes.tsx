@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { format } from 'date-fns';
-import GraficasLotes from './GraficasLotes'; // Reemplaza './ruta/del/componente/GraficasLotes' con la ruta correcta
-
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
 
 interface LoteData {
   _id: string;
@@ -62,7 +61,7 @@ const TotalKilosExportacion = styled.p`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 0px;
   overflow: hidden;
   transition: max-height 0.3s ease-in-out;
   max-height: 500px;
@@ -110,6 +109,29 @@ const FilterContainer = styled.div`
   & > * {
     margin-right: 20px;
   }
+`;
+
+const ChartContainer = styled.div`
+  margin-top: 0;  /* Elimina el margen superior o ajusta según sea necesario */
+  display: flex;
+  flex-direction: column;  /* Ajusta la dirección del flex container a columna */
+`;
+
+const ChartSelector = styled.div`
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  margin-top: 30px;
+`;
+
+const ChartButton = styled.button`
+  padding: 9px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: ${(props) => (props.selected ? '#4caf50' : '#ddd')};
+  color: ${(props) => (props.selected ? '#fff' : '#000')};
+  border: 1px solid #ddd;
+  border-radius: 5px;
 `;
 
 const FilterSelect = styled.select`
@@ -248,19 +270,25 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
   }
 `;
 
-
-const LoteTable: React.FC = () => {
+ const LoteTable: React.FC = () => {
   const [originalLoteData, setOriginalLoteData] = useState<LoteData[] | null>(null);
   const [filteredLoteData, setFilteredLoteData] = useState<LoteData[] | null>(null);
-  const [filtroRendimiento, setFiltroRendimiento] = useState<number | null>(null);
-  const [porcentajesDeshidratacion, setPorcentajesDeshidratacion] = useState([]);
+  const [filtroRendimientoMin, setFiltroRendimientoMin] = useState<number | null>(null);
+  const [filtroRendimientoMax, setFiltroRendimientoMax] = useState<number | null>(null);
   const [totalDeshidratacion, setTotalDeshidratacion] = useState<number | null>(null);
   const [tipoGrafico, setTipoGrafico] = useState<string>('bar');
-  const [filtros, setFiltros] = useState<{ tipoFruta: string | ''; nombrePredio: string | ''; fechaInicio: string; fechaFin: string }>({
+  const [selectedChart, setSelectedChart] = useState<string>('bar');
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [selectedEfId, setSelectedEfId] = useState<string | null>(null);
+  const [filtroId, setFiltroId] = useState<string | null>(null);
+  const [porcentajesDeshidratacion, setPorcentajesDeshidratacion] = useState<number[]>([]);
+
+  const [filtros, setFiltros] = useState<{ tipoFruta: string | ''; nombrePredio: string | ''; fechaInicio: string; fechaFin: string;  id: string | ''; }>({
     tipoFruta: '',
     nombrePredio: '',
     fechaInicio: '',
     fechaFin: '',
+    id: '',
   });
   const [columnVisibility, setColumnVisibility] = useState({
     canastillas: false,
@@ -281,11 +309,6 @@ const LoteTable: React.FC = () => {
   const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
   const [selectedLote, setSelectedLote] = useState<string>('');
   
-  // Nuevo estado para los datos de las gráficas
-  const [graficasData, setGraficasData] = useState<{
-    data: number[];
-    labels: string[];
-  } | null>(null);
 
   useEffect(() => {
     const obtenerDatosDelServidor = async () => {
@@ -294,45 +317,408 @@ const LoteTable: React.FC = () => {
           action: 'obtenerDatosLotes',
           data: { filtros: {} },
         };
-
+  
         const datosLotes = await window.api.inventario(request);
         setOriginalLoteData(datosLotes.data);
+  
+        // Actualizar datos del gráfico aquí, calculando dataCuantitativa y dataCualitativa
+        const dataCuantitativa = datosLotes.data.map((lote) => lote.exportacion?.calidad1 || 0);
+        const dataCualitativa = datosLotes.data.map((lote) => lote.tipoFruta || '');
+  
+        // Actualizar el estado de los datos del gráfico
+        // setDatosCuantitativos(dataCuantitativa);
+        // setDatosCualitativos(dataCualitativa);
       } catch (error) {
         console.error('Error al obtener datos del lote:', error);
       }
     };
-
+  
     obtenerDatosDelServidor();
   }, []);
+  
+  const obtenerTotalExportacion = (exportacion) => {
+    if (!exportacion) return 0;
+
+    return Object.values(exportacion).reduce(
+      (totalCalidad, calidad) =>
+        totalCalidad +
+        calidad.calidad1 +
+        calidad.calidad1_5 +
+        calidad.calidad2,
+      0
+    );
+  };
 
   useEffect(() => {
     const filteredData =
-      originalLoteData &&
-      originalLoteData.filter(
-        (lote) =>
-          (filtros.tipoFruta === '' || lote.tipoFruta === filtros.tipoFruta) &&
-          // Convertir a minúsculas antes de comparar
-          (filtros.nombrePredio === '' || lote.nombrePredio.toLowerCase().includes(filtros.nombrePredio.toLowerCase())) &&
-          (!filtros.fechaInicio || lote.fechaIngreso >= filtros.fechaInicio) &&
-          (!filtros.fechaFin || lote.fechaIngreso <= filtros.fechaFin) &&
-          (filtroRendimiento === null || lote.rendimiento >= filtroRendimiento)
-      );
+  originalLoteData &&
+  originalLoteData.filter(
+    (lote) =>
+      (filtros.tipoFruta === '' || lote.tipoFruta === filtros.tipoFruta) &&
+      (filtros.nombrePredio === '' || lote.nombrePredio.toLowerCase().includes(filtros.nombrePredio.toLowerCase())) &&
+      (filtros.id === '' || lote._id.toLowerCase().includes(filtros.id.toLowerCase())) && // Nuevo filtro por ID
+      (!filtros.fechaInicio || lote.fechaIngreso >= filtros.fechaInicio) &&
+      (!filtros.fechaFin || lote.fechaIngreso <= filtros.fechaFin) &&
+      (filtroRendimientoMin === null || lote.rendimiento >= filtroRendimientoMin) &&
+      (filtroRendimientoMax === null || lote.rendimiento <= filtroRendimientoMax)
+  );
   
-    setFilteredLoteData(filteredData);
-  
-    // Actualizar datos de las gráficas cuando cambian los filtros
-    if (filteredData) {
-      const dataCuantitativa = filteredData.map((lote) => lote.exportacion?.calidad1 || 0);
-      const dataCualitativa = filteredData.map((lote) => lote.tipoFruta || '');
-  
-      setGraficasData({
-        data: dataCuantitativa,
-        labels: dataCualitativa,
+      setFilteredLoteData(filteredData);
+
+      // Actualizar datos del gráfico aquí, calculando dataCuantitativa y dataCualitativa
+      const dataCuantitativa = filteredData?.map((lote) => lote.exportacion?.calidad1 || 0);
+      const dataCualitativa = filteredData?.map((lote) => lote.tipoFruta || '');
+    
+      // Actualizar el estado de los datos del gráfico
+      // setDatosCuantitativos(dataCuantitativa);
+      // setDatosCualitativos(dataCualitativa);
+    }, [originalLoteData, filtros, filtroRendimientoMax, filtroRendimientoMin]);
+
+
+    const renderBarChart = () => {
+      // Inicializar objetos para almacenar las sumas
+      const totalExportacion = {};
+      const totalDescarteLavado = {};
+      const totalDescarteEncerado = {};
+      const totalKilos = {};
+      const totalKilosVaciados = {};
+      const totalDeshidratacion = {};
+    
+      // Iterar sobre los lotes para acumular las sumas
+      filteredLoteData?.forEach((lote) => {
+        const nombrePredio = lote.nombrePredio;
+    
+        totalExportacion[nombrePredio] = (totalExportacion[nombrePredio] || 0) + obtenerTotalExportacion(lote.exportacion);
+        totalDescarteLavado[nombrePredio] = (totalDescarteLavado[nombrePredio] || 0) + parseFloat(calcularTotalDescarte(lote.descarteLavado));
+        totalDescarteEncerado[nombrePredio] = (totalDescarteEncerado[nombrePredio] || 0) + parseFloat(calcularTotalDescarte(lote.descarteEncerado));
+        totalKilos[nombrePredio] = (totalKilos[nombrePredio] || 0) + parseFloat(lote.kilos);
+        totalKilosVaciados[nombrePredio] = (totalKilosVaciados[nombrePredio] || 0) + parseFloat(lote.kilosVaciados);
+        totalDeshidratacion[nombrePredio] = (totalDeshidratacion[nombrePredio] || 0) + obtenerTotalDeshidratacion(lote); // Nueva línea para deshidratación
       });
-    } else {
-      setGraficasData(null);
+
+      const filteredData = selectedItemId
+      ? filteredLoteData?.filter((lote) => lote._id === selectedItemId)
+      : filteredLoteData;
+    
+      // Consolidar datos acumulados
+      const data = {
+        labels: Object.keys(totalExportacion),
+        datasets: [
+          {
+            label: 'Total Exportación',
+            data: Object.values(totalExportacion),
+            backgroundColor: 'rgba(144, 238, 144, 0.2)',
+            borderColor: 'rgba(144, 238, 144, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Total Descarte Lavado',
+            data: Object.values(totalDescarteLavado),
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Total Descarte Encerado',
+            data: Object.values(totalDescarteEncerado),
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Total Kilos',
+            data: Object.values(totalKilos),
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+          },
+          {
+            label: 'Total Kilos Vaciados',
+            data: Object.values(totalKilosVaciados),
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          },
+        ],
+      };
+    
+      const numBars = data.labels.length;
+      const maxWidthPerBar = 100; // Ancho máximo por barra
+      const minHeight = 200; // Altura mínima del contenedor
+      
+      // Ajusta el tamaño del contenedor en función de la cantidad de barras y el ancho máximo por barra
+      const containerWidth = Math.max(1000, numBars * maxWidthPerBar); // Ajusta este valor según tus necesidades
+      const containerHeight = Math.max(minHeight, containerWidth * 0.6); // Puedes ajustar el factor de proporción según tus necesidades
+      
+      const barWidth = Math.min(maxWidthPerBar, containerWidth / numBars);
+      
+      const options = {
+        // Otras opciones de configuración de tus gráficos
+        scales: {
+          x: [
+            {
+              barThickness: barWidth, // Ancho de la barra
+              maxBarThickness: maxWidthPerBar,
+            },
+          ],
+        },
+      };
+      
+      return (
+        <div style={{ width: `${containerWidth}px`, height: `${containerHeight}px` }}>
+          <Bar data={data} options={options} />
+        </div>
+      );
+    };
+
+    
+    const obtenerTotalDeshidratacion = (lote) => {
+      const totalDescarteLavado = parseFloat(calcularTotalDescarte(lote.descarteLavado));
+      const totalDescarteEncerado = parseFloat(calcularTotalDescarte(lote.descarteEncerado));
+      const totalDirectoNacional = parseFloat(lote.directoNacional) || 0;
+      const totalExportacion = obtenerTotalExportacion(lote.exportacion);
+    
+      // Suma total de deshidratación
+      const totalDeshidratacion = totalDescarteLavado + totalDescarteEncerado + totalDirectoNacional + totalExportacion;
+    
+      // Calcular porcentaje con respecto a los kilos totales
+      const porcentajeDeshidratacion = (totalDeshidratacion / parseFloat(lote.kilos)) * 100;
+    
+      // Calcular el complemento para llegar al 100%
+      const complementoDeshidratacion = 100 - porcentajeDeshidratacion;
+    
+      return complementoDeshidratacion;
+    };
+    console.log(totalDeshidratacion)
+    
+    const renderDoughnutChart = () => {
+      // Inicializar objetos para almacenar las sumas
+      const totalExportacion = {};
+      const totalDescarteLavado = {};
+      const totalDescarteEncerado = {};
+      const totalDeshidratacion = {};
+    
+      // Iterar sobre los lotes para acumular las sumas
+      filteredLoteData?.forEach((lote) => {
+        if (lote) {
+          const nombrePredio = lote.nombrePredio;
+    
+          totalExportacion[nombrePredio] = (totalExportacion[nombrePredio] || 0) + obtenerTotalExportacion(lote.exportacion);
+    
+          // Comprobar si 'descarteLavado' está definido antes de usarlo
+          if (lote.descarteLavado !== undefined) {
+            totalDescarteLavado[nombrePredio] = (totalDescarteLavado[nombrePredio] || 0) + parseFloat(calcularTotalDescarte(lote.descarteLavado));
+          }
+    
+          // Comprobar si 'descarteEncerado' está definido antes de usarlo
+          if (lote.descarteEncerado !== undefined) {
+            totalDescarteEncerado[nombrePredio] = (totalDescarteEncerado[nombrePredio] || 0) + parseFloat(calcularTotalDescarte(lote.descarteEncerado));
+          }
+    
+          totalDeshidratacion[nombrePredio] = (totalDeshidratacion[nombrePredio] || 0) + obtenerTotalDeshidratacion(lote);
+
+        }
+      });
+    
+      // Filtrar los datos según el ID seleccionado
+      const filteredData = selectedItemId
+        ? filteredLoteData?.filter((lote) => lote._id === selectedItemId)
+        : filteredLoteData;
+    
+      // Consolidar datos acumulados
+      const colorPalette = [
+        '#1792a4',
+        '#44b4c4',
+        '#80c9c6',
+        '#a3d5d1',
+        '#c8e5e3',
+      ];
+      
+      
+      const totalExportacionValues = Object.values(totalExportacion);
+      const totalDescarteLavadoValues = Object.values(totalDescarteLavado);
+      const totalDescarteEnceradoValues = Object.values(totalDescarteEncerado);
+      const totalDeshidratacionValues = Object.values(totalDeshidratacion);
+    
+      const totalKilos = filteredData?.length > 0 ? parseFloat(filteredData[0].kilos) : 0;
+    
+      const porcentajes = [
+        ((totalExportacionValues.reduce((a, b) => a + b, 0) / totalKilos) * 100).toFixed(2),
+        ((totalDescarteLavadoValues.reduce((a, b) => a + b, 0) / totalKilos) * 100).toFixed(2),
+        ((totalDescarteEnceradoValues.reduce((a, b) => a + b, 0) / totalKilos) * 100).toFixed(2),
+        ((totalDeshidratacionValues.reduce((a, b) => a + b, 0) / totalKilos) * 100).toFixed(2),
+      ];
+    
+      // Ajustar porcentajes proporcionalmente al 100%
+      const totalPorcentaje = porcentajes.reduce((a, b) => parseFloat(a) + parseFloat(b), 0);
+      const porcentajesAjustados = porcentajes.map(porcentaje => ((parseFloat(porcentaje) / totalPorcentaje) * 100).toFixed(2));
+    
+      const data = {
+        labels: [
+          `Total Exportación\n${porcentajesAjustados[0]}%`,
+          `Total Descarte Lavado\n${porcentajesAjustados[1]}%`,
+          `Total Descarte Encerado\n${porcentajesAjustados[2]}%`,
+          `Total Deshidratación\n${porcentajesAjustados[3]}%`,
+        ],
+        datasets: [
+          {
+            data: [
+              totalExportacionValues.reduce((a, b) => a + b, 0),
+              totalDescarteLavadoValues.reduce((a, b) => a + b, 0),
+              totalDescarteEnceradoValues.reduce((a, b) => a + b, 0),
+              totalDeshidratacionValues.reduce((a, b) => a + b, 0),
+            ],
+            backgroundColor: colorPalette,
+            borderColor: colorPalette,
+            borderWidth: 1,
+          },
+        ],
+      };
+    
+      const options = {
+        cutout: '10%', // Ajusta el tamaño del agujero en el centro del gráfico
+        plugins: {
+          legend: {
+            position: 'bottom',
+          },
+        },
+      };
+    
+      return (
+        <div style={{ width: '650px', height: '650px', display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft: '600px' }}>
+          <Doughnut data={data} options={options} />
+        </div>
+      );
+    };
+    
+const renderLineChart = () => {
+  // Identificar predios repetidos y sumar valores
+  const totalExportacion = {};
+  const totalDescarteLavado = {};
+  const totalDescarteEncerado = {};
+  const totalKilos = {};
+  const totalKilosVaciados = {};
+  const totalDeshidratacion = {};
+
+  // Iterar sobre los lotes para acumular las sumas
+  filteredLoteData?.forEach((lote) => {
+    const nombrePredio = lote.nombrePredio;
+
+    if (!totalExportacion[nombrePredio]) {
+      totalExportacion[nombrePredio] = 0;
     }
-  }, [originalLoteData, filtros, filtroRendimiento]);
+
+    if (!totalDescarteLavado[nombrePredio]) {
+      totalDescarteLavado[nombrePredio] = 0;
+    }
+
+    if (!totalDescarteEncerado[nombrePredio]) {
+      totalDescarteEncerado[nombrePredio] = 0;
+    }
+
+    if (!totalKilos[nombrePredio]) {
+      totalKilos[nombrePredio] = 0;
+    }
+
+    if (!totalKilosVaciados[nombrePredio]) {
+      totalKilosVaciados[nombrePredio] = 0;
+    }
+
+    if (!totalDeshidratacion[nombrePredio]) {
+      totalDeshidratacion[nombrePredio] = 0;
+    }
+
+    totalExportacion[nombrePredio] += lote.exportacion || 0;
+    totalDescarteLavado[nombrePredio] += parseFloat(calcularTotalDescarte(lote.descarteLavado)) || 0;
+    totalDescarteEncerado[nombrePredio] += parseFloat(calcularTotalDescarte(lote.descarteEncerado)) || 0;
+    totalKilos[nombrePredio] += parseFloat(lote.kilos) || 0;
+    totalKilosVaciados[nombrePredio] += parseFloat(lote.kilosVaciados) || 0;
+    totalDeshidratacion[nombrePredio] += obtenerTotalDeshidratacion(lote) || 0;
+  });
+
+  const filteredData = selectedItemId
+    ? filteredLoteData?.filter((lote) => lote._id === selectedItemId)
+    : filteredLoteData;
+
+  const data = {
+    labels: Object.keys(totalExportacion),
+    datasets: [
+      {
+        label: 'Total Deshidratación',
+        data: Object.values(totalDeshidratacion), // Usa los valores acumulados
+        backgroundColor: 'rgba(255, 0, 0, 0.2)',
+        borderColor: 'rgba(255, 0, 0, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Total Exportación',
+        data: Object.values(totalExportacion),
+        backgroundColor: 'rgba(144, 238, 144, 0.2)',
+        borderColor: 'rgba(144, 238, 144, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Total Descarte Lavado',
+        data: Object.values(totalDescarteLavado),
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Total Descarte Encerado',
+        data: Object.values(totalDescarteEncerado),
+        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+        borderColor: 'rgba(255, 159, 64, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Total Kilos',
+        data: Object.values(totalKilos),
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Total Kilos Vaciados',
+        data: Object.values(totalKilosVaciados),
+        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1,
+      },
+      // Puedes agregar más datasets según sea necesario para tus otros datos
+    ],
+  };
+
+  const options = {
+    scales: {
+      x: {
+        beginAtZero: true,
+      },
+      y: {
+        beginAtZero: true,
+        max: Math.max(
+          ...Object.values(totalExportacion, totalDescarteLavado, totalDescarteEncerado, totalKilos, totalKilosVaciados, totalDeshidratacion)
+        ) + 10,
+      },
+    },
+  };
+
+  return <Line data={data} options={options} />;
+};
+
+
+  const renderChart = () => {
+    switch (selectedChart) {
+      case 'bar':
+        return renderBarChart();
+      case 'doughnut':
+        return renderDoughnutChart();
+      case 'line':
+        return renderLineChart();
+      default:
+        return null;
+    }
+  };
 
   useEffect(() => {
     const calcularTotalDescarte = (descarte) => {
@@ -389,6 +775,7 @@ const LoteTable: React.FC = () => {
     
       const porcentajesDeshidratacion = (filteredLoteData || []).map((lote) => {
         if (columnVisibility.deshidratacion) {
+          // Calcular el porcentaje de deshidratación para cada lote
           const deshidratacionPredio =
             parseFloat(calcularTotalDescarte(lote.descarteLavado)) +
             parseFloat(calcularTotalDescarte(lote.descarteEncerado)) +
@@ -396,13 +783,14 @@ const LoteTable: React.FC = () => {
             obtenerTotalExportacion(lote.exportacion);
     
           const porcentaje =
-            lote.kilos !== 0 ? (deshidratacionPredio / lote.kilos) * 100 : 0;
+            lote.kilos !== 0 ? 100 - ((deshidratacionPredio / lote.kilos) * 100) : 0;
+          const porcentajeAproximado = parseFloat(porcentaje.toFixed(2));
     
-          const porcentajeAproximado = porcentaje.toFixed(2);
+          console.log(`Deshidratación de ${lote.nombrePredio}: ${deshidratacionPredio} `);
     
           return porcentajeAproximado + '%';
         } else {
-          return ''; // o cualquier otro valor que desees mostrar cuando la columna no está visible
+          return 0; // o cualquier otro valor que desees mostrar cuando la columna no está visible
         }
       });
     
@@ -416,10 +804,13 @@ const LoteTable: React.FC = () => {
   
   
   const calcularTotalDescarte = (descarte) => {
-    const total = Object.values(descarte).reduce((total, cantidad) => total + cantidad, 0);
-    return total.toFixed(2);
+    const total = Object.values(descarte).reduce((total, cantidad) => {
+      const numericValue = parseFloat(cantidad);
+      return isNaN(numericValue) ? total : total + numericValue;
+    }, 0);
+    return typeof total === 'number' ? total.toFixed(2) : total;
   };
-
+  
   const formatDescarteItem = (lote, label, value) => {
     return lote.tipoFruta === 'Naranja' ? `${label}: ${value}` : `${label}: ${value} `;
   };
@@ -644,7 +1035,6 @@ const LoteTable: React.FC = () => {
           <option value="Naranja">Naranja</option>
           <option value="Limon">Limón</option>
         </FilterSelect>
-
         <FilterInput
           type="text"
           placeholder="Nombre del Predio"
@@ -652,14 +1042,25 @@ const LoteTable: React.FC = () => {
           onChange={(e) => setFiltros({ ...filtros, nombrePredio: e.target.value })}
         />
         <FilterInput
-  type="number"
-  placeholder="Filtrar por rendimiento"
-  value={filtroRendimiento !== null ? filtroRendimiento : ''}
-  onChange={(e) => {
-    const valor = e.target.value === '' ? null : parseFloat(e.target.value.replace('.', '.')); // Reemplaza la coma por punto
-    setFiltroRendimiento(valor);
-  }}  
+  type="text"
+  placeholder="EF1"
+  value={filtros.id}
+  onChange={(e) => setFiltros({ ...filtros, id: e.target.value })}
 />
+        <div>  <label htmlFor="filtroRendimientoMin"><br></br>Rendimiento:</label></div>
+          <FilterInput
+    type="number"
+    placeholder="Mínimo"
+    value={filtroRendimientoMin !== null ? filtroRendimientoMin : ''}
+    onChange={(e) => setFiltroRendimientoMin(e.target.value !== '' ? parseFloat(e.target.value) : null)}
+  />
+  <span> - </span>
+  <FilterInput
+    type="number"
+    placeholder="Máximo"
+    value={filtroRendimientoMax !== null ? filtroRendimientoMax : ''}
+    onChange={(e) => setFiltroRendimientoMax(e.target.value !== '' ? parseFloat(e.target.value) : null)}
+  />
         <div>
           <FilterDateLabel>Fecha de Inicio:</FilterDateLabel>
           <FilterDate
@@ -682,23 +1083,30 @@ const LoteTable: React.FC = () => {
           Total kilos exportación Filtrados: {totalExportacionKilos}
         </TotalKilosExportacion>
       </FilterContainer>
-      <CardContainer>
-          <Title>Gráficas</Title>
-          <div>
-            <FilterSelect value={selectedLote} onChange={(e) => setSelectedLote(e.target.value)}>
-              <option value="">Seleccionar Lote</option>
-              {originalLoteData?.map((lote) => (
-                <option key={lote.nombrePredio} value={lote.nombrePredio}>
-                  {lote.nombrePredio}
-
-                </option>
-              ))}
-            </FilterSelect>
-          </div>
-          <GraficasLotes lotes={originalLoteData} selectedLote={selectedLote} />
-        </CardContainer>
       </CardContainer>
+      <ChartSelector>
+        <ChartButton
+          selected={selectedChart === 'bar'}
+          onClick={() => setSelectedChart('bar')}
+        >
+          Barras
+        </ChartButton>
+        <ChartButton
+          selected={selectedChart === 'doughnut'}
+          onClick={() => setSelectedChart('doughnut')}
+        >
+          Circular
+        </ChartButton>
+        <ChartButton
+          selected={selectedChart === 'line'}
+          onClick={() => setSelectedChart('line')}
+        >
+          Líneas
+        </ChartButton>
+      </ChartSelector>
+      <ChartContainer>{renderChart()}</ChartContainer>
       {renderTable()}
+      
     </Container>
   );
 };

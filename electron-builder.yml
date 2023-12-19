@@ -13,6 +13,7 @@ asarUnpack:
 afterSign: build/notarize.js
 win:
   executableName: recepcionapp
+  icon: build/iconCelifrut.ico  # Añade esta línea con la ruta correcta a tu icono .ico
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -25,6 +26,7 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  icon: build/tu-icono.icns  # Añade esta línea con la ruta correcta a tu icono .icns
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -34,9 +36,11 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
+  icon: build/tu-icono.png  # Añade esta línea con la ruta correcta a tu icono .png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
+

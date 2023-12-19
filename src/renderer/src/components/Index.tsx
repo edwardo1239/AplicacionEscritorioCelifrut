@@ -1,34 +1,35 @@
-import LoadingButton from '@mui/lab/LoadingButton'
-import { InputAdornment, TextField, Typography } from '@mui/material'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import React, { useState, useEffect } from 'react'
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye'
-import Api from '../../../preload/types'
+import LoadingButton from '@mui/lab/LoadingButton';
+import { InputAdornment, TextField, Typography } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import React, { useState } from 'react';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import Confetti from 'react-dom-confetti'; // Importa la librería de confeti
+import Api from '../../../preload/types';
 
 type indexType = {
-  permisosSesion: (permisos: string[]) => void
-}
+  permisosSesion: (permisos: string[]) => void;
+};
 
 type datosLogInType = {
-  user: string
-  password: string
-}
+  user: string;
+  password: string;
+};
 
 type loginResponseType = {
-  status: number
-  user: string
-  permisos: string[]
-}
+  status: number;
+  user: string;
+  permisos: string[];
+};
 
-let prueba = "esta es una prueba de git"
 export default function Index(props: indexType) {
-  const [usuario, setUsuario] = useState<string>('')
-  const [password, setPassword] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
-  const [visible, setVisible] = useState<boolean>(true)
-  const [errorUser, setErrorUser] = useState<boolean>(false)
-  const [errorClave, setErrorClave] = useState<boolean>(false)
-  const [isLogged, setIsLogged] = useState<boolean>(false)
+  const [usuario, setUsuario] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [visible, setVisible] = useState<boolean>(true);
+  const [errorUser, setErrorUser] = useState<boolean>(false);
+  const [errorClave, setErrorClave] = useState<boolean>(false);
+  const [isLogged, setIsLogged] = useState<boolean>(false);
+  const [confetti, setConfetti] = useState<boolean>(false);
 
   const login: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -41,46 +42,49 @@ export default function Index(props: indexType) {
       window.api.logIn(datosLogIn).then((response) => {
         console.log(response);
         if (response.status === 200) {
-          props.permisosSesion(response.data.permisos); // Ajuste aquí
+          props.permisosSesion(response.data.permisos);
           setIsLogged(true);
           setErrorUser(false);
           setErrorClave(false);
+          setConfetti(true); // Habilita el confeti cuando el usuario inicia sesión
+          // Opcional: Puedes desactivar el confeti después de cierta duración
+          setTimeout(() => setConfetti(false), 5000); // 5000 milisegundos (ajusta según sea necesario)
         } else if (response.status === 401) {
-          setErrorUser(true)
-          setIsLogged(false)
+          setErrorUser(true);
+          setIsLogged(false);
         } else if (response.status === 402) {
-          setErrorClave(true)
-          setIsLogged(false)
+          setErrorClave(true);
+          setIsLogged(false);
         } else {
-          setErrorUser(false)
-          setErrorClave(false)
-          alert('Error al intentar inciar sesion')
+          setErrorUser(false);
+          setErrorClave(false);
+          alert('Error al intentar iniciar sesión');
         }
-      })
+      });
     } catch (e) {
-      console.log(`${e.name}:${e.message}`)
+      console.log(`${e.name}:${e.message}`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const showPassword = () => {
-    setVisible(!visible)
-  }
+    setVisible(!visible);
+  };
 
   const inputClave = (e) => {
-    setPassword(e)
+    setPassword(e);
     if (password == '') {
-      setErrorClave(false)
+      setErrorClave(false);
     }
-  }
+  };
 
   const inputUsuario = (e) => {
-    setUsuario(e)
+    setUsuario(e);
     if (usuario == '') {
-      setErrorUser(false)
+      setErrorUser(false);
     }
-  }
+  };
 
   return (
     <form
@@ -94,7 +98,7 @@ export default function Index(props: indexType) {
           height: 380,
           width: 450,
           borderRadius: 15,
-          boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px'
+          boxShadow: 'rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px',
         }}
       >
         {isLogged ? (
@@ -105,13 +109,16 @@ export default function Index(props: indexType) {
                 justifyContent: 'center',
                 margin: '1.5rem',
                 height: 275,
-                paddingTop: 100
+                paddingTop: 100,
               }}
             >
-              <h2 className='4xl'>
-                Bienvenido
-              </h2>
+              <h2 className="4xl">Bienvenido</h2>
             </div>
+            {/* Agrega el componente de confeti aquí */}
+            <Confetti
+              active={confetti}
+              config={{ angle: 90, spread: 360, startVelocity: 40, elementCount: 70 }}
+            />
           </>
         ) : (
           <>
@@ -130,7 +137,7 @@ export default function Index(props: indexType) {
                 onChange={(e) => inputUsuario(e.target.value)}
                 sx={{ m: 1, width: '75%' }}
                 inputProps={{
-                  pattern: '[a-zA-Z0-9 ]+'
+                  pattern: '[a-zA-Z0-9 ]+',
                 }}
               />
             </div>
@@ -144,17 +151,14 @@ export default function Index(props: indexType) {
                 onChange={(e) => inputClave(e.target.value)}
                 sx={{ m: 1, width: '75%' }}
                 inputProps={{
-                  pattern: '[a-zA-Z0-9]+'
+                  pattern: '[a-zA-Z0-9]+',
                 }}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end" sx={{ cursor: 'pointer' }}>
-                      <RemoveRedEyeIcon
-                        aria-label="toggle password visibility"
-                        onClick={showPassword}
-                      />
+                      <RemoveRedEyeIcon aria-label="toggle password visibility" onClick={showPassword} />
                     </InputAdornment>
-                  )
+                  ),
                 }}
               />
             </div>
@@ -163,7 +167,7 @@ export default function Index(props: indexType) {
                 display: 'flex',
                 justifyContent: 'center',
                 alignContent: 'center',
-                marginTop: '1.5rem'
+                marginTop: '1.5rem',
               }}
             >
               <LoadingButton
@@ -187,10 +191,11 @@ export default function Index(props: indexType) {
             backgroundColor: '#7D9F3A',
             top: 'auto',
             bottom: 0,
-            marginTop: '1rem'
+            marginTop: '1rem',
           }}
         ></div>
       </div>
     </form>
-  )
+  );
 }
+
