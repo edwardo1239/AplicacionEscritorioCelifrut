@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faCheckSquare } from '@fortawesome/free-solid-svg-icons';
-import Confetti from 'react-confetti';
+
 
 const App = () => {
   const initialState = {
@@ -14,6 +14,26 @@ const App = () => {
   const [state, setState] = useState(initialState);
   const [showConfetti, setShowConfetti] = useState(false);
 
+
+  useEffect(() => {
+    const obtenerPermisos = async () => {
+      try {
+        const request = {
+          action: 'obtenerPermisos', // Ajusta según la acción requerida en tu servidor
+        };
+
+        // Realiza la petición al servidor para obtener los permisos
+        const datosPermisos = await window.api.obtenerPermisos(request);
+
+        // Actualiza el estado con los permisos obtenidos del servidor
+        setState((prevState) => ({ ...prevState, selectedPermissions: datosPermisos }));
+      } catch (error) {
+        console.error('Error al obtener permisos:', error);
+      }
+    };
+
+    obtenerPermisos();
+  }, []);
   const { username, password, selectedPermissions, showSuccessMessage } = state;
 
   const handleUsernameChange = (event) => {
@@ -46,7 +66,7 @@ const App = () => {
 
       // Simulación de la llamada al servidor
       const response = await window.api.ingresoFruta({
-        action: 'cuenta',
+        action: 'crearCuenta',
         data: { username, password, permissions: selectedPermissions.map((permission) => ({ ...permission })) },
       });
 

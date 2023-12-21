@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { format } from 'date-fns';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
+
 
 interface LoteData {
   _id: string;
@@ -101,13 +104,18 @@ const Loading = styled.p`
   margin-top: 20px;
 `;
 
+
 const FilterContainer = styled.div`
   display: flex;
+  flexWrap: wrap;
+  display: block;
+  gap: 10px;
+  justify-content:center;
   align-items: center;
   margin-bottom: 30px;
   margin-top: 35px;
   & > * {
-    margin-right: 20px;
+    margin-bottom: 20px; /* Ajusta el espacio entre los elementos */
   }
 `;
 
@@ -140,6 +148,7 @@ const FilterSelect = styled.select`
   border: 1px solid #ddd;
   border-radius: 5px;
   margin-top: 26px;
+  margin-right: 15px;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 
   &:hover {
@@ -158,7 +167,6 @@ const FilterInput = styled.input`
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  margin-top: 26px;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 
   &:hover {
@@ -171,6 +179,25 @@ const FilterInput = styled.input`
     border-color: #4caf50; /* Color del borde al enfocar */
   }
 `;
+const FilterInputs = styled.input`
+  padding: 10px;
+  width: 49%;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #4caf50; /* Color de fondo en hover */
+    color: #000; /* Color del texto en hover */
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4caf50; /* Color del borde al enfocar */
+  }
+`;
+
 
 const FilterDate = styled.input`
   padding: 10px;
@@ -309,6 +336,26 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
   });
   const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
   const [selectedLote, setSelectedLote] = useState<string>('');
+  const [nombrePredioSuggestions, setNombrePredioSuggestions] = useState([]);
+
+  const handleNombrePredioChange = (event) => {
+    const inputValue = event.target.value.toLowerCase();
+  
+    if (inputValue === "") {
+      setNombrePredioSuggestions([]);
+      setFiltros((prevFiltros) => ({ ...prevFiltros, nombrePredio: "" }));
+    } else {
+      const suggestions = Array.from(
+        new Set(
+          originalLoteData
+            ?.map((lote) => lote.nombrePredio)
+            .filter((predio) => predio.toLowerCase().startsWith(inputValue))
+        )
+      );
+      setFiltros((prevFiltros) => ({ ...prevFiltros, nombrePredio: inputValue }));
+      setNombrePredioSuggestions(suggestions);
+    }
+  };  
   
   useEffect(() => {
     const obtenerDatosDelServidor = async () => {
@@ -502,14 +549,16 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
         ? filteredLoteData?.filter((lote) => lote._id === selectedItemId)
         : filteredLoteData;
     
-      
-      const colorPalette = [
-        '#44b4c4', // Celeste
-        '#80c9c6', // Turquesa
-        '#a3d5d1', // Verde agua
-        '#e4f1ef', // Verde pálido
-      ];
-      
+        const colorPalette = [
+          '#3498db',   // Azul
+          '#f1c40f',   // Amarillo cálido
+          '#e74c3c',   // Rojo
+          '#2ecc71',   // Verde esmeralda
+          '#f39c12',   // Naranja
+          '#e74c3c',   // Rojo
+          '#f1c40f',   // Amarillo cálido
+        ];
+
       const totalExportacionValues = Object.values(totalExportacion);
       const totalDescarteLavadoValues = Object.values(totalDescarteLavado);
       const totalDescarteEnceradoValues = Object.values(totalDescarteEncerado);
@@ -550,7 +599,7 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
       };
     
       const options = {
-        cutout: '10%', // Ajusta el tamaño del agujero en el centro del gráfico
+        cutout: '55%', // Ajusta el tamaño del agujero en el centro del gráfico
         plugins: {
           legend: {
             position: 'bottom',
@@ -984,19 +1033,8 @@ const renderChart = () => {
           <option value="Naranja">Naranja</option>
           <option value="Limon">Limón</option>
         </FilterSelect>
-        <FilterInput
-          type="text"
-          placeholder="Nombre del Predio"
-          value={filtros.nombrePredio}
-          onChange={(e) => setFiltros({ ...filtros, nombrePredio: e.target.value })}
-        />
-        <FilterInput
-  type="text"
-  placeholder="EF1"
-  value={filtros.id}
-  onChange={(e) => setFiltros({ ...filtros, id: e.target.value })}
-/>
-        <div>  <label htmlFor="filtroRendimientoMin"><br></br>Rendimiento:</label></div>
+
+        <label htmlFor="filtroRendimientoMin">Rendimiento:</label>
           <FilterInput
     type="number"
     placeholder="Mínimo"
@@ -1010,6 +1048,25 @@ const renderChart = () => {
     value={filtroRendimientoMax !== null ? filtroRendimientoMax : ''}
     onChange={(e) => setFiltroRendimientoMax(e.target.value !== '' ? parseFloat(e.target.value) : null)}
   />
+<Autocomplete
+  options={nombrePredioSuggestions}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Nombre del Predio"
+      variant="outlined"
+      onChange={handleNombrePredioChange}
+      style={{ width: '503px' }} // Ajusta el tamaño según tus necesidades
+    />
+  )}
+/>
+<FilterInputs
+  type="text"
+  placeholder="EF1"
+  value={filtros.id}
+  onChange={(e) => setFiltros({ ...filtros, id: e.target.value })}
+/>
+
         <div>
           <FilterDateLabel>Fecha de Inicio:</FilterDateLabel>
           <FilterDate
