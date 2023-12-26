@@ -1,6 +1,6 @@
 import React from 'react'
-import { VscAccount } from "react-icons/vsc";
 import { List, ListItem, ListItemButton, ListItemText } from '@mui/material'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 export default function (props) {
 
@@ -14,7 +14,7 @@ export default function (props) {
       <List>
         <ListItem disablePadding>
           <ListItemButton sx={{gap:2}} onClick={clickIngresoFruta}>
-          <VscAccount />
+          <AccountCircleIcon />
             <ListItemText primary={'Crear cuenta'} />
           </ListItemButton>
         </ListItem>

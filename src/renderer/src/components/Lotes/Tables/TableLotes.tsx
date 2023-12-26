@@ -148,6 +148,7 @@ const FilterSelect = styled.select`
   border: 1px solid #ddd;
   border-radius: 5px;
   margin-top: 26px;
+  width: 39%;
   margin-right: 15px;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 
@@ -181,7 +182,7 @@ const FilterInput = styled.input`
 `;
 const FilterInputs = styled.input`
   padding: 10px;
-  width: 49%;
+  width: 503px;
   font-size: 16px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -336,26 +337,24 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
   });
   const [totalExportacionKilos, setTotalExportacionKilos] = useState<number>(0);
   const [selectedLote, setSelectedLote] = useState<string>('');
+  const [selectedNombrePredio, setSelectedNombrePredio] = useState("");
   const [nombrePredioSuggestions, setNombrePredioSuggestions] = useState([]);
 
-  const handleNombrePredioChange = (event) => {
-    const inputValue = event.target.value.toLowerCase();
+  const handleNombrePredioChange = (event, value) => {
+    const inputValue = value || "";
   
-    if (inputValue === "") {
-      setNombrePredioSuggestions([]);
-      setFiltros((prevFiltros) => ({ ...prevFiltros, nombrePredio: "" }));
-    } else {
-      const suggestions = Array.from(
-        new Set(
-          originalLoteData
-            ?.map((lote) => lote.nombrePredio)
-            .filter((predio) => predio.toLowerCase().startsWith(inputValue))
-        )
-      );
-      setFiltros((prevFiltros) => ({ ...prevFiltros, nombrePredio: inputValue }));
-      setNombrePredioSuggestions(suggestions);
-    }
-  };  
+    const suggestions = Array.from(
+      new Set(
+        originalLoteData
+          ?.map((lote) => lote.nombrePredio)
+          .filter((predio) => predio.toLowerCase().startsWith(inputValue.toLowerCase()))
+      )
+    );
+  
+    setFiltros((prevFiltros) => ({ ...prevFiltros, nombrePredio: inputValue }));
+    setNombrePredioSuggestions(suggestions);
+    setSelectedNombrePredio(inputValue);
+  };
   
   useEffect(() => {
     const obtenerDatosDelServidor = async () => {
@@ -479,11 +478,11 @@ const ColumnVisibilityToggle = styled(({ label, checked, onChange, className }) 
       };
     
       const numBars = data.labels.length;
-      const maxWidthPerBar = 100; // Ancho máximo por barra
-      const minHeight = 200; // Altura mínima del contenedor
+      const maxWidthPerBar = 90; // Ancho máximo por barra
+      const minHeight = 80; // Altura mínima del contenedor
       
-      const containerWidth = Math.max(1000, numBars * maxWidthPerBar); // Ajusta este valor según tus necesidades
-      const containerHeight = Math.max(minHeight, containerWidth * 0.6); // Puedes ajustar el factor de proporción según tus necesidades
+      const containerWidth = Math.max(950, numBars * maxWidthPerBar); // Ajusta este valor según tus necesidades
+      const containerHeight = Math.max(minHeight, containerWidth * 0.5 ); // Puedes ajustar el factor de proporción según tus necesidades
       
       const barWidth = Math.min(maxWidthPerBar, containerWidth / numBars);
       
@@ -752,9 +751,11 @@ const renderChart = () => {
         });
       }
     
+      totalExportacionKilos = parseFloat(totalExportacionKilos.toFixed(2));
+
       setTotalExportacionKilos(totalExportacionKilos);
     
-      // Calcular el total de deshidratación
+      // Calcular el total de deshidratación                                      
       let totalDeshidratacion = 0;
       let totalKilos = 0;
     
@@ -821,122 +822,122 @@ const renderChart = () => {
       return <Loading>Cargando...</Loading>;
     }
 
-    return (
-      <Table>
-        <thead>
-          <tr>
-            <Th>ID</Th>
-            <Th>Nombre del Predio</Th>
-            <Th>Fecha de Ingreso</Th>
-            {columnVisibility.canastillas && <Th>Canastillas</Th>}
-            <Th>Tipo de Fruta</Th>
-            {columnVisibility.deshidratacion && <Th>Deshidratación</Th>}
-            {columnVisibility.observaciones && <Th>Observaciones</Th>}
-            {columnVisibility.kilos && <Th>Kilos</Th>}
-            {columnVisibility.placa && <Th>Placa</Th>}
-            {columnVisibility.kilosVaciados && <Th>Kilos Vaciados</Th>}
-            {columnVisibility.promedio && <Th>Promedio</Th>}
-            {columnVisibility.rendimiento && <Th>Rendimiento (%)</Th>}
-            {columnVisibility.descarteLavado && <Th>Descarte Lavado</Th>}
-            {columnVisibility.descarteEncerado && <Th>Descarte Encerado</Th>}
-            {columnVisibility.directoNacional && <Th>Directo Nacional</Th>}
-            {columnVisibility.frutaNacional && <Th>Fruta Nacional</Th>}
-            {columnVisibility.desverdizado && <Th>Desverdizado</Th>}
-            {columnVisibility.exportacion && <Th>Exportación</Th>}
-            <br></br>
-          </tr>
-        </thead>
-        <tbody>
-          {dataToRender.map((lote) => (
-            <tr key={lote._id}>
-              <Td>{lote._id}</Td>
-              <Td>{lote.nombrePredio}</Td>
-              <Td>{format(new Date(lote.fechaIngreso),  'dd/MM/yyyy HH:mm:ss')}</Td>
-              {columnVisibility.canastillas && <Td>{lote.canastillas}</Td>}
-              <Td>{lote.tipoFruta}</Td>
-              {columnVisibility.deshidratacion && <Td>{porcentajesDeshidratacion[0]}</Td>}
-              {columnVisibility.observaciones && <Td>{lote.observaciones}</Td>}
-              {columnVisibility.kilos && <Td>{lote.kilos}</Td>}
-              {columnVisibility.placa && <Td>{lote.placa}</Td>}
-              {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
-              {columnVisibility.promedio && <Td>{lote.promedio}</Td>}
-              {columnVisibility.rendimiento && <Td>{`${Math.round(lote.rendimiento)}%`}</Td>}
-              {columnVisibility.descarteLavado && (
-  <Td className="total-descartes">
-    {lote.descarteLavado && (
-      <>
-        {formatDescarteItem(lote, 'General', lote.descarteLavado.descarteGeneral)},{' '}
-        {formatDescarteItem(lote, 'Pareja', lote.descarteLavado.pareja)},{' '}
-        {formatDescarteItem(lote, 'Balin', lote.descarteLavado.balin)},{' '}
-        {formatDescarteItem(lote, 'Descompuesta', lote.descarteLavado.descompuesta)},{' '}
-        {formatDescarteItem(lote, 'Piel', lote.descarteLavado.piel)},{' '}
-        {formatDescarteItem(lote, 'Hojas', lote.descarteLavado.hojas)},{' '}
+return (
+  <Table>
+    <thead>
+      <tr>
+        <Th>ID</Th>
+        <Th>Nombre del Predio</Th>
+        <Th>Fecha de Ingreso</Th>
+        {columnVisibility.canastillas && <Th>Canastillas</Th>}
+        <Th>Tipo de Fruta</Th>
+        {columnVisibility.deshidratacion && <Th>Deshidratación</Th>}
+        {columnVisibility.observaciones && <Th>Observaciones</Th>}
+        {columnVisibility.kilos && <Th>Kilos</Th>}
+        {columnVisibility.placa && <Th>Placa</Th>}
+        {columnVisibility.kilosVaciados && <Th>Kilos Vaciados</Th>}
+        {columnVisibility.promedio && <Th>Promedio</Th>}
+        {columnVisibility.rendimiento && <Th>Rendimiento (%)</Th>}
+        {columnVisibility.descarteLavado && <Th>Descarte Lavado</Th>}
+        {columnVisibility.descarteEncerado && <Th>Descarte Encerado</Th>}
+        {columnVisibility.directoNacional && <Th>Directo Nacional</Th>}
+        {columnVisibility.frutaNacional && <Th>Fruta Nacional</Th>}
+        {columnVisibility.desverdizado && <Th>Desverdizado</Th>}
+        {columnVisibility.exportacion && <Th>Exportación</Th>}
         <br></br>
-        <strong>Total: {calcularTotalDescarte(lote.descarteLavado)}</strong>
-      </>
-    )}
-  </Td>
-)}
+      </tr>
+    </thead>
+    <tbody>
+      {dataToRender.map((lote, index) => (
+        <tr key={lote._id}>
+          <Td>{lote._id}</Td>
+          <Td>{lote.nombrePredio}</Td>
+          <Td>{format(new Date(lote.fechaIngreso), 'dd/MM/yyyy HH:mm:ss')}</Td>
+          {columnVisibility.canastillas && <Td>{lote.canastillas}</Td>}
+          <Td>{lote.tipoFruta}</Td>
+          {columnVisibility.deshidratacion && <Td>{porcentajesDeshidratacion[index]}</Td>}
+          {columnVisibility.observaciones && <Td>{lote.observaciones}</Td>}
+          {columnVisibility.kilos && <Td>{lote.kilos}</Td>}
+          {columnVisibility.placa && <Td>{lote.placa}</Td>}
+          {columnVisibility.kilosVaciados && <Td>{lote.kilosVaciados}</Td>}
+          {columnVisibility.promedio && <Td>{lote.promedio}</Td>}
+          {columnVisibility.rendimiento && <Td>{`${Math.round(lote.rendimiento)}%`}</Td>}
+          {columnVisibility.descarteLavado && (
+            <Td className="total-descartes">
+              {lote.descarteLavado && (
+                <>
+                  {formatDescarteItem(lote, 'General', lote.descarteLavado.descarteGeneral)},{' '}
+                  {formatDescarteItem(lote, 'Pareja', lote.descarteLavado.pareja)},{' '}
+                  {formatDescarteItem(lote, 'Balin', lote.descarteLavado.balin)},{' '}
+                  {formatDescarteItem(lote, 'Descompuesta', lote.descarteLavado.descompuesta)},{' '}
+                  {formatDescarteItem(lote, 'Piel', lote.descarteLavado.piel)},{' '}
+                  {formatDescarteItem(lote, 'Hojas', lote.descarteLavado.hojas)},{' '}
+                  <br></br>
+                  <strong>Total: {calcularTotalDescarte(lote.descarteLavado)}</strong>
+                </>
+              )}
+            </Td>
+          )}
 
-{columnVisibility.descarteEncerado && (
-  <Td className="total-descartes">
-    {lote.descarteEncerado && (
-      <>
-        {formatDescarteItem(lote, 'General', lote.descarteEncerado.descarteGeneral)},{' '}
-        {formatDescarteItem(lote, 'Pareja', lote.descarteEncerado.pareja)},{' '}
-        {formatDescarteItem(lote, 'Balin', lote.descarteEncerado.balin)},{' '}
-        {formatDescarteItem(lote, 'Extra', lote.descarteEncerado.extra)},{' '}
-        {formatDescarteItem(lote, 'Descompuesta', lote.descarteEncerado.descompuesta)},{' '}
-        {formatDescarteItem(lote, 'Suelo', lote.descarteEncerado.suelo)},{' '}
-        <br></br>
-        <strong>Total: {calcularTotalDescarte(lote.descarteEncerado)}</strong>
-      </>
-    )}
-  </Td>
-)}
+          {columnVisibility.descarteEncerado && (
+            <Td className="total-descartes">
+              {lote.descarteEncerado && (
+                <>
+                  {formatDescarteItem(lote, 'General', lote.descarteEncerado.descarteGeneral)},{' '}
+                  {formatDescarteItem(lote, 'Pareja', lote.descarteEncerado.pareja)},{' '}
+                  {formatDescarteItem(lote, 'Balin', lote.descarteEncerado.balin)},{' '}
+                  {formatDescarteItem(lote, 'Extra', lote.descarteEncerado.extra)},{' '}
+                  {formatDescarteItem(lote, 'Descompuesta', lote.descarteEncerado.descompuesta)},{' '}
+                  {formatDescarteItem(lote, 'Suelo', lote.descarteEncerado.suelo)},{' '}
+                  <br></br>
+                  <strong>Total: {calcularTotalDescarte(lote.descarteEncerado)}</strong>
+                </>
+              )}
+            </Td>
+          )}
 
-              {columnVisibility.directoNacional && <Td>{lote.directoNacional}</Td>}
-              {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
-              {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
-              {columnVisibility.exportacion && (
-  <Td>
-    {lote.exportacion &&
-      Object.keys(lote.exportacion).map((calidad, index) => (
-        <div key={index} style={{ marginBottom: '10px' }}>
-          <div>
-          <strong style={{ color: '#000' }}> Contenedor {calidad.replace(/12:/, '')}:</strong>
-            <table>
-              <thead>
-                <tr>
-                  <Th>Calidad 1</Th>
-                  <Th>Calidad 1.5</Th>
-                  <Th>Calidad 2</Th>
-                  <Th>Total</Th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <Td>{lote.exportacion[calidad].calidad1}</Td>
-                  <Td>{lote.exportacion[calidad].calidad1_5}</Td>
-                  <Td>{lote.exportacion[calidad].calidad2}</Td>
-                  <Td>
-                    {lote.exportacion[calidad].calidad1 +
-                      lote.exportacion[calidad].calidad1_5 +
-                      lote.exportacion[calidad].calidad2}
-                  </Td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+          {columnVisibility.directoNacional && <Td>{lote.directoNacional}</Td>}
+          {columnVisibility.frutaNacional && <Td>{lote.frutaNacional}</Td>}
+          {columnVisibility.desverdizado && <Td>{lote.desverdizado}</Td>}
+          {columnVisibility.exportacion && (
+            <Td>
+              {lote.exportacion &&
+                Object.keys(lote.exportacion).map((calidad, index) => (
+                  <div key={index} style={{ marginBottom: '10px' }}>
+                    <div>
+                      <strong style={{ color: '#000' }}> Contenedor {calidad.replace(/12:/, '')}:</strong>
+                      <table>
+                        <thead>
+                          <tr>
+                            <Th>Calidad 1</Th>
+                            <Th>Calidad 1.5</Th>
+                            <Th>Calidad 2</Th>
+                            <Th>Total</Th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <Td>{lote.exportacion[calidad].calidad1}</Td>
+                            <Td>{lote.exportacion[calidad].calidad1_5}</Td>
+                            <Td>{lote.exportacion[calidad].calidad2}</Td>
+                            <Td>
+                              {lote.exportacion[calidad].calidad1 +
+                                lote.exportacion[calidad].calidad1_5 +
+                                lote.exportacion[calidad].calidad2}
+                            </Td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+            </Td>
+          )}
+        </tr>
       ))}
-  </Td>
-)}
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    );
+    </tbody>
+  </Table>
+);
   };
 
   return (
@@ -1024,7 +1025,9 @@ const renderChart = () => {
        </div>
       </CardContainerS>
       </div>
+      
       <FilterContainer>
+      <label htmlFor="filtroRendimientoMin">Filtro por fruta:</label>
         <FilterSelect
           value={filtros.tipoFruta}
           onChange={(e) => setFiltros({ ...filtros, tipoFruta: e.target.value })}
@@ -1033,7 +1036,7 @@ const renderChart = () => {
           <option value="Naranja">Naranja</option>
           <option value="Limon">Limón</option>
         </FilterSelect>
-
+        <br></br>
         <label htmlFor="filtroRendimientoMin">Rendimiento:</label>
           <FilterInput
     type="number"
@@ -1050,15 +1053,17 @@ const renderChart = () => {
   />
 <Autocomplete
   options={nombrePredioSuggestions}
+  value={selectedNombrePredio}
+  onInputChange={handleNombrePredioChange}
   renderInput={(params) => (
     <TextField
       {...params}
       label="Nombre del Predio"
       variant="outlined"
-      onChange={handleNombrePredioChange}
-      style={{ width: '503px' }} // Ajusta el tamaño según tus necesidades
+      style={{ width: '503px' }}
     />
   )}
+  clearOnBlur={false}  
 />
 <FilterInputs
   type="text"

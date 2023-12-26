@@ -11,7 +11,7 @@ const api = {
     const response = await ipcRenderer.invoke('cuenta', datos)
     return response
   },
-  ingresoFruta: async (datos) => {
+ingresoFruta  : async (datos) => {
     const response = await ipcRenderer.invoke('ingresoFruta', datos)
     return response
   },
