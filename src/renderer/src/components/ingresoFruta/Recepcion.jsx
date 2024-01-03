@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Typography,
   Grid,
@@ -119,6 +120,9 @@ export default function Recepcion() {
           <Typography variant="h4" component="h2">
             Recepcion
           </Typography>
+          <div>
+            HOLAAA
+          </div>
         </Grid>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Autocomplete
