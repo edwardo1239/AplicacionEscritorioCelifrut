@@ -34,6 +34,8 @@ import Lotes from './Lotes/components/Lotes'
 import InformesCalidad from './Calidad/Informes/components/InformesCalidad'
 import BotonCrear from './Cuentas/BotonCrear'
 import CrearCuentas from './Cuentas/CrearCuentas'
+import BotonDescarte from './Descartes/BotonDescarte'
+import Descartes from './Descartes/CrearDescartes'
 import VerListasDeEmpaqueCerrada from './Contenedores/components/VerListaDeEmpaqueCerrada'
 
 
@@ -84,6 +86,7 @@ export default function Nav() {
                     {text === 'Proveedores' && <BotonProveedores seleccion={seleccion}/>}
                     {text === 'Lotes' && <BotonLotes seleccion={seleccion}/>}
                     {text === 'Crear cuenta' && <BotonCrear seleccion={seleccion} />}
+                    {text === 'Descartes' && <BotonDescarte seleccion={seleccion} />}
                   </ListItemIcon>
               </ListItem>
             ))}
@@ -112,6 +115,7 @@ export default function Nav() {
         {state === 'Proveedor' && <Proveedor />}
         {state === 'Lotes' && <Lotes />}
         {state === 'Crear cuenta' && <CrearCuentas />}
+        {state === 'Descartes' && <Descartes />}
         {state === 'Contenedores cerrados' && <VerListasDeEmpaqueCerrada />}
       </Box>
     </Box>

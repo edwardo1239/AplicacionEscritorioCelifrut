@@ -70,8 +70,6 @@ function VolanteCalidad() {
     filterText: '',
   });
   
-  
-  
   const [filteredData, setFilteredData] = useState([]);
   const [availableWeeks, setAvailableWeeks] = useState([]);
   const [filteredDayData, setFilteredDayData] = useState([]);
@@ -145,7 +143,6 @@ function VolanteCalidad() {
   const updateFilters = (newFilters) => {
     setFilters((prevFilters) => {
      
-  
       // Verifica si se está restableciendo los filtros
       const isResettingFilters =
         Object.values(newFilters).every((value) => value === null || value === "") &&
