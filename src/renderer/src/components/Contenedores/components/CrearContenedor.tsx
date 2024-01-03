@@ -104,7 +104,7 @@ export default function CrearContenedor() {
       <Grid container spacing={2} sx={{ padding: '1rem', overflow: 'auto' }}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center' }}>
           <Typography variant="h4" component="h2">
-            Crear Contenedor
+            Crear Improsora
           </Typography>
         </Grid>
         <Grid item xs={2}></Grid>
